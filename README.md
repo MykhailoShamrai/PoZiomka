@@ -17,3 +17,9 @@ v20.18.2
 
 nvm --version
 0.40.1
+
+Tech stack
+angular
+dotnet
+ms sql server
+azure for deployment
