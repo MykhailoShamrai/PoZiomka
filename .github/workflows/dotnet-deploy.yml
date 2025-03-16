@@ -16,6 +16,7 @@ jobs:
     defaults:
       run:
         working-directory: backend
+        
     steps:
     - name: 'Checkout GitHub Action'
       uses: actions/checkout@v4

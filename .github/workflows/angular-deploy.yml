@@ -2,13 +2,15 @@ name: Angular CI
 
 on:
   push:
-    branches:
-      - development
+    branches: ["development"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     environment: development
+    defaults:
+      run:
+        working-directory: frontend
 
     steps:
       - name: Checkout Repository
