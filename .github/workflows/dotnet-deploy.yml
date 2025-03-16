@@ -1,0 +1,40 @@
+name: DotNet CI
+
+on:
+  push:
+    branches: ["development"]
+
+env:
+  AZURE_FUNCTIONAPP_NAME: 'PoZiomka'
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: development
+    defaults:
+      run:
+        working-directory: backend
+        
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v4
+      
+    - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Build with dotnet
+      run: dotnet build
+
+#    - name: Publish dotnet
+#      run: dotnet publish -c Release -o "PoZiomka"
+
+#    - name: Upload artifact for deployment job
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: .net-app
+#        path: "PoZiomka"
+      
