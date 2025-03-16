@@ -1,5 +1,8 @@
 # PoZiomka
 
+frontend: inside dir frontend type "ng serve"
+backend: inside dir backend type "dotnet run"
+
 dotnet --version
 8.0.406
 
