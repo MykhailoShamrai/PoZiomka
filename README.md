@@ -23,3 +23,4 @@ angular
 dotnet
 ms sql server
 azure for deployment
+[image](super diagram bombka.png)
