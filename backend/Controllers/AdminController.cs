@@ -3,8 +3,6 @@ public class AdminController
     private readonly ApplicationService _applicationService;
     private readonly CommunicationSender _communicationSender;
     private readonly RoomSelector _roomSelector;
-
-    
     
     // public AdminController(ApplicationService applicationService, CommunicationSender communicationSender, RoomSelector roomSelector)
     // {
