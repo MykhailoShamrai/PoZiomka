@@ -1,6 +1,8 @@
+using backend.Models.Users;
+
 public class Judge
 {
-    public List<User> FindMatching(User user)
+    public List<Student> FindMatching(Student student)
     {
         // Algorytm dopasowania użytkownika do współlokatora
         throw new NotImplementedException();
