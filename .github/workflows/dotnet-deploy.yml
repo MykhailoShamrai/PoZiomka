@@ -5,9 +5,9 @@ on:
     branches: ["development"]
 
 env:
-  AZURE_FUNCTIONAPP_NAME: 'PoZiomka'
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'
-  DOTNET_VERSION: '8.0.x'
+  AZURE_FUNCTIONAPP_NAME: "PoZiomka"
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: "."
+  DOTNET_VERSION: "8.0.x"
 
 jobs:
   build:
@@ -16,19 +16,18 @@ jobs:
     defaults:
       run:
         working-directory: backend
-        
+
     steps:
-    - name: 'Checkout GitHub Action'
-      uses: actions/checkout@v4
-      
-    - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@v4
 
-    - name: Build with dotnet
-      run: dotnet build
+      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Build with dotnet
+        run: dotnet build
 #    - name: Publish dotnet
 #      run: dotnet publish -c Release -o "PoZiomka"
 
@@ -37,4 +36,4 @@ jobs:
 #      with:
 #        name: .net-app
 #        path: "PoZiomka"
-      
+

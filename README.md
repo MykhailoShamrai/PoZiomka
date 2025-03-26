@@ -1,26 +1,62 @@
 # PoZiomka
 
-frontend: inside dir frontend type "ng serve"
-backend: inside dir backend type "dotnet run"
+## Startup locally
 
-dotnet --version
+### Frontend
+
+```sh
+  cd frontend; ng serve
+```
+
+### Backend
+
+```sh
+  cd backend; dotnet run
+```
+
+## Tools versions
+
+```sh
+  dotnet --version
+```
+
 8.0.406
 
-ng --version
+```sh
+  ng --version
+```
+
 19.1.5
 
-npm --version  
+```sh
+  npm --version
+```
+
 10.8.2
 
-node --version
+```sh
+  node --version
+```
+
 v20.18.2
 
-nvm --version
+```sh
+  nvm --version
+```
+
 0.40.1
 
-Tech stack
-angular
-dotnet
-ms sql server
-azure for deployment
+## Tech stack
+#### angular
+#### dotnet
+#### ms sql server
+#### azure deployment
+
+## Formatowanie Frontend'u
+
+```sh
+  npx prettier . --write
+```
+
+## C00l diagram
 ![data flow diagram](super_diagram_bombka.png)
