@@ -8,7 +8,7 @@ import { environment } from '../environment/environment';
   providedIn: 'root',
 })
 export class AuthGatewayService {
-  private apiUrl = `${environment.apiUrl}/register`;
+  private apiUrl = `${environment.apiUrl}/Auth`;
 
   constructor(private http: HttpClient) {
   }
@@ -19,9 +19,9 @@ export class AuthGatewayService {
     const saltRounds = 10;
     const hashedPassword = bcrypt.hashSync(password, saltRounds);
 
-    return this.http.post(this.apiUrl, {
+    return this.http.post(this.apiUrl + '/register', {
       email,
-      password: hashedPassword,
+      hashedPassword,
     });
   }
 }
