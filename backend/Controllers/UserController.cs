@@ -9,7 +9,7 @@ public class UserController
         _applicationService = applicationService;
     }
 
-    public void FillForm(Answers answers)
+    public void FillForm(Answer answers)
     {
         throw new NotImplementedException();
     }
