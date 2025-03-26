@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import * as bcrypt from 'bcryptjs';
 import { environment } from '../environment/environment';
 
 @Injectable({
@@ -16,12 +15,9 @@ export class AuthGatewayService {
   // TODO: login
 
   register(email: string, password: string): Observable<any> {
-    const saltRounds = 10;
-    const hashedPassword = bcrypt.hashSync(password, saltRounds);
-
     return this.http.post(this.apiUrl + '/register', {
       email,
-      hashedPassword,
+      password,
     });
   }
 }

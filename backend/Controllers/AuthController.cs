@@ -14,7 +14,7 @@ public class AuthController : ControllerBase
     {
         Console.WriteLine($"Received registration request:");
         Console.WriteLine($"Email: {model.Email}");
-        Console.WriteLine($"Password: {model.HashedPassword}");
+        Console.WriteLine($"Password: {model.Password}");
         
         throw new NotImplementedException();
     }
