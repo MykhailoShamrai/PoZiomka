@@ -1,18 +1,20 @@
+using backend.Models.Users;
+
 public class SecurityService
 {
-    public User GetLoggedUser()
+    public Student GetLoggedUser()
     {
         // Zwrócenie aktualnie zalogowanego użytkownika
         throw new NotImplementedException();
     }
 
-    public void RegisterUser(User user)
+    public void RegisterUser(Student student)
     {
         // Rejestracja nowego użytkownika
         throw new NotImplementedException();
     }
 
-    public void LogUser(User user)
+    public void LogUser(Student student)
     {
         // Logowanie użytkownika
         throw new NotImplementedException();
