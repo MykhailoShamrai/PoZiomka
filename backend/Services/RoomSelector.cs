@@ -9,12 +9,12 @@ public class RoomSelector
         throw new NotImplementedException();
     }
 
-    public void AddStudentToRoom(Room room, Student student)
+    public void AddStudentToRoom(Room room, User student)
     {
         throw new NotImplementedException();
     }
 
-    public void DeleteStudentFromRoom(Room room, Student student)
+    public void DeleteStudentFromRoom(Room room, User student)
     {
         throw new NotImplementedException();
     }
