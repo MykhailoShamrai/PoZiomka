@@ -8,12 +8,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// It's important to not forgot to add ConnextionStrings__Devconnection environment variable
+// Please set "dotnet user-secrets init"
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Devconnection")));
+    options.UseSqlServer(connectionString));
 builder.Services.AddIdentity<User, IdentityRole<int>>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddRoles<IdentityRole<int>>();
+
 
 builder.Services.AddCors(options =>
 {
