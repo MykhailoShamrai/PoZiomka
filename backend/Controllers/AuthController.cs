@@ -10,6 +10,11 @@ public class AuthController : ControllerBase
     //private readonly SecurityService _securityService;
     private readonly IAuthInterface _authInterface;
 
+    public AuthController(IAuthInterface authInterface)
+    {
+        _authInterface = authInterface;
+    }
+
     [HttpPost]
     [Route("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto model)
@@ -18,7 +23,7 @@ public class AuthController : ControllerBase
         Console.WriteLine($"Email: {model.Email}");
         Console.WriteLine($"Password: {model.Password}");
 
-        if (!await _authInterface.Register())
+        if (!await _authInterface.Register(model))
             return BadRequest();
         return Ok();
     }
