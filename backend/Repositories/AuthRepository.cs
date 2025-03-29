@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using backend.Dto;
 using backend.Interfaces;
 using backend.Models.Users;
@@ -20,13 +21,13 @@ public class AuthRepository : IAuthInterface
     {
         if (await CheckIfUserExist(dto.Email))
         {
-            Console.WriteLine("User already exists!");
+            Debug.WriteLine("User already exists!");
             return false;
         }
 
         if (!await CreateNewUser(dto))
         {
-            Console.WriteLine("User creation failed");
+            Debug.WriteLine("User creation failed");
             return false;
         }
         
