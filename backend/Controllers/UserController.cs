@@ -1,5 +1,7 @@
 public class UserController
 {
+    //TODO: to nie jest controller.
+    
     // private readonly FormFiller _formFiller;
     // private readonly ApplicationService _applicationService;
     //
@@ -18,6 +20,4 @@ public class UserController
     // {
     //     throw new NotImplementedException();
     // }
-    
-    
 }

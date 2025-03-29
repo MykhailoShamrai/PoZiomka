@@ -1,4 +1,6 @@
+using backend.Interfaces;
 using backend.Models.Users;
+using backend.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +23,8 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 builder.Services.AddIdentity<User, IdentityRole<int>>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddRoles<IdentityRole<int>>();
+
+builder.Services.AddScoped<IAuthInterface, AuthRepository>();
 
 
 builder.Services.AddCors(options =>

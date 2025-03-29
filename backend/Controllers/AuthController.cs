@@ -1,4 +1,5 @@
 using backend.Dto;
+using backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
@@ -7,6 +8,12 @@ namespace backend.Controllers;
 public class AuthController : ControllerBase
 {
     //private readonly SecurityService _securityService;
+    private readonly IAuthInterface _authInterface;
+
+    public AuthController(IAuthInterface authInterface)
+    {
+        _authInterface = authInterface;
+    }
 
     [HttpPost]
     [Route("register")]
@@ -15,14 +22,18 @@ public class AuthController : ControllerBase
         Console.WriteLine($"Received registration request:");
         Console.WriteLine($"Email: {model.Email}");
         Console.WriteLine($"Password: {model.Password}");
-        
-        throw new NotImplementedException();
+
+        if (!await _authInterface.Register(model))
+            return BadRequest();
+        return Ok();
     }
 
     [HttpPost]
     [Route("login")]
     public async Task<IActionResult> Login([FromBody] LoginUserDto model)
     {
-        throw new NotImplementedException();
+        if (!await _authInterface.Login())
+            return BadRequest();
+        return Ok();
     }
 }

@@ -1,9 +1,10 @@
 public class AdminController
 {
-    private readonly ApplicationService _applicationService;
-    private readonly CommunicationSender _communicationSender;
-    private readonly RoomSelector _roomSelector;
+    //TODO: To nie jest controller.
     
+    // private readonly ApplicationService _applicationService;
+    // private readonly CommunicationSender _communicationSender;
+    // private readonly RoomSelector _roomSelector;
     // public AdminController(ApplicationService applicationService, CommunicationSender communicationSender, RoomSelector roomSelector)
     // {
     //     _applicationService = applicationService;
@@ -25,6 +26,4 @@ public class AdminController
     // {
     //     throw new NotImplementedException();
     // }
-    
-    //TODO: w controllerach siedzą endpointy, injectujemy serwisy i jazda
 }
