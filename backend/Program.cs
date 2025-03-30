@@ -55,11 +55,16 @@ builder.Services.AddIdentity<User, IdentityRole<int>>()
 
 builder.Services.AddScoped<IAuthInterface, AuthRepository>();
 
-builder.Services.AddAuthentication(Settings.AuthCookieName)
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = Settings.AuthCookieName;
+        options.DefaultChallengeScheme = Settings.AuthCookieName;
+        options.DefaultScheme = Settings.AuthCookieName;
+    })
     .AddCookie(Settings.AuthCookieName,
     options =>
     {
-        options.LoginPath = "/api/login";
+        options.LoginPath = "/api/Auth/login";
         options.Cookie.Name = Settings.AuthCookieName;
         options.Cookie.HttpOnly = true;
     });
