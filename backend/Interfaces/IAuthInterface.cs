@@ -5,5 +5,6 @@ namespace backend.Interfaces;
 public interface IAuthInterface
 {
     public Task<bool> Register(RegisterUserDto dto);
-    public Task<bool> Login();
+    public Task<bool> Login(LoginUserDto dto);
+    public Task Logout();
 }
