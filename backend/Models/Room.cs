@@ -1,3 +1,5 @@
+using backend.Models.Users;
+
 public class Room
 {
     public int Id { get; set; }

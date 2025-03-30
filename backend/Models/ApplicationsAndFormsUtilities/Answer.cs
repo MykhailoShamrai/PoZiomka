@@ -1,4 +1,4 @@
-public class Answers
+public class Answer
 {
     public int Id { get; set; }
     public List<ChoosablePreference>? Choosable { get; set; }

@@ -1,3 +1,5 @@
+using backend.Models.Users;
+
 public class CommunicationSender
 {
     public void SendCommunication(Communication communication, List<User> users)

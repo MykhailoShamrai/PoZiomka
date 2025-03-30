@@ -7,7 +7,7 @@ public class FormFiller
         _securityService = securityService;
     }
 
-    public void FillForm(Answers answers)
+    public void FillForm(Answer answer)
     {
         // Zapisanie odpowiedzi użytkownika w ankiecie
         throw new NotImplementedException();
