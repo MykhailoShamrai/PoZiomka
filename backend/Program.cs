@@ -1,6 +1,7 @@
 using backend.Interfaces;
 using backend.Models.Users;
 using backend.Repositories;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +9,32 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(
+    options =>
+    {
+        options.AddSecurityDefinition("Cookie", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+        {
+            Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+            Name = Settings.AuthCookieName,
+            In = Microsoft.OpenApi.Models.ParameterLocation.Cookie,
+            Description = "Use the Cookie for authentication"
+        });
+
+        options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+        {
+            {
+                new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                    {
+                        Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                        Id = "Cookie"
+                    }
+                },
+                new string[] { }
+            }
+        });
+    });
 builder.Services.AddHttpContextAccessor();
 
 // Please set "dotnet user-secrets init"
@@ -29,7 +55,7 @@ builder.Services.AddIdentity<User, IdentityRole<int>>()
 
 builder.Services.AddScoped<IAuthInterface, AuthRepository>();
 
-builder.Services.AddAuthentication()
+builder.Services.AddAuthentication(Settings.AuthCookieName)
     .AddCookie(Settings.AuthCookieName,
     options =>
     {
@@ -64,9 +90,9 @@ if (app.Environment.IsDevelopment())
 }
 
 await app.InitializeAuthContext();
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseRouting();
 app.UseCors("AllowAngularApp");
 app.MapControllers();
 

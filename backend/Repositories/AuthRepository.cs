@@ -4,6 +4,7 @@ using backend.Dto;
 using backend.Interfaces;
 using backend.Models.Users;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 
 namespace backend.Repositories;
@@ -44,13 +45,24 @@ public class AuthRepository : IAuthInterface
         if (account is not null)
         {
             var claims = await _userManager.GetClaimsAsync(account);
+            var roles = await _userManager.GetRolesAsync(account);
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
             var identity = new ClaimsIdentity(claims, Settings.AuthCookieName);
             var principal = new ClaimsPrincipal(identity); 
+
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTime.UtcNow.AddMinutes(5) 
+            };
 
             var context = _contextAccessor.HttpContext;
             if (context is null)
                 throw new NullReferenceException("HttpContext is null!");
-            await context!.SignInAsync(Settings.AuthCookieName, principal);
+            await context!.SignInAsync(Settings.AuthCookieName, principal, authProperties);
             return true;
         }
 

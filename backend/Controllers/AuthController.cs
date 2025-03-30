@@ -1,5 +1,6 @@
 using backend.Dto;
 using backend.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
@@ -42,6 +43,20 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Logout()
     {
         await _authInterface.Logout();
+        return Ok();
+    }
+
+    [HttpGet]
+    [Authorize]
+    [Route("test_for_student")]
+    public async Task<IActionResult> Test()
+    {
+        var cookies = Request.Cookies;
+        Console.WriteLine(cookies.AsEnumerable().First());
+        if (User.Identity is not { IsAuthenticated: true })
+        {
+            return Unauthorized("User is not authenticated!");
+        }
         return Ok();
     }
 }
