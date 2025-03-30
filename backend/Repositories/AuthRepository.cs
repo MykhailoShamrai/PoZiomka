@@ -42,31 +42,33 @@ public class AuthRepository : IAuthInterface
     public async Task<bool> Login(LoginUserDto dto)
     {
         var account = await _userManager.FindByEmailAsync(dto.Email);
-
+    
         if (account is not null)
         {
-            var claims = await _userManager.GetClaimsAsync(account);
-            var roles = await _userManager.GetRolesAsync(account);
-            foreach (var role in roles)
+            if (await _userManager.CheckPasswordAsync(account, dto.Password))
             {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                var claims = await _userManager.GetClaimsAsync(account);
+                var roles = await _userManager.GetRolesAsync(account);
+                foreach (var role in roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
+                var identity = new ClaimsIdentity(claims, Settings.AuthCookieName);
+                var principal = new ClaimsPrincipal(identity); 
+
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTime.UtcNow.AddMinutes(5) 
+                };
+
+                var context = _contextAccessor.HttpContext;
+                if (context is null)
+                    throw new NullReferenceException("HttpContext is null!");
+                await context!.SignInAsync(Settings.AuthCookieName, principal, authProperties);
+                return true;
             }
-            var identity = new ClaimsIdentity(claims, Settings.AuthCookieName);
-            var principal = new ClaimsPrincipal(identity); 
-
-            var authProperties = new AuthenticationProperties
-            {
-                IsPersistent = true,
-                ExpiresUtc = DateTime.UtcNow.AddMinutes(5) 
-            };
-
-            var context = _contextAccessor.HttpContext;
-            if (context is null)
-                throw new NullReferenceException("HttpContext is null!");
-            await context!.SignInAsync(Settings.AuthCookieName, principal, authProperties);
-            return true;
         }
-
         return false;
     }
 
