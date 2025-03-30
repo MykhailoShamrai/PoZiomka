@@ -1,4 +1,4 @@
-static class Settings
+public static class Settings
 {
     public const string AuthCookieName = "PoZiomka_Cookie";
 }

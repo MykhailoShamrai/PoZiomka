@@ -102,3 +102,5 @@ app.UseCors("AllowAngularApp");
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

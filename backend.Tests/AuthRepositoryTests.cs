@@ -63,6 +63,9 @@ namespace backend.Tests
                            .ReturnsAsync(user);
             mockUserManager.Setup(m => m.GetClaimsAsync(user))
                            .ReturnsAsync(new List<Claim>());
+            // Dodaj tę linię:
+            mockUserManager.Setup(m => m.GetRolesAsync(user))
+                           .ReturnsAsync(new List<string>());
 
             var mockHttpContext = new DefaultHttpContext();
             var serviceProvider = new ServiceCollection()
@@ -77,7 +80,6 @@ namespace backend.Tests
 
             Assert.True(result);
         }
-
         [Fact]
         public async Task Login_ThrowsException_WhenHttpContextIsNull()
         {
@@ -119,7 +121,7 @@ namespace backend.Tests
 
             mockAuthService.Verify(auth => auth.SignOutAsync(
                 It.IsAny<HttpContext>(),
-                "PoZiomka_Cookie",// tu powinno być Settings.AuthCookieName
+                "PoZiomka_Cookie",
                 null), Times.Once);
         }
 
