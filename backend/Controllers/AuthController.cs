@@ -32,8 +32,16 @@ public class AuthController : ControllerBase
     [Route("login")]
     public async Task<IActionResult> Login([FromBody] LoginUserDto model)
     {
-        if (!await _authInterface.Login())
+        if (!await _authInterface.Login(model))
             return BadRequest();
+        return Ok();
+    }
+
+    [HttpPost]
+    [Route("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await _authInterface.Logout();
         return Ok();
     }
 }

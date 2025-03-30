@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 
 // Please set "dotnet user-secrets init"
 if (builder.Environment.IsDevelopment())
@@ -20,12 +21,29 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(connectionString));
+
 builder.Services.AddIdentity<User, IdentityRole<int>>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddRoles<IdentityRole<int>>();
 
+
 builder.Services.AddScoped<IAuthInterface, AuthRepository>();
 
+builder.Services.AddAuthentication()
+    .AddCookie(Settings.AuthCookieName,
+    options =>
+    {
+        options.LoginPath = "/api/login";
+        options.Cookie.Name = Settings.AuthCookieName;
+        options.Cookie.HttpOnly = true;
+    });
+
+builder.Services.AddAuthorization(
+    options =>
+    {
+        options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+        options.AddPolicy("Student", policy => policy.RequireRole("Student"));
+    });
 
 builder.Services.AddCors(options =>
 {
@@ -46,6 +64,8 @@ if (app.Environment.IsDevelopment())
 }
 
 await app.InitializeAuthContext();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseRouting();
 app.UseCors("AllowAngularApp");
 app.MapControllers();
