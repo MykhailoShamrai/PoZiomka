@@ -47,8 +47,8 @@
         }
 
         [HttpGet]
-        [Authorize]
-        [Route("test_for_student")]
+        [Authorize("Admin")]
+        [Route("test_for_admin")]
         public async Task<IActionResult> Test()
         {
             if (User.Identity is not { IsAuthenticated: true })
