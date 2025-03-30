@@ -3,22 +3,14 @@
     <div class="col-md-6 col-lg-4">
       <h3 class="text-center mb-4">Go ahead</h3>
 
-      <form
-        [formGroup]="registrationForm"
-        (ngSubmit)="onSubmit()"
-        class="p-4 bg-light rounded shadow-sm">
+      <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="p-4 bg-light rounded shadow-sm">
 
         <div *ngIf="errorMessage" class="alert alert-danger mb-3">
           {{ errorMessage }}
         </div>
 
         <div class="mb-3">
-          <input
-            type="email"
-            id="email"
-            class="form-control"
-            placeholder="Email"
-            formControlName="email"
+          <input type="email" id="email" class="form-control" placeholder="Email" formControlName="email"
             [ngClass]="{ 'is-invalid': submitted && formControls['email'].errors }" />
           <div *ngIf="submitted && formControls['email'].errors" class="invalid-feedback">
             <div *ngIf="formControls['email'].errors?.['required']">Email is required</div>
@@ -27,12 +19,7 @@
         </div>
 
         <div class="mb-3">
-          <input
-            type="password"
-            id="password"
-            class="form-control"
-            placeholder="Password"
-            formControlName="password"
+          <input type="password" id="password" class="form-control" placeholder="Password" formControlName="password"
             [ngClass]="{ 'is-invalid': submitted && formControls['password'].errors }" />
           <div *ngIf="submitted && formControls['password'].errors" class="invalid-feedback">
             <div *ngIf="formControls['password'].errors?.['required']">Password is required</div>
@@ -40,7 +27,10 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Register</button>
+        <button type="submit" class="btn btn-primary w-100 mb-3">Register</button>
+        <div class="text-center">
+          <a routerLink="/login" class="btn btn-outline-secondary">Already have an account? Login</a>
+        </div>
       </form>
     </div>
   </div>

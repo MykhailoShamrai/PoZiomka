@@ -30,7 +30,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: test with dotnet
-        run: dotnet test
+        run: dotnet test ../backend.Tests/backend.Tests.csproj
 
       - name: Build with dotnet
         run: dotnet build
