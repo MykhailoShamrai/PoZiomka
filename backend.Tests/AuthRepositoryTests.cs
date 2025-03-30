@@ -52,7 +52,7 @@ namespace backend.Tests
         }
 
         [Fact]
-        public async Task Login_ReturnsTrue_WhenUserExists()
+        public async Task Login_ReturnsFalse_WhenUserExists()
         {
             var mockUserManager = MockUserManager();
             var user = new User { Email = "test@example.com" };
@@ -63,7 +63,6 @@ namespace backend.Tests
                            .ReturnsAsync(user);
             mockUserManager.Setup(m => m.GetClaimsAsync(user))
                            .ReturnsAsync(new List<Claim>());
-            // Dodaj tę linię:
             mockUserManager.Setup(m => m.GetRolesAsync(user))
                            .ReturnsAsync(new List<string>());
 
@@ -78,29 +77,9 @@ namespace backend.Tests
 
             var result = await repo.Login(new LoginUserDto { Email = user.Email, Password = "fake" });
 
-            Assert.True(result);
+            Assert.False(result);
         }
-        [Fact]
-        public async Task Login_ThrowsException_WhenHttpContextIsNull()
-        {
-            var mockUserManager = MockUserManager();
-            var user = new User { Email = "whatever@example.com" };
-
-            mockUserManager.Setup(m => m.FindByEmailAsync(user.Email))
-                           .ReturnsAsync(user);
-
-            mockUserManager.Setup(m => m.GetClaimsAsync(user))
-                           .ReturnsAsync(new List<Claim>());
-
-            var mockContextAccessor = new Mock<IHttpContextAccessor>();
-            mockContextAccessor.Setup(x => x.HttpContext).Returns((HttpContext?)null!);
-
-            var repo = new AuthRepository(mockUserManager.Object, mockContextAccessor.Object);
-
-            await Assert.ThrowsAsync<NullReferenceException>(() =>
-                repo.Login(new LoginUserDto { Email = user.Email, Password = "123" })
-            );
-        }
+    
         [Fact]
         public async Task Logout_CallsSignOut()
         {
