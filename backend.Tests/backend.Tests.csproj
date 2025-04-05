@@ -28,4 +28,11 @@
     <ProjectReference Include="..\backend\backend.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+  <Content Include="..\backend\AdditionalFiles\xato-net-10-million-passwords-10000.txt">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+  
+</ItemGroup>
+
 </Project>
