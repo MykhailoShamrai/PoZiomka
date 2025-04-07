@@ -10,11 +10,11 @@ public class AppDbContext : DbContext
         
     }
     
-    // Entities
-    public DbSet<StudentAnswers> StudentAnswers;
-    public DbSet<Room> Rooms;
-    public DbSet<Application> Applications;
+    // TODO: Entities - for now not used
+    // public DbSet<StudentAnswers> StudentAnswers;
+    // public DbSet<Room> Rooms;
+    // public DbSet<Application> Applications;
     
     // Settings
-    public DbSet<DisplayPreferences> DisplayPreferences;
+    public DbSet<DisplayPreferences> DisplayPreferences { get; set; }
 }
