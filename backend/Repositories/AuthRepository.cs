@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using System.IO;
 using System.Collections.Generic;
+using backend.Data;
 using backend.Models.User;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
@@ -19,11 +20,13 @@ public class AuthRepository : IAuthInterface
     private readonly HashSet<string> _weakPasswords = new HashSet<string>();
     private readonly UserManager<User> _userManager;
     private readonly IHttpContextAccessor _contextAccessor;
+    private readonly AppDbContext _appDbContext;
 
-    public AuthRepository(UserManager<User> userManager, IHttpContextAccessor contextAccessor)
+    public AuthRepository(UserManager<User> userManager, IHttpContextAccessor contextAccessor, AppDbContext appDbContext)
     {
         _userManager = userManager;
         _contextAccessor = contextAccessor;
+        _appDbContext = appDbContext;
         var collection = File.ReadLines(PathToFileWithPasswords);
         foreach (string s in collection)
         {
@@ -106,15 +109,24 @@ public class AuthRepository : IAuthInterface
     /// <returns></returns>
     private async Task<bool> CreateNewUser(RegisterUserDto dto)
     {
+        // Create display preferences first
+        DisplayPreferences nDisplayPreferences = new DisplayPreferences();
+        _appDbContext.DisplayPreferences.Add(nDisplayPreferences);
+        await _appDbContext.SaveChangesAsync(); 
+        
+        // Then create a new user
         User nUser = new User
         {
             UserName = dto.Email,
-            Email = dto.Email
+            Email = dto.Email,
+            DisplayPreferencesId = nDisplayPreferences.Id
         };
+        
         // Check if password is in weak passwords collection. 
         if (_weakPasswords.Contains(dto.Password))
             return false;
         var result = await _userManager.CreateAsync(nUser, dto.Password);
+        
         return result.Succeeded;
     }
 }

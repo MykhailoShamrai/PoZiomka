@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using backend.Dto;
 using backend.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -19,9 +20,9 @@ public class AuthController : ControllerBase
     [Route("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto model)
     {
-        Console.WriteLine($"Received registration request:");
-        Console.WriteLine($"Email: {model.Email}");
-        Console.WriteLine($"Password: {model.Password}");
+        Debug.WriteLine($"Received registration request:");
+        Debug.WriteLine($"Email: {model.Email}");
+        Debug.WriteLine($"Password: {model.Password}");
 
         if (!await _authInterface.Register(model))
             return BadRequest();
