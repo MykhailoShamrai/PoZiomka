@@ -1,3 +1,4 @@
+using backend.Data;
 using backend.Interfaces;
 using backend.Models.Users;
 using backend.Repositories;
@@ -46,6 +47,8 @@ if (builder.Environment.IsDevelopment())
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
+    options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseSqlServer(connectionString));
 
 builder.Services.AddIdentity<User, IdentityRole<int>>()

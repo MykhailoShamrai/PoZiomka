@@ -1,5 +1,5 @@
 public class ChoosablePreference
 {
-    public int Id { get; set; }
+    public int ChoosablePreferenceId { get; set; }
     public string Name { get; set; } = string.Empty;
 }
