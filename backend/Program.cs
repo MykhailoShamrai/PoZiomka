@@ -47,13 +47,13 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(connectionString));
-
 builder.Services.AddIdentity<User, IdentityRole<int>>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddRoles<IdentityRole<int>>();
 
-
+// Here we register our interfaces and repositories
 builder.Services.AddScoped<IAuthInterface, AuthRepository>();
+builder.Services.AddScoped<IUserInterface, UserRepository>();
 
 builder.Services.AddAuthentication(options =>
     {
