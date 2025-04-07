@@ -3,12 +3,12 @@ using System.Security.Claims;
 using System.Diagnostics;
 using backend.Dto;
 using backend.Interfaces;
-using backend.Models.Users;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using System.IO;
 using System.Collections.Generic;
+using backend.Models.User;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace backend.Repositories;

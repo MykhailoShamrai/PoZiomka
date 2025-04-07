@@ -1,5 +1,5 @@
 using backend.Interfaces;
-using backend.Models.Users;
+using backend.Models.User;
 using backend.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
