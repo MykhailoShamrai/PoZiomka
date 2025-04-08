@@ -1,3 +1,4 @@
+using backend.Models.User;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Data;
@@ -8,8 +9,9 @@ public class AppDbContext : DbContext
     {
         
     }
-
-    public DbSet<StudentAnswers> StudentAnswers;
-    public DbSet<Room> Rooms;
-    public DbSet<Application> Applications;
+    
+    // TODO: Entities - for now not used
+    // public DbSet<StudentAnswers> StudentAnswers;
+    // public DbSet<Room> Rooms;
+    // public DbSet<Application> Applications;
 }
