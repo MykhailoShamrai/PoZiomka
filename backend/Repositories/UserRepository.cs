@@ -33,21 +33,16 @@ public class UserRepository : IUserInterface
         if (user == null)
             return new Tuple<UserErrorCodes, ProfileDisplayDto?>(UserErrorCodes.UserNotFound, null);
         
-        var preferences = await _appContext.DisplayPreferences.
-            FirstOrDefaultAsync(x => x.Id == user.DisplayPreferencesId);
-        if (preferences == null)
-            return new Tuple<UserErrorCodes, ProfileDisplayDto?>(UserErrorCodes.PreferencesNotFound, null);
-        
-        var display = CreateDisplayFromPreferences(preferences);
+        var display = CreateDisplayFromPreferences(user.Preferences);
         return new Tuple<UserErrorCodes, ProfileDisplayDto?>(UserErrorCodes.Ok, display);
     }
     
-    public async Task<UserErrorCodes> ChangeUserPreferences(DisplayPreferences displayPreferences)
+    public async Task<UserErrorCodes> ChangeUserPreferences(bool[] displayPreferences)
     {
         throw new NotImplementedException();
     }
 
-    ProfileDisplayDto CreateDisplayFromPreferences(DisplayPreferences displayPreferences)
+    ProfileDisplayDto CreateDisplayFromPreferences(UInt64 displayPreferences)
     {
         throw new NotImplementedException();
     }

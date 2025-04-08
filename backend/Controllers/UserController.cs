@@ -19,7 +19,7 @@ public class UserController : ControllerBase
     [HttpPost]
     [Authorize("Student")]
     [Route("change-display-preferences")]
-    public async Task<IActionResult> ChangeMyPreferences([FromBody] DisplayPreferences displayPreferences)
+    public async Task<IActionResult> ChangeMyPreferences([FromBody] bool[] displayPreferences)
     {
         var code = await _userInterface.ChangeUserPreferences(displayPreferences);
         switch (code)

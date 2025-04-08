@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace backend.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20250407121314_AddFieldToUser")]
-    partial class AddFieldToUser
+    [Migration("20250408102142_AuthUserAddField")]
+    partial class AuthUserAddField
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -172,9 +172,6 @@ namespace backend.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DisplayPreferencesId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -204,6 +201,9 @@ namespace backend.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<decimal>("Preferences")
+                        .HasColumnType("decimal(20,0)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");

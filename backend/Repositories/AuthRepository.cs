@@ -109,17 +109,12 @@ public class AuthRepository : IAuthInterface
     /// <returns></returns>
     private async Task<bool> CreateNewUser(RegisterUserDto dto)
     {
-        // Create display preferences first
-        DisplayPreferences nDisplayPreferences = new DisplayPreferences();
-        _appDbContext.DisplayPreferences.Add(nDisplayPreferences);
-        await _appDbContext.SaveChangesAsync(); 
-        
         // Then create a new user
         User nUser = new User
         {
             UserName = dto.Email,
             Email = dto.Email,
-            DisplayPreferencesId = nDisplayPreferences.Id
+            Preferences = 1UL,
         };
         
         // Check if password is in weak passwords collection. 

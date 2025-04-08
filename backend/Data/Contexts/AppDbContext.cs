@@ -14,7 +14,4 @@ public class AppDbContext : DbContext
     // public DbSet<StudentAnswers> StudentAnswers;
     // public DbSet<Room> Rooms;
     // public DbSet<Application> Applications;
-    
-    // Settings
-    public DbSet<DisplayPreferences> DisplayPreferences { get; set; }
 }

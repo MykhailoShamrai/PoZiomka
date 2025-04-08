@@ -5,24 +5,24 @@
 namespace backend.Migrations
 {
     /// <inheritdoc />
-    public partial class AddFieldToUser : Migration
+    public partial class AuthUserAddField : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "DisplayPreferencesId",
+            migrationBuilder.AddColumn<decimal>(
+                name: "Preferences",
                 table: "AspNetUsers",
-                type: "int",
+                type: "decimal(20,0)",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0m);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "DisplayPreferencesId",
+                name: "Preferences",
                 table: "AspNetUsers");
         }
     }
