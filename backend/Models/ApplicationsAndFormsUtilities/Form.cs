@@ -5,5 +5,6 @@
     public class Form
     {
         public int FormId { get; set; }
+        public string NameOfForm { get; set; }
         public required List<ObligatoryPreference> Obligatory { get; set; }
     }
