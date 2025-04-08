@@ -6,6 +6,13 @@ using Microsoft.AspNetCore.Identity;
 
 namespace backend.Repositories;
 
+public enum UserErrorCodes
+{
+    UserNotFound,
+    UserAlreadyExists,
+    Ok,
+}
+
 public class UserRepository : IUserInterface
 {
     private readonly AppDbContext _appContext;
@@ -19,12 +26,12 @@ public class UserRepository : IUserInterface
         _contextAccessor = contextAccessor;
     }
     
-    public Task ChangeUserPreferences(DisplayPreferences displayPreferences)
+    public async Task<Tuple<UserErrorCodes, ProfileDisplay>> DisplayUserProfile(string email)
     {
         throw new NotImplementedException();
     }
-
-    public Task<ProfileDisplay> DisplayUserProfile(string email)
+    
+    public async Task<UserErrorCodes> ChangeUserPreferences(DisplayPreferences displayPreferences)
     {
         throw new NotImplementedException();
     }

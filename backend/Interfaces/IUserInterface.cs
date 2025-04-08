@@ -1,11 +1,12 @@
 using backend.Dto;
 using backend.Models.User;
+using backend.Repositories;
 
 namespace backend.Interfaces;
 
 public interface IUserInterface
 {
-    Task ChangeUserPreferences(DisplayPreferences displayPreferences);
+    public Task<UserErrorCodes> ChangeUserPreferences(DisplayPreferences displayPreferences);
 
-    Task<ProfileDisplay> DisplayUserProfile(string email);
+    public Task<Tuple<UserErrorCodes, ProfileDisplay>> DisplayUserProfile(string email);
 }

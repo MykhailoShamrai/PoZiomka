@@ -1,6 +1,7 @@
 using backend.Dto;
 using backend.Interfaces;
 using backend.Models.User;
+using backend.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +21,14 @@ public class UserController : ControllerBase
     [Route("change-display-preferences")]
     public async Task<IActionResult> ChangeMyPreferences([FromBody] DisplayPreferences displayPreferences)
     {
-        throw new NotImplementedException();
+        var code = await _userInterface.ChangeUserPreferences(displayPreferences);
+        switch (code)
+        {
+            case UserErrorCodes.UserNotFound:
+                return NotFound("User not found.");
+            default:
+                return Ok();
+        }
     }
 
     [HttpGet]
@@ -28,6 +36,13 @@ public class UserController : ControllerBase
     [Route("display-user-profile")]
     public async Task<IActionResult> DisplayProfile([FromBody] string email)
     {
-        throw new NotImplementedException();
+        var (code, profile) = await _userInterface.DisplayUserProfile(email);
+        switch (code)
+        {
+          case UserErrorCodes.UserNotFound:
+              return NotFound("User not found.");
+          default:
+              return Ok(profile);
+        }
     }
 }
