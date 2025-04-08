@@ -176,6 +176,12 @@ namespace backend.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -198,9 +204,6 @@ namespace backend.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<decimal>("Preferences")
-                        .HasColumnType("decimal(20,0)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -276,6 +279,39 @@ namespace backend.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("backend.Models.User.User", b =>
+                {
+                    b.OwnsOne("backend.Models.User.UserPreferences", "Preferences", b1 =>
+                        {
+                            b1.Property<int>("UserId")
+                                .HasColumnType("int");
+
+                            b1.Property<bool>("DisplayEmail")
+                                .HasColumnType("bit");
+
+                            b1.Property<bool>("DisplayFirstName")
+                                .HasColumnType("bit");
+
+                            b1.Property<bool>("DisplayLastName")
+                                .HasColumnType("bit");
+
+                            b1.Property<bool>("DisplayPhoneNumber")
+                                .HasColumnType("bit");
+
+                            b1.HasKey("UserId");
+
+                            b1.ToTable("AspNetUsers");
+
+                            b1.ToJson("Preferences");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.Navigation("Preferences")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

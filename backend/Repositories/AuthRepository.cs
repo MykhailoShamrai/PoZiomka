@@ -66,6 +66,7 @@ public class AuthRepository : IAuthInterface
                 {
                     claims.Add(new Claim(ClaimTypes.Role, role));
                 }
+                claims.Add(new Claim(ClaimTypes.Email, account.Email!));
                 var identity = new ClaimsIdentity(claims, Settings.AuthCookieName);
                 var principal = new ClaimsPrincipal(identity); 
 
@@ -114,7 +115,7 @@ public class AuthRepository : IAuthInterface
         {
             UserName = dto.Email,
             Email = dto.Email,
-            Preferences = 1UL,
+            Preferences = new UserPreferences()
         };
         
         // Check if password is in weak passwords collection. 

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using backend.Data;
 using backend.Dto;
 using backend.Interfaces;
@@ -10,19 +11,16 @@ namespace backend.Repositories;
 public enum UserErrorCodes
 {
     UserNotFound,
-    PreferencesNotFound,
     Ok,
 }
 
 public class UserRepository : IUserInterface
 {
-    private readonly AppDbContext _appContext;
     private readonly UserManager<User> _userManager;
     private readonly IHttpContextAccessor _contextAccessor;
 
-    public UserRepository(AppDbContext appContext, UserManager<User> userManager, IHttpContextAccessor contextAccessor)
+    public UserRepository(UserManager<User> userManager, IHttpContextAccessor contextAccessor)
     {
-        _appContext = appContext;
         _userManager = userManager;
         _contextAccessor = contextAccessor;
     }
@@ -33,17 +31,33 @@ public class UserRepository : IUserInterface
         if (user == null)
             return new Tuple<UserErrorCodes, ProfileDisplayDto?>(UserErrorCodes.UserNotFound, null);
         
-        var display = CreateDisplayFromPreferences(user.Preferences);
+        var display = CreateDisplayFromPreferences(user);
         return new Tuple<UserErrorCodes, ProfileDisplayDto?>(UserErrorCodes.Ok, display);
     }
-    
-    public async Task<UserErrorCodes> ChangeUserPreferences(bool[] displayPreferences)
+    public async Task<UserErrorCodes> ChangeUserPreferences(UserPreferences newUserPreferences)
     {
-        throw new NotImplementedException();
+        var userEmail = _contextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value;
+        if (userEmail == null)
+            return UserErrorCodes.UserNotFound;
+        var user = await _userManager.FindByEmailAsync(userEmail);
+        if (user == null)
+            return UserErrorCodes.UserNotFound;
+        user.Preferences = newUserPreferences;
+        var result = await _userManager.UpdateAsync(user);
+        if (result.Succeeded)
+            return UserErrorCodes.Ok;
+        return UserErrorCodes.UserNotFound;
     }
 
-    ProfileDisplayDto CreateDisplayFromPreferences(UInt64 displayPreferences)
+    // For now, I do not have better idea
+    ProfileDisplayDto CreateDisplayFromPreferences(User user)
     {
-        throw new NotImplementedException();
+        var preferences = user.Preferences;
+        ProfileDisplayDto dto = new ProfileDisplayDto();
+        dto.Email = preferences.DisplayEmail ? user.Email : null;
+        dto.FirstName = preferences.DisplayFirstName ? user.FirstName : null;
+        dto.LastName = preferences.DisplayLastName ? user.LastName : null;
+        dto.PhoneNumber = preferences.DisplayPhoneNumber ? user.PhoneNumber : null;
+        return dto;
     }
 }

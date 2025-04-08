@@ -17,17 +17,15 @@ public class UserController : ControllerBase
     }
     
     [HttpPost]
-    [Authorize("Student")]
-    [Route("change-display-preferences")]
-    public async Task<IActionResult> ChangeMyPreferences([FromBody] bool[] displayPreferences)
+    [Authorize]
+    [Route("change-user-preferences")]
+    public async Task<IActionResult> ChangeMyPreferences([FromBody] UserPreferences userPreferences)
     {
-        var code = await _userInterface.ChangeUserPreferences(displayPreferences);
+        var code = await _userInterface.ChangeUserPreferences(userPreferences);
         switch (code)
         {
             case UserErrorCodes.UserNotFound:
                 return NotFound("User not found.");
-            case UserErrorCodes.PreferencesNotFound:
-                return BadRequest("Preferences not found.");
             case UserErrorCodes.Ok:
                 return Ok();
             default:
@@ -37,16 +35,14 @@ public class UserController : ControllerBase
 
     [HttpGet]
     [Authorize]
-    [Route("display-user-profile")]
-    public async Task<IActionResult> DisplayProfile([FromBody] string email)
+    [Route("display-user-profile/{email}")]
+    public async Task<IActionResult> DisplayProfile([FromRoute] string email)
     {
         var (code, profile) = await _userInterface.DisplayUserProfile(email);
         switch (code)
         {
           case UserErrorCodes.UserNotFound:
               return NotFound("User not found.");
-          case UserErrorCodes.PreferencesNotFound:
-              return BadRequest("Preferences not found.");
           case UserErrorCodes.Ok:
               return Ok(profile);
           default:
