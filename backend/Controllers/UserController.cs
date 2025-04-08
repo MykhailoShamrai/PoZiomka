@@ -26,6 +26,10 @@ public class UserController : ControllerBase
         {
             case UserErrorCodes.UserNotFound:
                 return NotFound("User not found.");
+            case UserErrorCodes.CannotRetrieveUserFromCookie:
+                return Unauthorized("Cookie retrieval failed.");
+            case UserErrorCodes.UpdateUserDbFailed:
+                return BadRequest("Db update failed.");
             case UserErrorCodes.Ok:
                 return Ok();
             default:

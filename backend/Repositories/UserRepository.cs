@@ -11,6 +11,8 @@ namespace backend.Repositories;
 public enum UserErrorCodes
 {
     UserNotFound,
+    CannotRetrieveUserFromCookie,
+    UpdateUserDbFailed,
     Ok,
 }
 
@@ -38,15 +40,17 @@ public class UserRepository : IUserInterface
     {
         var userEmail = _contextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value;
         if (userEmail == null)
-            return UserErrorCodes.UserNotFound;
+            return UserErrorCodes.CannotRetrieveUserFromCookie;
         var user = await _userManager.FindByEmailAsync(userEmail);
+        
         if (user == null)
             return UserErrorCodes.UserNotFound;
         user.Preferences = newUserPreferences;
+        
         var result = await _userManager.UpdateAsync(user);
         if (result.Succeeded)
             return UserErrorCodes.Ok;
-        return UserErrorCodes.UserNotFound;
+        return UserErrorCodes.UpdateUserDbFailed;
     }
 
     // For now, I do not have better idea
