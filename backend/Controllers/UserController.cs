@@ -26,8 +26,12 @@ public class UserController : ControllerBase
         {
             case UserErrorCodes.UserNotFound:
                 return NotFound("User not found.");
-            default:
+            case UserErrorCodes.PreferencesNotFound:
+                return BadRequest("Preferences not found.");
+            case UserErrorCodes.Ok:
                 return Ok();
+            default:
+                throw new KeyNotFoundException();
         }
     }
 
@@ -41,8 +45,12 @@ public class UserController : ControllerBase
         {
           case UserErrorCodes.UserNotFound:
               return NotFound("User not found.");
-          default:
+          case UserErrorCodes.PreferencesNotFound:
+              return BadRequest("Preferences not found.");
+          case UserErrorCodes.Ok:
               return Ok(profile);
+          default:
+              throw new KeyNotFoundException();
         }
     }
 }

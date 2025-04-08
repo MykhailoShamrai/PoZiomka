@@ -1,6 +1,6 @@
 namespace backend.Dto;
 
-public class ProfileDisplay
+public class ProfileDisplayDto
 {
     // Fields here have to be nullable due to the fact that user
     // can set his/her preferences so that he/she does not want 

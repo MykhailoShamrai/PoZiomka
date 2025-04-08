@@ -3,13 +3,14 @@ using backend.Dto;
 using backend.Interfaces;
 using backend.Models.User;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repositories;
 
 public enum UserErrorCodes
 {
     UserNotFound,
-    UserAlreadyExists,
+    PreferencesNotFound,
     Ok,
 }
 
@@ -26,12 +27,27 @@ public class UserRepository : IUserInterface
         _contextAccessor = contextAccessor;
     }
     
-    public async Task<Tuple<UserErrorCodes, ProfileDisplay>> DisplayUserProfile(string email)
+    public async Task<Tuple<UserErrorCodes, ProfileDisplayDto?>> DisplayUserProfile(string email)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+            return new Tuple<UserErrorCodes, ProfileDisplayDto?>(UserErrorCodes.UserNotFound, null);
+        
+        var preferences = await _appContext.DisplayPreferences.
+            FirstOrDefaultAsync(x => x.Id == user.DisplayPreferencesId);
+        if (preferences == null)
+            return new Tuple<UserErrorCodes, ProfileDisplayDto?>(UserErrorCodes.PreferencesNotFound, null);
+        
+        var display = CreateDisplayFromPreferences(preferences);
+        return new Tuple<UserErrorCodes, ProfileDisplayDto?>(UserErrorCodes.Ok, display);
     }
     
     public async Task<UserErrorCodes> ChangeUserPreferences(DisplayPreferences displayPreferences)
+    {
+        throw new NotImplementedException();
+    }
+
+    ProfileDisplayDto CreateDisplayFromPreferences(DisplayPreferences displayPreferences)
     {
         throw new NotImplementedException();
     }

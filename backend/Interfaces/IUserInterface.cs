@@ -8,5 +8,5 @@ public interface IUserInterface
 {
     public Task<UserErrorCodes> ChangeUserPreferences(DisplayPreferences displayPreferences);
 
-    public Task<Tuple<UserErrorCodes, ProfileDisplay>> DisplayUserProfile(string email);
+    public Task<Tuple<UserErrorCodes, ProfileDisplayDto?>> DisplayUserProfile(string email);
 }
