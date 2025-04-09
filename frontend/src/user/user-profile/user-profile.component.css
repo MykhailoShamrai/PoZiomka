@@ -1,0 +1,32 @@
+/* Custom styles for user profile component */
+.form-control:read-only {
+    background-color: #f8f9fa;
+}
+
+.profile-container {
+    transition: all 0.3s ease;
+}
+
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.profile-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.user-info .row:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.user-info .row {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.user-info .row:last-child {
+    border-bottom: none;
+}
