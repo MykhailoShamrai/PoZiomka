@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { NgClass, NgIf } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UserService } from '../user.service';
+import { AuthGatewayService } from '../../auth/auth-gateway.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -26,7 +27,11 @@ export class UserProfileComponent implements OnInit {
     phoneNumber: '555-123-4567'
   };
 
-  constructor(private fb: FormBuilder, private userService: UserService) {
+  constructor(
+    private fb: FormBuilder, 
+    private userService: UserService,
+    private authService: AuthGatewayService
+  ) {
     this.userForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       firstName: ['', Validators.required],
@@ -71,6 +76,10 @@ export class UserProfileComponent implements OnInit {
       // Reset form validation state when exiting edit mode
       this.submitted = false;
     }
+  }
+  
+  logout(): void {
+    this.authService.logout();
   }
 
   onSubmit() {
