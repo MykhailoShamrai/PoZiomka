@@ -1,8 +1,10 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using backend.Data;
+using backend.Dto;
 using backend.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 public class FormService : IFormsInterface
 {
@@ -12,16 +14,13 @@ public class FormService : IFormsInterface
         _appDbContext = AppDbContext;
     }
 
-    public Task<bool> CreateNewForm(string NameOfForm, IEnumerable<string> Questions, IEnumerable<int> NumberOfAnswers, IEnumerable<string> Answers)
+    public async Task<bool> CreateNewForm(FormDto formDto)
     {
-        // Firstly, chack if number validation of arguments
-        if (Questions.Count() != NumberOfAnswers.Count())
-        {
-            throw new InvalidDataException("Number of questions and collection of number of answers for it have different sizes!");
-        }
-        // After, check if Form does already exist in a database.
-        throw new NotImplementedException();
-
+        // Error handling is on controller level
+        var form = formDto.DtoToForm();
+        await _appDbContext.AddAsync(form);
+        var res = await _appDbContext.SaveChangesAsync();
+        return res > 0;   
     }
 
     public Task<bool> AddNewObligatoryQuestionToForm(string NameOfForm, string Question, IEnumerable<string> Answers)
@@ -45,13 +44,4 @@ public class FormService : IFormsInterface
         return null;
     }
 
-    private bool CheckIfNumberOfAnswersIsSameAsDeclared(IEnumerable<int> NumberOfAnswers, IEnumerable<string> Answers)
-    {
-        int sum  = 0;
-        foreach (int number in NumberOfAnswers)
-        {
-            sum += number;
-        }
-        return Answers.Count() == sum;
-    }
 }
