@@ -5,7 +5,7 @@
 namespace backend.Migrations.AppDb
 {
     /// <inheritdoc />
-    public partial class FormsMigration : Migration
+    public partial class MigrationWithFormsAndAnswers : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,7 +15,8 @@ namespace backend.Migrations.AppDb
                 columns: table => new
                 {
                     FormId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1")
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    NameOfForm = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,7 +43,7 @@ namespace backend.Migrations.AppDb
                     ObligatoryPreferenceId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FormForWhichCorrespondFormId = table.Column<int>(type: "int", nullable: false)
+                    FormForWhichCorrespondFormId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -51,8 +52,7 @@ namespace backend.Migrations.AppDb
                         name: "FK_ObligatoryPreference_Form_FormForWhichCorrespondFormId",
                         column: x => x.FormForWhichCorrespondFormId,
                         principalTable: "Form",
-                        principalColumn: "FormId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "FormId");
                 });
 
             migrationBuilder.CreateTable(

@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations.AppDb
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250407114900_FormsMigration")]
-    partial class FormsMigration
+    [Migration("20250410221810_MigrationWithFormsAndAnswers")]
+    partial class MigrationWithFormsAndAnswers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -81,6 +81,10 @@ namespace backend.Migrations.AppDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FormId"));
 
+                    b.Property<string>("NameOfForm")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("FormId");
 
                     b.ToTable("Form");
@@ -94,7 +98,7 @@ namespace backend.Migrations.AppDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ObligatoryPreferenceId"));
 
-                    b.Property<int>("FormForWhichCorrespondFormId")
+                    b.Property<int?>("FormForWhichCorrespondFormId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -191,9 +195,7 @@ namespace backend.Migrations.AppDb
                 {
                     b.HasOne("Form", "FormForWhichCorrespond")
                         .WithMany("Obligatory")
-                        .HasForeignKey("FormForWhichCorrespondFormId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("FormForWhichCorrespondFormId");
 
                     b.Navigation("FormForWhichCorrespond");
                 });

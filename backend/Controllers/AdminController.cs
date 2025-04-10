@@ -1,29 +1,41 @@
-public class AdminController
+using backend.Dto;
+using backend.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
+
+namespace backend.Controllers;
+
+[Route("api/[controller]")]
+[Authorize("Admin")]
+public class AdminController: ControllerBase
 {
-    //TODO: To nie jest controller.
-    
-    // private readonly ApplicationService _applicationService;
-    // private readonly CommunicationSender _communicationSender;
-    // private readonly RoomSelector _roomSelector;
-    // public AdminController(ApplicationService applicationService, CommunicationSender communicationSender, RoomSelector roomSelector)
-    // {
-    //     _applicationService = applicationService;
-    //     _communicationSender = communicationSender;
-    //     _roomSelector = roomSelector;
-    // }
-    //
-    // public void MakeApplication(string type)
-    // {
-    //     throw new NotImplementedException();
-    // }
-    //
-    // public void SendCommunication(Communication communication, List<User> users)
-    // {
-    //     throw new NotImplementedException();
-    // }
-    //
-    // public void ResolveAnApplication(Application application)
-    // {
-    //     throw new NotImplementedException();
-    // }
+    private readonly IFormsInterface _formsInterface;
+
+    public AdminController(IFormsInterface formsInterface)
+    {
+        _formsInterface = formsInterface;
+    }
+
+    [HttpPost]
+    [Route("add_new_form")]
+    public async Task<IActionResult> AddNewForm([FromBody] FormDto formDto)
+    {
+        try
+        {
+            if (await _formsInterface.CreateNewForm(formDto))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("Something went wrong while adding new form!");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Is it okay to send it in such form?
+            return BadRequest(ex.Message);
+        }
+    }
 }

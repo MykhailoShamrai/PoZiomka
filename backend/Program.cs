@@ -2,6 +2,7 @@ using backend.Data;
 using backend.Interfaces;
 using backend.Models.Users;
 using backend.Repositories;
+using backend.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -57,6 +58,7 @@ builder.Services.AddIdentity<User, IdentityRole<int>>()
 
 
 builder.Services.AddScoped<IAuthInterface, AuthRepository>();
+builder.Services.AddScoped<IFormsInterface, FormService>();
 
 builder.Services.AddAuthentication(options =>
     {

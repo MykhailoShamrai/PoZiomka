@@ -78,6 +78,10 @@ namespace backend.Migrations.AppDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FormId"));
 
+                    b.Property<string>("NameOfForm")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("FormId");
 
                     b.ToTable("Form");
@@ -91,7 +95,7 @@ namespace backend.Migrations.AppDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ObligatoryPreferenceId"));
 
-                    b.Property<int>("FormForWhichCorrespondFormId")
+                    b.Property<int?>("FormForWhichCorrespondFormId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -188,9 +192,7 @@ namespace backend.Migrations.AppDb
                 {
                     b.HasOne("Form", "FormForWhichCorrespond")
                         .WithMany("Obligatory")
-                        .HasForeignKey("FormForWhichCorrespondFormId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("FormForWhichCorrespondFormId");
 
                     b.Navigation("FormForWhichCorrespond");
                 });
