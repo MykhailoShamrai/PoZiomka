@@ -5,13 +5,13 @@
 namespace backend.Migrations.AppDb
 {
     /// <inheritdoc />
-    public partial class MigrationWithFormsAndAnswers : Migration
+    public partial class FormsMigrationWithCustomTableNames : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Form",
+                name: "Forms",
                 columns: table => new
                 {
                     FormId = table.Column<int>(type: "int", nullable: false)
@@ -20,11 +20,11 @@ namespace backend.Migrations.AppDb
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Form", x => x.FormId);
+                    table.PrimaryKey("PK_Forms", x => x.FormId);
                 });
 
             migrationBuilder.CreateTable(
-                name: "StudentAnswers",
+                name: "StudentAnswersCollections",
                 columns: table => new
                 {
                     StudentAnswersId = table.Column<int>(type: "int", nullable: false)
@@ -33,11 +33,11 @@ namespace backend.Migrations.AppDb
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StudentAnswers", x => x.StudentAnswersId);
+                    table.PrimaryKey("PK_StudentAnswersCollections", x => x.StudentAnswersId);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ObligatoryPreference",
+                name: "ObligatoryPreferences",
                 columns: table => new
                 {
                     ObligatoryPreferenceId = table.Column<int>(type: "int", nullable: false)
@@ -47,16 +47,16 @@ namespace backend.Migrations.AppDb
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ObligatoryPreference", x => x.ObligatoryPreferenceId);
+                    table.PrimaryKey("PK_ObligatoryPreferences", x => x.ObligatoryPreferenceId);
                     table.ForeignKey(
-                        name: "FK_ObligatoryPreference_Form_FormForWhichCorrespondFormId",
+                        name: "FK_ObligatoryPreferences_Forms_FormForWhichCorrespondFormId",
                         column: x => x.FormForWhichCorrespondFormId,
-                        principalTable: "Form",
+                        principalTable: "Forms",
                         principalColumn: "FormId");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Answer",
+                name: "Answers",
                 columns: table => new
                 {
                     AnswerId = table.Column<int>(type: "int", nullable: false)
@@ -67,23 +67,23 @@ namespace backend.Migrations.AppDb
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Answer", x => x.AnswerId);
+                    table.PrimaryKey("PK_Answers", x => x.AnswerId);
                     table.ForeignKey(
-                        name: "FK_Answer_Form_CorrespondingFormFormId",
+                        name: "FK_Answers_Forms_CorrespondingFormFormId",
                         column: x => x.CorrespondingFormFormId,
-                        principalTable: "Form",
+                        principalTable: "Forms",
                         principalColumn: "FormId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Answer_StudentAnswers_StudentAnswersId",
+                        name: "FK_Answers_StudentAnswersCollections_StudentAnswersId",
                         column: x => x.StudentAnswersId,
-                        principalTable: "StudentAnswers",
+                        principalTable: "StudentAnswersCollections",
                         principalColumn: "StudentAnswersId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "OptionForObligatoryPreference",
+                name: "OptionsForObligatoryPreferences",
                 columns: table => new
                 {
                     OptionForObligatoryPreferenceId = table.Column<int>(type: "int", nullable: false)
@@ -93,17 +93,17 @@ namespace backend.Migrations.AppDb
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OptionForObligatoryPreference", x => x.OptionForObligatoryPreferenceId);
+                    table.PrimaryKey("PK_OptionsForObligatoryPreferences", x => x.OptionForObligatoryPreferenceId);
                     table.ForeignKey(
-                        name: "FK_OptionForObligatoryPreference_ObligatoryPreference_PreferenceObligatoryPreferenceId",
+                        name: "FK_OptionsForObligatoryPreferences_ObligatoryPreferences_PreferenceObligatoryPreferenceId",
                         column: x => x.PreferenceObligatoryPreferenceId,
-                        principalTable: "ObligatoryPreference",
+                        principalTable: "ObligatoryPreferences",
                         principalColumn: "ObligatoryPreferenceId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChoosablePreference",
+                name: "ChoosablePreferences",
                 columns: table => new
                 {
                     ChoosablePreferenceId = table.Column<int>(type: "int", nullable: false)
@@ -113,11 +113,11 @@ namespace backend.Migrations.AppDb
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChoosablePreference", x => x.ChoosablePreferenceId);
+                    table.PrimaryKey("PK_ChoosablePreferences", x => x.ChoosablePreferenceId);
                     table.ForeignKey(
-                        name: "FK_ChoosablePreference_Answer_AnswerId",
+                        name: "FK_ChoosablePreferences_Answers_AnswerId",
                         column: x => x.AnswerId,
-                        principalTable: "Answer",
+                        principalTable: "Answers",
                         principalColumn: "AnswerId");
                 });
 
@@ -132,71 +132,71 @@ namespace backend.Migrations.AppDb
                 {
                     table.PrimaryKey("PK_OptionForObligatoryPreference_Answer", x => new { x.AnswerId, x.OptionForObligatoryPreferenceId });
                     table.ForeignKey(
-                        name: "FK_OptionForObligatoryPreference_Answer_Answer_AnswerId",
+                        name: "FK_OptionForObligatoryPreference_Answer_Answers_AnswerId",
                         column: x => x.AnswerId,
-                        principalTable: "Answer",
+                        principalTable: "Answers",
                         principalColumn: "AnswerId");
                     table.ForeignKey(
-                        name: "FK_OptionForObligatoryPreference_Answer_OptionForObligatoryPreference_OptionForObligatoryPreferenceId",
+                        name: "FK_OptionForObligatoryPreference_Answer_OptionsForObligatoryPreferences_OptionForObligatoryPreferenceId",
                         column: x => x.OptionForObligatoryPreferenceId,
-                        principalTable: "OptionForObligatoryPreference",
+                        principalTable: "OptionsForObligatoryPreferences",
                         principalColumn: "OptionForObligatoryPreferenceId");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Answer_CorrespondingFormFormId",
-                table: "Answer",
+                name: "IX_Answers_CorrespondingFormFormId",
+                table: "Answers",
                 column: "CorrespondingFormFormId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Answer_StudentAnswersId",
-                table: "Answer",
+                name: "IX_Answers_StudentAnswersId",
+                table: "Answers",
                 column: "StudentAnswersId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChoosablePreference_AnswerId",
-                table: "ChoosablePreference",
+                name: "IX_ChoosablePreferences_AnswerId",
+                table: "ChoosablePreferences",
                 column: "AnswerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ObligatoryPreference_FormForWhichCorrespondFormId",
-                table: "ObligatoryPreference",
+                name: "IX_ObligatoryPreferences_FormForWhichCorrespondFormId",
+                table: "ObligatoryPreferences",
                 column: "FormForWhichCorrespondFormId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OptionForObligatoryPreference_PreferenceObligatoryPreferenceId",
-                table: "OptionForObligatoryPreference",
-                column: "PreferenceObligatoryPreferenceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OptionForObligatoryPreference_Answer_OptionForObligatoryPreferenceId",
                 table: "OptionForObligatoryPreference_Answer",
                 column: "OptionForObligatoryPreferenceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OptionsForObligatoryPreferences_PreferenceObligatoryPreferenceId",
+                table: "OptionsForObligatoryPreferences",
+                column: "PreferenceObligatoryPreferenceId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ChoosablePreference");
+                name: "ChoosablePreferences");
 
             migrationBuilder.DropTable(
                 name: "OptionForObligatoryPreference_Answer");
 
             migrationBuilder.DropTable(
-                name: "Answer");
+                name: "Answers");
 
             migrationBuilder.DropTable(
-                name: "OptionForObligatoryPreference");
+                name: "OptionsForObligatoryPreferences");
 
             migrationBuilder.DropTable(
-                name: "StudentAnswers");
+                name: "StudentAnswersCollections");
 
             migrationBuilder.DropTable(
-                name: "ObligatoryPreference");
+                name: "ObligatoryPreferences");
 
             migrationBuilder.DropTable(
-                name: "Form");
+                name: "Forms");
         }
     }
 }

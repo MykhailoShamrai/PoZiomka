@@ -12,5 +12,7 @@ public interface IFormsInterface
     public Task<bool> AddNewObligatoryQuestionToForm(string NameOfForm, ObligatoryPreferenceDto dto);
 
     public Task<bool> DeleteQuestionFromForm(string NameOfForm, string Question);
+
+    public Task<bool> DeleteForm(string NameOfForm);
     
 }

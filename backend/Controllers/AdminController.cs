@@ -51,4 +51,20 @@ public class AdminController: ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpDelete]
+    [Route("delete_form")]
+    public async Task<IActionResult> DeleteForm([FromBody] string NameOfForm)
+    {
+        try
+        {
+            if (await _formsInterface.DeleteForm(NameOfForm))
+                return Ok();
+            return BadRequest("Something went wrong while deleting a form!");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

@@ -45,7 +45,7 @@ namespace backend.Migrations.AppDb
 
                     b.HasIndex("StudentAnswersId");
 
-                    b.ToTable("Answer");
+                    b.ToTable("Answers", (string)null);
                 });
 
             modelBuilder.Entity("ChoosablePreference", b =>
@@ -67,7 +67,7 @@ namespace backend.Migrations.AppDb
 
                     b.HasIndex("AnswerId");
 
-                    b.ToTable("ChoosablePreference");
+                    b.ToTable("ChoosablePreferences", (string)null);
                 });
 
             modelBuilder.Entity("Form", b =>
@@ -84,7 +84,7 @@ namespace backend.Migrations.AppDb
 
                     b.HasKey("FormId");
 
-                    b.ToTable("Form");
+                    b.ToTable("Forms", (string)null);
                 });
 
             modelBuilder.Entity("ObligatoryPreference", b =>
@@ -106,7 +106,7 @@ namespace backend.Migrations.AppDb
 
                     b.HasIndex("FormForWhichCorrespondFormId");
 
-                    b.ToTable("ObligatoryPreference");
+                    b.ToTable("ObligatoryPreferences", (string)null);
                 });
 
             modelBuilder.Entity("OptionForObligatoryPreference", b =>
@@ -128,7 +128,7 @@ namespace backend.Migrations.AppDb
 
                     b.HasIndex("PreferenceObligatoryPreferenceId");
 
-                    b.ToTable("OptionForObligatoryPreference");
+                    b.ToTable("OptionsForObligatoryPreferences", (string)null);
                 });
 
             modelBuilder.Entity("OptionForObligatoryPreference_Answer", b =>
@@ -159,7 +159,7 @@ namespace backend.Migrations.AppDb
 
                     b.HasKey("StudentAnswersId");
 
-                    b.ToTable("StudentAnswers");
+                    b.ToTable("StudentAnswersCollections", (string)null);
                 });
 
             modelBuilder.Entity("Answer", b =>

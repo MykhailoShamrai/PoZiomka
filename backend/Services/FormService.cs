@@ -9,23 +9,26 @@ namespace backend.Services;
 public class FormService : IFormsInterface
 {
     private readonly AppDbContext _appDbContext;
-    public FormService(AppDbContext AppDbContext)
+    public FormService(AppDbContext appDbContext)
     {
-        _appDbContext = AppDbContext;
+        _appDbContext = appDbContext;
     }
 
     public async Task<bool> CreateNewForm(FormDto formDto)
     {
         // Error handling is on controller level
         var form = formDto.DtoToForm();
+        var ftmp = await FindForm(form.NameOfForm);
+        if (ftmp is not null)
+            return false;
         await _appDbContext.AddAsync(form);
         var res = await _appDbContext.SaveChangesAsync();
         return res > 0;   
     }
 
-    public async Task<bool> AddNewObligatoryQuestionToForm(string NameOfForm, ObligatoryPreferenceDto dto)
+    public async Task<bool> AddNewObligatoryQuestionToForm(string nameOfForm, ObligatoryPreferenceDto dto)
     {
-        var form = await FindForm(NameOfForm);
+        var form = await FindForm(nameOfForm);
         if (form is null)
             throw new ArgumentException("There is no form with provided name!");
         var newObligatoryPreference = new ObligatoryPreference
@@ -49,20 +52,29 @@ public class FormService : IFormsInterface
         return res > 0;
     }
 
+    public async Task<bool> DeleteForm(string nameOfForm)
+    {
+        var form = await FindForm(nameOfForm);
+        if (form is null)
+            throw new ArgumentException("There is no form wtih provided name!");
+        var obligatoryPreferences = _appDbContext.ObligatoryPreferences
+            .Where(x => x.FormForWhichCorrespond!.NameOfForm == form.NameOfForm);
+        _appDbContext.ObligatoryPreferences.RemoveRange(obligatoryPreferences);
+        _appDbContext.Forms.Remove(form);
+        await _appDbContext.SaveChangesAsync();
+        _appDbContext.Remove(form);
+        var res = await _appDbContext.SaveChangesAsync();
+        return res > 0;
+    }
 
-    public Task<bool> DeleteQuestionFromForm(string NameOfForm, string Question)
+
+    public Task<bool> DeleteQuestionFromForm(string nameOfForm, string question)
     {
         throw new NotImplementedException();
     }
 
-    private async Task<Form?> FindForm(string FormName)
+    private async Task<Form?> FindForm(string formName)
     {
-        var form = await _appDbContext.Forms.Where(f => f.NameOfForm == FormName).ToListAsync();
-        if (form.Count > 0)
-        {
-            return form[0];
-        }
-        return null;
+        return await _appDbContext.Forms.FirstOrDefaultAsync(f => f.NameOfForm == formName);
     }
-
 }

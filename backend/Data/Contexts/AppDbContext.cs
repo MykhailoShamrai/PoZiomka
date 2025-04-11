@@ -10,16 +10,24 @@ public class AppDbContext : DbContext
         
     }
 
-    public DbSet<Answer> Answers;
-    public DbSet<StudentAnswers> StudentAnswersCollections;
-    public DbSet<Form> Forms;
-    public DbSet<ChoosablePreference> ChoosablePreferences;
-    public DbSet<ObligatoryPreference> ObligatoryPreferences;
-    public DbSet<OptionForObligatoryPreference> OptionForObligatoryPreferences;
+    public DbSet<Answer> Answers {get; set;}
+    public DbSet<StudentAnswers> StudentAnswersCollections {get; set;}
+    public DbSet<Form> Forms {get; set;}
+    public DbSet<ChoosablePreference> ChoosablePreferences {get; set;}
+    public DbSet<ObligatoryPreference> ObligatoryPreferences {get; set;}
+    public DbSet<OptionForObligatoryPreference> OptionsForObligatoryPreferences {get; set;}  
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
+        modelBuilder.Entity<Answer>().ToTable("Answers");
+        modelBuilder.Entity<StudentAnswers>().ToTable("StudentAnswersCollections");
+        modelBuilder.Entity<Form>().ToTable("Forms");
+        modelBuilder.Entity<ChoosablePreference>().ToTable("ChoosablePreferences");
+        modelBuilder.Entity<ObligatoryPreference>().ToTable("ObligatoryPreferences");
+        modelBuilder.Entity<OptionForObligatoryPreference>().ToTable("OptionsForObligatoryPreferences");
+
         modelBuilder.Entity<OptionForObligatoryPreference>()
         .HasMany(opt => opt.AnswersWhichContains)
         .WithMany(answ => answ.ObligatoryAnswers)
