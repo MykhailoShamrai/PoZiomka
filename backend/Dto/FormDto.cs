@@ -7,5 +7,3 @@ public class FormDto
     public IEnumerable<int> NumberOfAnswers {get; set;} = new List<int>();
     public IEnumerable<string> Answers {get; set;} = new List<string>();
 }
-
-

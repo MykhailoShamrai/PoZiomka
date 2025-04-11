@@ -23,9 +23,30 @@ public class FormService : IFormsInterface
         return res > 0;   
     }
 
-    public Task<bool> AddNewObligatoryQuestionToForm(string NameOfForm, string Question, IEnumerable<string> Answers)
+    public async Task<bool> AddNewObligatoryQuestionToForm(string NameOfForm, ObligatoryPreferenceDto dto)
     {
-        throw new NotImplementedException();
+        var form = await FindForm(NameOfForm);
+        if (form is null)
+            throw new ArgumentException("There is no form with provided name!");
+        var newObligatoryPreference = new ObligatoryPreference
+        {
+            Name = dto.Name,
+            FormForWhichCorrespond = form,
+        };
+        // Can something change here asynchronuosly?
+        foreach (var answ in dto.Answers)
+        {
+            newObligatoryPreference.Options.Append(new OptionForObligatoryPreference
+            {
+                Preference = newObligatoryPreference,
+                OptionForPreference = answ
+            });
+        }
+        form.Obligatory.Add(newObligatoryPreference);
+
+        await _appDbContext.AddAsync(newObligatoryPreference);
+        var res = await _appDbContext.SaveChangesAsync();
+        return res > 0;
     }
 
 
