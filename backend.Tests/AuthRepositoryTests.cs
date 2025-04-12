@@ -2,7 +2,7 @@ using Xunit;
 using Moq;
 using backend.Repositories;
 using backend.Dto;
-using backend.Models.Users;
+using backend.Models.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;

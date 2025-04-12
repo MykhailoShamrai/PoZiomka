@@ -20,13 +20,11 @@ public class AuthRepository : IAuthInterface
     private readonly HashSet<string> _weakPasswords = new HashSet<string>();
     private readonly UserManager<User> _userManager;
     private readonly IHttpContextAccessor _contextAccessor;
-    private readonly AppDbContext _appDbContext;
 
-    public AuthRepository(UserManager<User> userManager, IHttpContextAccessor contextAccessor, AppDbContext appDbContext)
+    public AuthRepository(UserManager<User> userManager, IHttpContextAccessor contextAccessor)
     {
         _userManager = userManager;
         _contextAccessor = contextAccessor;
-        _appDbContext = appDbContext;
         var collection = File.ReadLines(PathToFileWithPasswords);
         foreach (string s in collection)
         {

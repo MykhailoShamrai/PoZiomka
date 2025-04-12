@@ -7,5 +7,5 @@ public class User: IdentityUser<int>
     public string? LastName { get; set; } = string.Empty;
     
     public string? StudentIndex{ get; set; } = string.Empty;
-    public required UserPreferences Preferences { get; set; }
+    public UserPreferences Preferences { get; set; } = new UserPreferences();
 }
