@@ -14,5 +14,6 @@ public interface IFormsInterface
     public Task<bool> DeleteQuestion(string question);
 
     public Task<bool> DeleteForm(string nameOfForm);
+    public Task<Form[]> GetAll();
     
 }

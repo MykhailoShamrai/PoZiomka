@@ -34,9 +34,11 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginUserDto model)
     {
         if (!await _authInterface.Login(model))
-            return BadRequest();
-        return Ok();
-    }
+        {
+            return BadRequest(new { error = "Invalid credentials" });
+        }
+        return Ok(new { email = model.Email });
+    }  
 
     [HttpPost]
     [Route("logout")]

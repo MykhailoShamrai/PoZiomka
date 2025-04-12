@@ -10,6 +10,13 @@ export interface UserProfile {
   phoneNumber?: string;
 }
 
+export interface UserForm {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -26,6 +33,12 @@ export class UserService {
 
   updateUserProfile(userData: UserProfile): Observable<any> {
     return this.http.put(`${this.apiUrl}/profile`, userData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getUserForms(): Observable<UserForm[]> {
+    return this.http.get<UserForm[]>(`${this.apiUrl}/forms`).pipe(
       catchError(this.handleError)
     );
   }

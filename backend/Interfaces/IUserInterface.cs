@@ -6,7 +6,11 @@ namespace backend.Interfaces;
 
 public interface IUserInterface
 {
-    public Task<UserErrorCodes> ChangeUserPreferences(UserPreferences newUserPreferences);
+    public Task<ErrorCodes> ChangeUserPreferences(UserPreferences newUserPreferences);
 
-    public Task<Tuple<UserErrorCodes, ProfileDisplayDto?>> DisplayUserProfile(string email);
+    public Task<Tuple<ErrorCodes, ProfileDisplayDto?>> DisplayUserProfile(string email);
+    public Task<ErrorCodes> ChangeUserProfile(UpdateUserDto user);
+
+    public Task<Tuple<ErrorCodes, Form[]?>> GetUserForms(string email);
+    // public Task<ErrorCodes> SubmitAnswers(AnswerDto answer);
 }

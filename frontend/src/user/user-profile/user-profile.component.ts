@@ -7,7 +7,7 @@ import { AuthGatewayService } from '../../auth/auth-gateway.service';
 
 @Component({
   selector: 'app-user-profile',
-  imports: [ReactiveFormsModule, NgClass, NgIf, RouterLink],
+  imports: [ReactiveFormsModule, NgClass, NgIf],
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.css',
 })
@@ -48,6 +48,7 @@ export class UserProfileComponent implements OnInit {
     this.loading = true;
     this.userService.getUserProfile().subscribe({
       next: (userData) => {
+        console.log(userData);
         this.userForm.patchValue({
           email: userData.email,
           firstName: userData.firstName || '',

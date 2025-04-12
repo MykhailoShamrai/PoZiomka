@@ -17,12 +17,12 @@ export class AuthGatewayService {
   private tokenKey = 'auth_token';
   private userEmailKey = 'user_email';
   
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.isAuthenticated());
   isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   constructor(private http: HttpClient, private router: Router) {
     // Check if token exists on service instantiation
-    this.isAuthenticatedSubject.next(this.hasToken());
+    this.isAuthenticatedSubject.next(this.isAuthenticated());
   }
 
   login(email: string, password: string): Observable<AuthResponse> {
@@ -61,13 +61,12 @@ export class AuthGatewayService {
     return localStorage.getItem(this.userEmailKey);
   }
 
-  private hasToken(): boolean {
-    return !!this.getToken();
+  private isAuthenticated(): boolean {
+    return !!this.getUserEmail();
   }
 
   private handleAuthResponse(response: AuthResponse): void {
-    if (response && response.token) {
-      localStorage.setItem(this.tokenKey, response.token);
+    if (response && response.email) {
       localStorage.setItem(this.userEmailKey, response.email);
       this.isAuthenticatedSubject.next(true);
     }

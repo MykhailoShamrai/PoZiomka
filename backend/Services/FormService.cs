@@ -77,6 +77,14 @@ public class FormService : IFormsInterface
         var res = await _appDbContext.SaveChangesAsync();
         return res > 0;
     }
+
+    public async Task<Form[]> GetAll()
+    {
+        return await _appDbContext.Forms
+            .Include(f => f.Questions)
+            .ThenInclude(q => q.Options)
+            .ToArrayAsync();
+    }
     
     private async Task<Question?> FindQuestionWithAnswers(string questionName)
     {

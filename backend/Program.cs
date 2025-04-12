@@ -39,6 +39,12 @@ builder.Services.AddSwaggerGen(
     });
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    });
+
 // Please set "dotnet user-secrets init"
 if (builder.Environment.IsDevelopment())
 {
@@ -60,6 +66,7 @@ builder.Services.AddIdentity<User, IdentityRole<int>>()
 // Here we register our interfaces and repositories
 builder.Services.AddScoped<IAuthInterface, AuthRepository>();
 builder.Services.AddScoped<IFormsInterface, FormService>();
+builder.Services.AddScoped<FormFiller>();
 builder.Services.AddScoped<IUserInterface, UserRepository>();
 
 builder.Services.AddAuthentication(options =>
@@ -88,8 +95,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularApp", policy =>
     {
         policy.WithOrigins("http://localhost:4200")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -103,9 +111,9 @@ if (app.Environment.IsDevelopment())
 
 await app.InitializeAuthContext();
 app.UseRouting();
+app.UseCors("AllowAngularApp");
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors("AllowAngularApp");
 app.MapControllers();
 
 app.Run();
