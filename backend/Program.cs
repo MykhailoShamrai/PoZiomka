@@ -2,6 +2,7 @@ using backend.Data;
 using backend.Interfaces;
 using backend.Models.User;
 using backend.Repositories;
+using backend.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -49,7 +50,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // Db contexts
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(connectionString));
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseSqlServer(connectionString));
 
 builder.Services.AddIdentity<User, IdentityRole<int>>()
@@ -58,6 +59,7 @@ builder.Services.AddIdentity<User, IdentityRole<int>>()
 
 // Here we register our interfaces and repositories
 builder.Services.AddScoped<IAuthInterface, AuthRepository>();
+builder.Services.AddScoped<IFormsInterface, FormService>();
 builder.Services.AddScoped<IUserInterface, UserRepository>();
 
 builder.Services.AddAuthentication(options =>
