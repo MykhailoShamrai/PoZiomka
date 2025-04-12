@@ -6,5 +6,5 @@
     {
         public int FormId { get; set; }
         public required string NameOfForm { get; set; }
-        public required List<ObligatoryPreference> Obligatory { get; set; }
+        public required List<Question> Questions { get; set; }
     }

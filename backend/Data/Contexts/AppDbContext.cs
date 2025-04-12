@@ -11,39 +11,35 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Answer> Answers {get; set;}
-    public DbSet<StudentAnswers> StudentAnswersCollections {get; set;}
     public DbSet<Form> Forms {get; set;}
-    public DbSet<ChoosablePreference> ChoosablePreferences {get; set;}
-    public DbSet<ObligatoryPreference> ObligatoryPreferences {get; set;}
-    public DbSet<OptionForObligatoryPreference> OptionsForObligatoryPreferences {get; set;}  
+    public DbSet<Question> Questions {get; set;}
+    public DbSet<OptionForQuestion> OptionsForQuestions {get; set;}  
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 
         modelBuilder.Entity<Answer>().ToTable("Answers");
-        modelBuilder.Entity<StudentAnswers>().ToTable("StudentAnswersCollections");
         modelBuilder.Entity<Form>().ToTable("Forms");
-        modelBuilder.Entity<ChoosablePreference>().ToTable("ChoosablePreferences");
-        modelBuilder.Entity<ObligatoryPreference>().ToTable("ObligatoryPreferences");
-        modelBuilder.Entity<OptionForObligatoryPreference>().ToTable("OptionsForObligatoryPreferences");
+        modelBuilder.Entity<Question>().ToTable("Questions");
+        modelBuilder.Entity<OptionForQuestion>().ToTable("OptionsForQuestions");
 
-        modelBuilder.Entity<OptionForObligatoryPreference>()
+        modelBuilder.Entity<OptionForQuestion>()
         .HasMany(opt => opt.AnswersWhichContains)
-        .WithMany(answ => answ.ObligatoryAnswers)
+        .WithMany(answ => answ.ChosenOptions)
         .UsingEntity<Dictionary<string, object>>(
-            "OptionForObligatoryPreference_Answer",
+            "OptionForQuestion_Answer",
             j => j.HasOne<Answer>()
                   .WithMany()
                   .HasForeignKey("AnswerId")
                   .OnDelete(DeleteBehavior.ClientCascade),
-            j => j.HasOne<OptionForObligatoryPreference>()
+            j => j.HasOne<OptionForQuestion>()
                   .WithMany()
-                  .HasForeignKey("OptionForObligatoryPreferenceId")
+                  .HasForeignKey("OptionForQuestionId")
                   .OnDelete(DeleteBehavior.ClientCascade),
             j => 
             {
-                j.HasKey("AnswerId", "OptionForObligatoryPreferenceId");
+                j.HasKey("AnswerId", "OptionForQuestionId");
             });
     }
 }

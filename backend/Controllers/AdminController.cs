@@ -36,8 +36,8 @@ public class AdminController: ControllerBase
     }
 
     [HttpPost]
-    [Route("add_obl_question")]
-    public async Task<IActionResult> AddNewObligatoryQuestionTo([FromBody] AddObligatoryPreferenceDto preferenceDto)
+    [Route("add_question")]
+    public async Task<IActionResult> AddNewObligatoryQuestionTo([FromBody] AddQuestionDto preferenceDto)
     {
         try
         {
@@ -69,7 +69,7 @@ public class AdminController: ControllerBase
     }
 
     [HttpDelete]
-    [Route("delete_obligatory_question")]
+    [Route("delete_question")]
     public async Task<IActionResult> DeleteObligatoryQuestion([FromBody] string nameOfQuestion)
     {
         try

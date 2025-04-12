@@ -1,6 +1,5 @@
 using backend.Dto;
 
-
 namespace backend.Mappers;
 public static class FormDtoMapper
 {
@@ -8,20 +7,23 @@ public static class FormDtoMapper
     {
         var NameOfForm = dto.FormName;
         var Questions = dto.Questions;
-        var NumberOfAnswers = dto.NumberOfAnswers;
-        var Answers = dto.Answers;
+        var Obligatoriness = dto.Obligatoriness;
+        var NumberOfAnswers = dto.NumberOfOptions;
+        var Answers = dto.Options;
         // Firstly, chack if number validation of arguments
         if (Questions.Count() != NumberOfAnswers.Count())
             throw new InvalidDataException("Number of questions and collection of number of answers for it have different sizes!");
+        if (Questions.Count() != Obligatoriness.Count())
+            throw new InvalidDataException("Number of questions and obligatoriness for it have different sizes!");
         if (!CheckIfNumberOfAnswersIsSameAsDeclared(NumberOfAnswers, Answers))
             throw new InvalidDataException("Number of answers isn't proper to number of declared answers!");
         // After, check if Form does already exist in a database.
         var form = new Form 
         {
             NameOfForm = NameOfForm,
-            Obligatory = Questions.Select(q => new ObligatoryPreference
+            Questions = Questions.Select(q => new Question
             {
-                Name = q
+                Name = q,
             }).ToList(),
         };  
         int sum = 0;
@@ -29,15 +31,17 @@ public static class FormDtoMapper
             sum += number;
         var arrAnswers = Answers.ToArray();
         var arrNumbers = NumberOfAnswers.ToArray();
+        var arrObligatoriness = Obligatoriness.ToArray();
         int numberOfPassedOptions = 0;
         for (int i = 0; i < NumberOfAnswers.Count(); i++)
         {
-            form.Obligatory[i].FormForWhichCorrespond = form;
-            form.Obligatory[i].Options = arrAnswers[numberOfPassedOptions..(numberOfPassedOptions+arrNumbers[i])]
-                .Select(a => new OptionForObligatoryPreference
+            form.Questions[i].IsObligatory = arrObligatoriness[i];
+            form.Questions[i].FormForWhichCorrespond = form;
+            form.Questions[i].Options = arrAnswers[numberOfPassedOptions..(numberOfPassedOptions+arrNumbers[i])]
+                .Select(answ => new OptionForQuestion
             {
-                Preference = form.Obligatory[i],
-                OptionForPreference = a 
+                Question = form.Questions[i],
+                Name = answ
             }).ToList();
             numberOfPassedOptions += arrNumbers[i];
         }

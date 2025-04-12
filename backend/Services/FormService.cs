@@ -26,28 +26,29 @@ public class FormService : IFormsInterface
         return res > 0;   
     }
 
-    public async Task<bool> AddNewObligatoryQuestionToForm(AddObligatoryPreferenceDto dto)
+    public async Task<bool> AddNewObligatoryQuestionToForm(AddQuestionDto dto)
     {
         var form = await FindFormWithQuestions(dto.NameOfForm);
         if (form is null)
             throw new ArgumentException("There is no form with provided name!");
-        var newObligatoryPreference = new ObligatoryPreference
+        var tmpQuestion = new Question
         {
             Name = dto.Name,
             FormForWhichCorrespond = form,
+            IsObligatory = dto.IsObligatory
         };
         // Can something change here asynchronuosly?
         foreach (var answ in dto.Answers)
         {
-            newObligatoryPreference.Options.Append(new OptionForObligatoryPreference
+            tmpQuestion.Options.Add(new OptionForQuestion
             {
-                Preference = newObligatoryPreference,
-                OptionForPreference = answ
+                Name = answ,
+                Question = tmpQuestion
             });
         }
-        form.Obligatory.Add(newObligatoryPreference);
+        form.Questions.Add(tmpQuestion);
 
-        await _appDbContext.AddAsync(newObligatoryPreference);
+        await _appDbContext.AddAsync(tmpQuestion);
         var res = await _appDbContext.SaveChangesAsync();
         return res > 0;
     }
@@ -57,9 +58,9 @@ public class FormService : IFormsInterface
         var form = await FindForm(nameOfForm);
         if (form is null)
             throw new ArgumentException("There is no form with provided name!");
-        var obligatoryQuestions = _appDbContext.ObligatoryPreferences
+        var questions = _appDbContext.Questions
             .Where(x => x.FormForWhichCorrespond!.NameOfForm == form.NameOfForm);
-        _appDbContext.ObligatoryPreferences.RemoveRange(obligatoryQuestions);
+        _appDbContext.Questions.RemoveRange(questions);
         _appDbContext.Forms.Remove(form);
         var res = await _appDbContext.SaveChangesAsync();
         return res > 0;
@@ -68,24 +69,18 @@ public class FormService : IFormsInterface
 
     public async Task<bool> DeleteQuestion(string question)
     {
-        var oblQuestion = await FindQuestionWithAnswers(question);
-        if (oblQuestion is null)
+        var tmpQuestion = await FindQuestionWithAnswers(question);
+        if (tmpQuestion is null)
             throw new ArgumentException("There is no question with such name!");
-        _appDbContext.OptionsForObligatoryPreferences.RemoveRange(oblQuestion.Options);
-        _appDbContext.ObligatoryPreferences.Remove(oblQuestion);
+        _appDbContext.OptionsForQuestions.RemoveRange(tmpQuestion.Options);
+        _appDbContext.Questions.Remove(tmpQuestion);
         var res = await _appDbContext.SaveChangesAsync();
         return res > 0;
     }
     
-    private async Task<ObligatoryPreference?> FindQuestion(string questionName)
+    private async Task<Question?> FindQuestionWithAnswers(string questionName)
     {
-        return await _appDbContext.ObligatoryPreferences
-            .FirstOrDefaultAsync(o => o.Name.ToLower() == questionName.ToLower());
-    }
-
-    private async Task<ObligatoryPreference?> FindQuestionWithAnswers(string questionName)
-    {
-        return await _appDbContext.ObligatoryPreferences
+        return await _appDbContext.Questions
             .Include(o => o.Options)
             .FirstOrDefaultAsync(o => o.Name.ToLower() == questionName.ToLower());
     }
@@ -93,14 +88,14 @@ public class FormService : IFormsInterface
     private async Task<Form?> FindForm(string formName)
     {
         return await _appDbContext.Forms
-            .FirstOrDefaultAsync(f => f.NameOfForm.ToLower() == formName.ToLower());
+            .FirstOrDefaultAsync(f => f.NameOfForm == formName);
     }
 
     private async Task<Form?> FindFormWithQuestions(string formName)
     {
         return await _appDbContext.Forms
-            .Include(f => f.Obligatory)
+            .Include(f => f.Questions)
             .ThenInclude(o => o.Options)
-            .FirstOrDefaultAsync(f => f.NameOfForm.ToLower() == formName.ToLower());
+            .FirstOrDefaultAsync(f => f.NameOfForm == formName);
     }
 }

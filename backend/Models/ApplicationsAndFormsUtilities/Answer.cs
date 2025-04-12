@@ -4,10 +4,9 @@ public class Answer
     // For which form the answers are filled.
     public required Form CorrespondingForm { get; set;}
     // Answers for choosable preferences
-    public IEnumerable<ChoosablePreference>? Choosable { get; set; }
-    public required IEnumerable<OptionForObligatoryPreference> ObligatoryAnswers { get; set; }
+    public int UserId { get; set; }
+    public required List<OptionForQuestion> ChosenOptions{ get; set; }
     public AnswerStatus Status { get; set; } = AnswerStatus.Created;
-    public StudentAnswers StudentAnswers { get; set; } = null!;
 }
 
 public enum AnswerStatus
