@@ -9,7 +9,7 @@ public interface IFormsInterface
     // First collection represents new questions, second - number of answers for a question and last one - options to answer.
     public Task<bool> CreateNewForm(FormDto formDto);
 
-    public Task<bool> AddNewObligatoryQuestionToForm(string NameOfForm, ObligatoryPreferenceDto dto);
+    public Task<bool> AddNewObligatoryQuestionToForm(AddObligatoryPreferenceDto dto);
 
     public Task<bool> DeleteQuestionFromForm(string NameOfForm, string Question);
 

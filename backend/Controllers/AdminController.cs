@@ -37,11 +37,11 @@ public class AdminController: ControllerBase
 
     [HttpPost]
     [Route("add_obl_question")]
-    public async Task<IActionResult> AddNewObligatoryQuestionTo([FromBody] string NameOfForm, [FromBody] ObligatoryPreferenceDto preferenceDto)
+    public async Task<IActionResult> AddNewObligatoryQuestionTo([FromBody] AddObligatoryPreferenceDto preferenceDto)
     {
         try
         {
-            if (await _formsInterface.AddNewObligatoryQuestionToForm(NameOfForm, preferenceDto))
+            if (await _formsInterface.AddNewObligatoryQuestionToForm(preferenceDto))
                 return Ok();
             return BadRequest("Something went wrong while adding new preferene!");
 

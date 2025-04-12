@@ -26,9 +26,9 @@ public class FormService : IFormsInterface
         return res > 0;   
     }
 
-    public async Task<bool> AddNewObligatoryQuestionToForm(string nameOfForm, ObligatoryPreferenceDto dto)
+    public async Task<bool> AddNewObligatoryQuestionToForm(AddObligatoryPreferenceDto dto)
     {
-        var form = await FindForm(nameOfForm);
+        var form = await FindFormWithQuestions(dto.NameOfForm);
         if (form is null)
             throw new ArgumentException("There is no form with provided name!");
         var newObligatoryPreference = new ObligatoryPreference
@@ -61,8 +61,6 @@ public class FormService : IFormsInterface
             .Where(x => x.FormForWhichCorrespond!.NameOfForm == form.NameOfForm);
         _appDbContext.ObligatoryPreferences.RemoveRange(obligatoryPreferences);
         _appDbContext.Forms.Remove(form);
-        await _appDbContext.SaveChangesAsync();
-        _appDbContext.Remove(form);
         var res = await _appDbContext.SaveChangesAsync();
         return res > 0;
     }
@@ -75,6 +73,15 @@ public class FormService : IFormsInterface
 
     private async Task<Form?> FindForm(string formName)
     {
-        return await _appDbContext.Forms.FirstOrDefaultAsync(f => f.NameOfForm == formName);
+        return await _appDbContext.Forms
+            .FirstOrDefaultAsync(f => f.NameOfForm.ToLower() == formName.ToLower());
+    }
+
+    private async Task<Form?> FindFormWithQuestions(string formName)
+    {
+        return await _appDbContext.Forms
+            .Include(f => f.Obligatory)
+            .ThenInclude(o => o.Options)
+            .FirstOrDefaultAsync(f => f.NameOfForm.ToLower() == formName.ToLower());
     }
 }
