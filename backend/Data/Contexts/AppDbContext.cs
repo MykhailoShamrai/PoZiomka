@@ -1,3 +1,4 @@
+using backend.Models.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Builder;
 
@@ -9,7 +10,7 @@ public class AppDbContext : DbContext
     {
         
     }
-
+    
     public DbSet<Answer> Answers {get; set;}
     public DbSet<Form> Forms {get; set;}
     public DbSet<Question> Questions {get; set;}
