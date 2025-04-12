@@ -56,19 +56,38 @@ public class FormService : IFormsInterface
     {
         var form = await FindForm(nameOfForm);
         if (form is null)
-            throw new ArgumentException("There is no form wtih provided name!");
-        var obligatoryPreferences = _appDbContext.ObligatoryPreferences
+            throw new ArgumentException("There is no form with provided name!");
+        var obligatoryQuestions = _appDbContext.ObligatoryPreferences
             .Where(x => x.FormForWhichCorrespond!.NameOfForm == form.NameOfForm);
-        _appDbContext.ObligatoryPreferences.RemoveRange(obligatoryPreferences);
+        _appDbContext.ObligatoryPreferences.RemoveRange(obligatoryQuestions);
         _appDbContext.Forms.Remove(form);
         var res = await _appDbContext.SaveChangesAsync();
         return res > 0;
     }
 
 
-    public Task<bool> DeleteQuestionFromForm(string nameOfForm, string question)
+    public async Task<bool> DeleteQuestion(string question)
     {
-        throw new NotImplementedException();
+        var oblQuestion = await FindQuestionWithAnswers(question);
+        if (oblQuestion is null)
+            throw new ArgumentException("There is no question with such name!");
+        _appDbContext.OptionsForObligatoryPreferences.RemoveRange(oblQuestion.Options);
+        _appDbContext.ObligatoryPreferences.Remove(oblQuestion);
+        var res = await _appDbContext.SaveChangesAsync();
+        return res > 0;
+    }
+    
+    private async Task<ObligatoryPreference?> FindQuestion(string questionName)
+    {
+        return await _appDbContext.ObligatoryPreferences
+            .FirstOrDefaultAsync(o => o.Name.ToLower() == questionName.ToLower());
+    }
+
+    private async Task<ObligatoryPreference?> FindQuestionWithAnswers(string questionName)
+    {
+        return await _appDbContext.ObligatoryPreferences
+            .Include(o => o.Options)
+            .FirstOrDefaultAsync(o => o.Name.ToLower() == questionName.ToLower());
     }
 
     private async Task<Form?> FindForm(string formName)

@@ -2,7 +2,7 @@ namespace backend.Dto;
 
 public class AddObligatoryPreferenceDto
 {
-    public string NameOfForm { get; set; }
-    public string Name { get; set; }
-    public IEnumerable<string> Answers { get; set; }
+    public required string NameOfForm { get; set; }
+    public required string Name { get; set; }
+    public required IEnumerable<string> Answers { get; set; }
 }
