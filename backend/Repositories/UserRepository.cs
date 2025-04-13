@@ -111,6 +111,13 @@ public class UserRepository : IUserInterface
         dto.FirstName = preferences.DisplayFirstName || isForCurrentUser ? user.FirstName : null;
         dto.LastName = preferences.DisplayLastName || isForCurrentUser ? user.LastName : null;
         dto.PhoneNumber = preferences.DisplayPhoneNumber || isForCurrentUser ? user.PhoneNumber : null;
+        dto.Preferences = new UserPreferencesDto
+        {
+            DisplayEmail = preferences.DisplayEmail,
+            DisplayFirstName = preferences.DisplayFirstName,
+            DisplayLastName = preferences.DisplayLastName,
+            DisplayPhoneNumber = preferences.DisplayPhoneNumber
+        };
         return dto;
     }
 }

@@ -21,6 +21,9 @@
                         <p class="text-muted mb-0">{{ userForm.value.email || 'user@example.com' }}</p>
                     </div>
                     <div class="ms-auto d-flex">
+                        <a routerLink="/forms" class="btn btn-outline-info me-2">
+                            <i class="bi bi-file-text me-2"></i>My Forms
+                        </a>
                         <button *ngIf="!editMode" (click)="toggleEditMode()" class="btn btn-outline-primary me-2"
                             type="button">
                             <i class="bi bi-pencil me-2"></i>Edit Profile
@@ -66,13 +69,31 @@
                         <!-- Edit Mode -->
                         <div *ngIf="editMode" class="user-edit">
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label for="email" class="form-label mb-0">Email</label>
+                                    <button type="button" class="btn btn-sm"
+                                        [ngClass]="preferencesForm.value.displayEmail ? 'btn-outline-success' : 'btn-outline-danger'"
+                                        (click)="toggleVisibility('displayEmail')">
+                                        <i class="bi"
+                                            [ngClass]="preferencesForm.value.displayEmail ? 'bi-eye' : 'bi-eye-slash'"></i>
+                                        {{ preferencesForm.value.displayEmail ? 'Public' : 'Private' }}
+                                    </button>
+                                </div>
                                 <input type="email" id="email" class="form-control" formControlName="email" readonly />
                                 <small class="text-muted">Email cannot be changed</small>
                             </div>
 
                             <div class="mb-3">
-                                <label for="firstName" class="form-label">First Name</label>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label for="firstName" class="form-label mb-0">First Name</label>
+                                    <button type="button" class="btn btn-sm"
+                                        [ngClass]="preferencesForm.value.displayFirstName ? 'btn-outline-success' : 'btn-outline-danger'"
+                                        (click)="toggleVisibility('displayFirstName')">
+                                        <i class="bi"
+                                            [ngClass]="preferencesForm.value.displayFirstName ? 'bi-eye' : 'bi-eye-slash'"></i>
+                                        {{ preferencesForm.value.displayFirstName ? 'Public' : 'Private' }}
+                                    </button>
+                                </div>
                                 <input type="text" id="firstName" class="form-control" formControlName="firstName"
                                     [ngClass]="{ 'is-invalid': submitted && formControls['firstName'].errors }" />
                                 <div *ngIf="submitted && formControls['firstName'].errors" class="invalid-feedback">
@@ -82,7 +103,16 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="lastName" class="form-label">Last Name</label>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label for="lastName" class="form-label mb-0">Last Name</label>
+                                    <button type="button" class="btn btn-sm"
+                                        [ngClass]="preferencesForm.value.displayLastName ? 'btn-outline-success' : 'btn-outline-danger'"
+                                        (click)="toggleVisibility('displayLastName')">
+                                        <i class="bi"
+                                            [ngClass]="preferencesForm.value.displayLastName ? 'bi-eye' : 'bi-eye-slash'"></i>
+                                        {{ preferencesForm.value.displayLastName ? 'Public' : 'Private' }}
+                                    </button>
+                                </div>
                                 <input type="text" id="lastName" class="form-control" formControlName="lastName"
                                     [ngClass]="{ 'is-invalid': submitted && formControls['lastName'].errors }" />
                                 <div *ngIf="submitted && formControls['lastName'].errors" class="invalid-feedback">
@@ -92,7 +122,16 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="phoneNumber" class="form-label">Phone Number</label>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label for="phoneNumber" class="form-label mb-0">Phone Number</label>
+                                    <button type="button" class="btn btn-sm"
+                                        [ngClass]="preferencesForm.value.displayPhoneNumber ? 'btn-outline-success' : 'btn-outline-danger'"
+                                        (click)="toggleVisibility('displayPhoneNumber')">
+                                        <i class="bi"
+                                            [ngClass]="preferencesForm.value.displayPhoneNumber ? 'bi-eye' : 'bi-eye-slash'"></i>
+                                        {{ preferencesForm.value.displayPhoneNumber ? 'Public' : 'Private' }}
+                                    </button>
+                                </div>
                                 <input type="tel" id="phoneNumber" class="form-control" formControlName="phoneNumber" />
                             </div>
 

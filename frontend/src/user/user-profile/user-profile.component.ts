@@ -2,17 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgClass, NgIf } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { UserService } from '../user.service';
+import { UserService, UserPreferences } from '../user.service';
 import { AuthGatewayService } from '../../auth/auth-gateway.service';
 
 @Component({
   selector: 'app-user-profile',
-  imports: [ReactiveFormsModule, NgClass, NgIf],
+  imports: [ReactiveFormsModule, NgClass, NgIf, RouterLink],
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.css',
 })
 export class UserProfileComponent implements OnInit {
   userForm: FormGroup;
+  preferencesForm: FormGroup;
   submitted = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
@@ -24,7 +25,13 @@ export class UserProfileComponent implements OnInit {
     email: 'user@example.com',
     firstName: 'John',
     lastName: 'Doe',
-    phoneNumber: '555-123-4567'
+    phoneNumber: '555-123-4567',
+    preferences: {
+      displayFirstName: true,
+      displayLastName: true,
+      displayEmail: true,
+      displayPhoneNumber: true
+    }
   };
 
   constructor(
@@ -37,6 +44,13 @@ export class UserProfileComponent implements OnInit {
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       phoneNumber: [''],
+    });
+
+    this.preferencesForm = this.fb.group({
+      displayFirstName: [true],
+      displayLastName: [true],
+      displayEmail: [true],
+      displayPhoneNumber: [true],
     });
   }
 
@@ -55,6 +69,15 @@ export class UserProfileComponent implements OnInit {
           lastName: userData.lastName || '',
           phoneNumber: userData.phoneNumber || '',
         });
+
+        if (userData.preferences) {
+          this.preferencesForm.patchValue({
+            displayFirstName: userData.preferences.displayFirstName,
+            displayLastName: userData.preferences.displayLastName,
+            displayEmail: userData.preferences.displayEmail,
+            displayPhoneNumber: userData.preferences.displayPhoneNumber,
+          });
+        }
         this.loading = false;
       },
       error: (err) => {
@@ -62,6 +85,7 @@ export class UserProfileComponent implements OnInit {
         this.errorMessage = 'Failed to load user data. Using default profile.';
         // Load default data in case of API failure
         this.userForm.patchValue(this.defaultUserData);
+        this.preferencesForm.patchValue(this.defaultUserData.preferences);
         this.loading = false;
       },
     });
@@ -69,6 +93,10 @@ export class UserProfileComponent implements OnInit {
 
   get formControls() {
     return this.userForm.controls;
+  }
+
+  get preferencesControls() {
+    return this.preferencesForm.controls;
   }
 
   toggleEditMode(): void {
@@ -81,6 +109,27 @@ export class UserProfileComponent implements OnInit {
   
   logout(): void {
     this.authService.logout();
+  }
+
+  toggleVisibility(field: keyof UserPreferences): void {
+    const currentValue = this.preferencesForm.get(field)?.value;
+    this.preferencesForm.get(field)?.setValue(!currentValue);
+    this.updatePreferences();
+  }
+
+  updatePreferences(): void {
+    const preferences: UserPreferences = this.preferencesForm.value;
+    this.userService.updateUserPreferences(preferences).subscribe({
+      next: () => {
+        this.successMessage = 'Privacy preferences updated!';
+        setTimeout(() => this.successMessage = null, 3000);
+      },
+      error: (err) => {
+        console.error('Failed to update preferences:', err);
+        this.errorMessage = 'Failed to update privacy preferences.';
+        setTimeout(() => this.errorMessage = null, 3000);
+      }
+    });
   }
 
   onSubmit() {

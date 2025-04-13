@@ -3,11 +3,19 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError, of, delay } from 'rxjs';
 import { environment } from '../environment/environment';
 
+export interface UserPreferences {
+  displayFirstName: boolean;
+  displayLastName: boolean;
+  displayEmail: boolean;
+  displayPhoneNumber: boolean;
+}
+
 export interface UserProfile {
   email: string;
   firstName?: string;
   lastName?: string;
   phoneNumber?: string;
+  preferences?: UserPreferences;
 }
 
 export interface UserForm {
@@ -39,6 +47,12 @@ export class UserService {
 
   getUserForms(): Observable<UserForm[]> {
     return this.http.get<UserForm[]>(`${this.apiUrl}/forms`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  updateUserPreferences(preferences: UserPreferences): Observable<any> {
+    return this.http.post(`${this.apiUrl}/preferences`, preferences).pipe(
       catchError(this.handleError)
     );
   }
