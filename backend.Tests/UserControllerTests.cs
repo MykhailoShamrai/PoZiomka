@@ -9,6 +9,8 @@ using System.Security.Claims;
 using backend.Data;
 using Microsoft.EntityFrameworkCore;
 using backend.Repositories;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 
 namespace backend.Tests.Controllers
@@ -25,7 +27,16 @@ namespace backend.Tests.Controllers
         {
             _userRepoMock = new Mock<IUserInterface>();
             _userManagerMock = new Mock<UserManager<User>>(
-                Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+                Mock.Of<IUserStore<User>>(),
+                new Mock<IOptions<IdentityOptions>>().Object,
+                new Mock<IPasswordHasher<User>>().Object,
+                Array.Empty<IUserValidator<User>>(),
+                Array.Empty<IPasswordValidator<User>>(),
+                new Mock<ILookupNormalizer>().Object,
+                new Mock<IdentityErrorDescriber>().Object,
+                new Mock<IServiceProvider>().Object,
+                new Mock<ILogger<UserManager<User>>>().Object
+            );
             _dbContextMock = new Mock<AppDbContext>(new DbContextOptions<AppDbContext>());
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
@@ -79,9 +90,7 @@ namespace backend.Tests.Controllers
             };
 
             _userRepoMock.Setup(repo => repo.DisplayUserProfile("test@example.com"))
-                .Returns(Task.FromResult(Tuple.Create(ErrorCodes.Ok, profileDto)));
-
-
+                .Returns(Task.FromResult(Tuple.Create(ErrorCodes.Ok, (ProfileDisplayDto?)profileDto)));
 
             // Act
             var result = await _controller.DisplayProfile();

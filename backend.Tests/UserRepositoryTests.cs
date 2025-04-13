@@ -1,4 +1,3 @@
-using backend.Dto;
 using backend.Interfaces;
 using backend.Models.User;
 using backend.Repositories;
@@ -6,7 +5,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 using System.Security.Claims;
-using Xunit;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Tests.Repositories;
 
@@ -20,7 +20,16 @@ public class UserRepositoryTests
     public UserRepositoryTests()
     {
         _userManagerMock = new Mock<UserManager<User>>(
-            Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
+     Mock.Of<IUserStore<User>>(),
+     new Mock<IOptions<IdentityOptions>>().Object,
+     new Mock<IPasswordHasher<User>>().Object,
+     new IUserValidator<User>[0],
+     new IPasswordValidator<User>[0],
+     new Mock<ILookupNormalizer>().Object,
+     new Mock<IdentityErrorDescriber>().Object,
+     new Mock<IServiceProvider>().Object,
+     new Mock<ILogger<UserManager<User>>>().Object
+ );
 
         _formServiceMock = new Mock<IFormsInterface>();
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
@@ -36,7 +45,7 @@ public class UserRepositoryTests
     public async Task DisplayUserProfile_ReturnsNotFound_WhenUserNotFound()
     {
         _userManagerMock.Setup(m => m.FindByEmailAsync("email@test.com"))
-            .ReturnsAsync((User)null);
+            .ReturnsAsync((User?)null);
 
         var result = await _repository.DisplayUserProfile("email@test.com");
 
@@ -84,7 +93,7 @@ public class UserRepositoryTests
     public async Task GetUserForms_ReturnsNotFound_WhenUserNotFound()
     {
         _userManagerMock.Setup(m => m.FindByEmailAsync("email@test.com"))
-            .ReturnsAsync((User)null);
+            .ReturnsAsync((User?)null);
 
         var result = await _repository.GetUserForms("email@test.com");
 
@@ -133,7 +142,7 @@ public class UserRepositoryTests
         _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(context);
 
         _userManagerMock.Setup(m => m.FindByEmailAsync(userDto.Email))
-            .ReturnsAsync((User)null);
+            .ReturnsAsync((User?)null);
 
         var result = await _repository.ChangeUserProfile(userDto);
 

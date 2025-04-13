@@ -6,7 +6,7 @@ namespace backend.Tests
     public class FormServiceTests
     {
         [Fact]
-        public async Task CheckIfNumberOfAnswersIsSameAsDeclared_ReturnsTrue_WhenCountsAreCorrect()
+        public void CheckIfNumberOfAnswersIsSameAsDeclared_ReturnsTrue_WhenCountsAreCorrect()
         {
             var numberOfAnswers = new List<int> { 2, 3 };
             var answers = new List<string> { "Answer1", "Answer2", "Answer3", "Answer4", "Answer5" };
@@ -17,7 +17,7 @@ namespace backend.Tests
         }
 
         [Fact]
-        public async Task CheckIfNumberOfAnswersIsSameAsDeclared_ReturnsFalse_WhenCountsAreNotCorrect()
+        public void CheckIfNumberOfAnswersIsSameAsDeclared_ReturnsFalse_WhenCountsAreNotCorrect()
         {
             var numberOfAnswers = new List<int> { 1, 5 };
             var answers = new List<string> { "Answer1", "Answer2", "Answer3", "Answer4", "Answer5" };
