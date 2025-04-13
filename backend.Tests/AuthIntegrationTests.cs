@@ -1,12 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
-using backend;
 using backend.Dto;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using backend.Data;
-using Xunit;
 
 namespace backend.Tests
 {

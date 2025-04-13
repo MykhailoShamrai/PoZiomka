@@ -3,8 +3,6 @@ using backend.Dto;
 using backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace backend.Tests.Controllers
 {

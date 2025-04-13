@@ -2,7 +2,6 @@ using backend.Data;
 using backend.Dto;
 using backend.Services;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 
 namespace backend.Tests.Services;
 
@@ -174,21 +173,18 @@ public class FormServiceTests
     {
         var dbContext = GetInMemoryDbContext();
 
-        // Utwórz pytanie bez opcji na początku
         var question = new Question
         {
             Name = "Jak się masz?",
             Options = new List<OptionForQuestion>()
         };
 
-        // Dodaj opcje i przypisz do pytania
         var option1 = new OptionForQuestion { Name = "Dobrze", Question = question };
         var option2 = new OptionForQuestion { Name = "Źle", Question = question };
 
         question.Options.Add(option1);
         question.Options.Add(option2);
 
-        // Utwórz formularz i przypisz pytanie
         var form = new Form
         {
             NameOfForm = "Form z pytaniem",

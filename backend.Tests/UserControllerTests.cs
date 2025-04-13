@@ -73,7 +73,6 @@ namespace backend.Tests.Controllers
         [Fact]
         public async Task DisplayProfile_ReturnsOk_WhenSuccessful()
         {
-            // Arrange: tworzenie tożsamości z e-mailem
             var claims = new List<Claim> { new Claim(ClaimTypes.Email, "test@example.com") };
             var identity = new ClaimsIdentity(claims);
             var principal = new ClaimsPrincipal(identity);
@@ -81,10 +80,8 @@ namespace backend.Tests.Controllers
 
             _httpContextAccessorMock.Setup(c => c.HttpContext).Returns(httpContext);
 
-            // Załóżmy, że zwracany typ to User
             var profileDto = new ProfileDisplayDto
             {
-                // Wypełnij wymagane pola
                 FirstName = "TestUser",
                 Email = "test@example.com"
             };
@@ -92,10 +89,8 @@ namespace backend.Tests.Controllers
             _userRepoMock.Setup(repo => repo.DisplayUserProfile("test@example.com"))
                 .Returns(Task.FromResult(Tuple.Create(ErrorCodes.Ok, (ProfileDisplayDto?)profileDto)));
 
-            // Act
             var result = await _controller.DisplayProfile();
 
-            // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(profileDto, okResult.Value);
         }

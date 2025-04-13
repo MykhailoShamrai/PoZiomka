@@ -1,10 +1,8 @@
-using Xunit;
 using Moq;
 using backend.Controllers;
 using backend.Interfaces;
 using backend.Dto;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace backend.Tests
 {

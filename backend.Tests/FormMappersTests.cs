@@ -1,4 +1,3 @@
-using Xunit;
 using backend.Mappers;
 
 namespace backend.Tests
