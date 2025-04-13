@@ -1,4 +1,3 @@
-using Xunit;
 using Moq;
 using backend.Repositories;
 using backend.Dto;
@@ -7,7 +6,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Tests
@@ -79,7 +77,7 @@ namespace backend.Tests
 
             Assert.False(result);
         }
-    
+
         [Fact]
         public async Task Logout_CallsSignOut()
         {
@@ -123,7 +121,7 @@ namespace backend.Tests
             var mockContextAccessor = new Mock<IHttpContextAccessor>();
             var authRepository = new AuthRepository(mockUserManager.Object, mockContextAccessor.Object);
 
-            var weakPassword = "michael"; 
+            var weakPassword = "michael";
             var weakPasswordsField = authRepository.GetType()
                 .GetField("_weakPasswords", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
