@@ -3,15 +3,21 @@ using System.Security.Claims;
 using System.Diagnostics;
 using backend.Dto;
 using backend.Interfaces;
-using backend.Models.Users;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using System.IO;
+using System.Collections.Generic;
+using backend.Data;
+using backend.Models.User;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace backend.Repositories;
 
 public class AuthRepository : IAuthInterface
 {
+    private readonly string PathToFileWithPasswords = Path.Combine(AppContext.BaseDirectory, "AdditionalFiles", "xato-net-10-million-passwords-10000.txt");
+    private readonly HashSet<string> _weakPasswords = new HashSet<string>();
     private readonly UserManager<User> _userManager;
     private readonly IHttpContextAccessor _contextAccessor;
 
@@ -19,6 +25,11 @@ public class AuthRepository : IAuthInterface
     {
         _userManager = userManager;
         _contextAccessor = contextAccessor;
+        var collection = File.ReadLines(PathToFileWithPasswords);
+        foreach (string s in collection)
+        {
+            _weakPasswords.Add(s);
+        }
     }
     
     // Interface functions
@@ -53,6 +64,7 @@ public class AuthRepository : IAuthInterface
                 {
                     claims.Add(new Claim(ClaimTypes.Role, role));
                 }
+                claims.Add(new Claim(ClaimTypes.Email, account.Email!));
                 var identity = new ClaimsIdentity(claims, Settings.AuthCookieName);
                 var principal = new ClaimsPrincipal(identity); 
 
@@ -96,12 +108,19 @@ public class AuthRepository : IAuthInterface
     /// <returns></returns>
     private async Task<bool> CreateNewUser(RegisterUserDto dto)
     {
+        // Then create a new user
         User nUser = new User
         {
             UserName = dto.Email,
-            Email = dto.Email
+            Email = dto.Email,
+            Preferences = new UserPreferences()
         };
+        
+        // Check if password is in weak passwords collection. 
+        if (_weakPasswords.Contains(dto.Password))
+            return false;
         var result = await _userManager.CreateAsync(nUser, dto.Password);
+        
         return result.Succeeded;
     }
 }

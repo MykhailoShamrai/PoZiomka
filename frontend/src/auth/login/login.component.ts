@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgClass, NgIf } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthGatewayService } from '../auth-gateway.service';
 
 @Component({
@@ -15,7 +15,11 @@ export class LoginComponent {
   submitted = false;
   errorMessage: string | null = null;
 
-  constructor(private fb: FormBuilder, private authGateway: AuthGatewayService) {
+  constructor(
+    private fb: FormBuilder,
+    private authGateway: AuthGatewayService,
+    private router: Router
+  ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
@@ -39,6 +43,7 @@ export class LoginComponent {
         console.log('Login successful:', response);
         this.loginForm.reset();
         this.submitted = false;
+        this.router.navigate(['/profile']);
       },
       error: (err) => {
         console.error('Login failed:', err);

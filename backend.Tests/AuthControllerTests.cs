@@ -1,10 +1,8 @@
-using Xunit;
 using Moq;
 using backend.Controllers;
 using backend.Interfaces;
 using backend.Dto;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace backend.Tests
 {
@@ -78,8 +76,7 @@ namespace backend.Tests
             // Act
             var result = await controller.Login(loginDto);
 
-            // Assert
-            Assert.IsType<OkResult>(result);
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
@@ -103,7 +100,7 @@ namespace backend.Tests
             var result = await controller.Login(loginDto);
 
             // Assert
-            Assert.IsType<BadRequestResult>(result);
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]

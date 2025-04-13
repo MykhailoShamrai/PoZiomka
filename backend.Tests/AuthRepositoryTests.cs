@@ -1,13 +1,11 @@
-using Xunit;
 using Moq;
 using backend.Repositories;
 using backend.Dto;
-using backend.Models.Users;
+using backend.Models.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Tests
@@ -79,7 +77,7 @@ namespace backend.Tests
 
             Assert.False(result);
         }
-    
+
         [Fact]
         public async Task Logout_CallsSignOut()
         {
@@ -114,6 +112,35 @@ namespace backend.Tests
             var repo = new AuthRepository(mockUserManager.Object, mockContextAccessor.Object);
 
             await Assert.ThrowsAsync<NullReferenceException>(() => repo.Logout());
+        }
+
+        [Fact]
+        public async Task CreateNewUser_ShouldReturnFalse_WhenPasswordIsWeak()
+        {
+            var mockUserManager = MockUserManager();
+            var mockContextAccessor = new Mock<IHttpContextAccessor>();
+            var authRepository = new AuthRepository(mockUserManager.Object, mockContextAccessor.Object);
+
+            var weakPassword = "michael";
+            var weakPasswordsField = authRepository.GetType()
+                .GetField("_weakPasswords", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            var weakPasswordsSet = weakPasswordsField?.GetValue(authRepository) as HashSet<string>;
+
+            if (weakPasswordsSet == null)
+                throw new Exception("Failed to inject weak password");
+
+            weakPasswordsSet.Add(weakPassword);
+
+            var registerDto = new RegisterUserDto
+            {
+                Email = "test@example.com",
+                Password = weakPassword
+            };
+
+            var result = await authRepository.Register(registerDto);
+
+            Assert.False(result);
         }
     }
 }

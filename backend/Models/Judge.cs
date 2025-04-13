@@ -1,4 +1,4 @@
-using backend.Models.Users;
+using backend.Models.User;
 
 public class Judge
 {
