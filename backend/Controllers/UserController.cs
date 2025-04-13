@@ -17,7 +17,7 @@ public class UserController : ControllerBase
     private readonly AppDbContext _appDbContext;
     private readonly IHttpContextAccessor _contextAccessor;
 
-    public UserController(IUserInterface userInterface, 
+    public UserController(IUserInterface userInterface,
                           UserManager<User> userManager,
                           AppDbContext appDbContext,
                           IHttpContextAccessor contextAccessor)
@@ -27,7 +27,7 @@ public class UserController : ControllerBase
         _userManager = userManager;
         _appDbContext = appDbContext;
     }
-    
+
     [HttpPost]
     [Authorize]
     [Route("preferences")]
@@ -54,19 +54,22 @@ public class UserController : ControllerBase
     [Route("profile")]
     public async Task<IActionResult> DisplayProfile()
     {
-        var email = _contextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value;
-        if (email == null) {
+        var email = _contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+
+        if (string.IsNullOrEmpty(email))
+        {
             return Unauthorized();
         }
+
         var (code, profile) = await _userRepository.DisplayUserProfile(email);
         switch (code)
         {
-          case ErrorCodes.NotFound:
-              return NotFound("User not found.");
-          case ErrorCodes.Ok:
-              return Ok(profile);
-          default:
-              throw new KeyNotFoundException();
+            case ErrorCodes.NotFound:
+                return NotFound("User not found.");
+            case ErrorCodes.Ok:
+                return Ok(profile);
+            default:
+                throw new KeyNotFoundException();
         }
     }
 
@@ -78,12 +81,12 @@ public class UserController : ControllerBase
         var code = await _userRepository.ChangeUserProfile(user);
         switch (code)
         {
-          case ErrorCodes.Forbidden:
-              return NotFound("Forbidden");
-          case ErrorCodes.Ok:
-              return Ok();
-          default:
-              throw new KeyNotFoundException();
+            case ErrorCodes.Forbidden:
+                return NotFound("Forbidden");
+            case ErrorCodes.Ok:
+                return Ok();
+            default:
+                throw new KeyNotFoundException();
         }
     }
 
@@ -92,19 +95,20 @@ public class UserController : ControllerBase
     [Route("forms")]
     public async Task<IActionResult> GetForms()
     {
-        var email = _contextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value;
-        if (email == null) {
+        var email = _contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+
+        if (string.IsNullOrEmpty(email))
             return Unauthorized();
-        }
+
         var (code, forms) = await _userRepository.GetUserForms(email);
         switch (code)
         {
-          case ErrorCodes.NotFound:
-              return NotFound("Forms not found.");
-          case ErrorCodes.Ok:
-              return Ok(forms);
-          default:
-              throw new KeyNotFoundException();
+            case ErrorCodes.NotFound:
+                return NotFound("Forms not found.");
+            case ErrorCodes.Ok:
+                return Ok(forms);
+            default:
+                throw new KeyNotFoundException();
         }
     }
 
