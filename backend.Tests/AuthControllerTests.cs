@@ -78,8 +78,7 @@ namespace backend.Tests
             // Act
             var result = await controller.Login(loginDto);
 
-            // Assert
-            Assert.IsType<OkResult>(result);
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
@@ -103,7 +102,7 @@ namespace backend.Tests
             var result = await controller.Login(loginDto);
 
             // Assert
-            Assert.IsType<BadRequestResult>(result);
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
