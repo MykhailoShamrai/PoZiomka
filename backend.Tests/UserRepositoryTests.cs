@@ -1,12 +1,14 @@
 using backend.Interfaces;
 using backend.Models.User;
 using backend.Repositories;
+using backend.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 using System.Security.Claims;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Tests.Repositories;
 
@@ -15,6 +17,7 @@ public class UserRepositoryTests
     private readonly Mock<UserManager<User>> _userManagerMock;
     private readonly Mock<IFormsInterface> _formServiceMock;
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
+    private readonly Mock<AppDbContext> _dbContextMock;
     private readonly UserRepository _repository;
 
     public UserRepositoryTests()
@@ -28,8 +31,9 @@ public class UserRepositoryTests
      new Mock<ILookupNormalizer>().Object,
      new Mock<IdentityErrorDescriber>().Object,
      new Mock<IServiceProvider>().Object,
-     new Mock<ILogger<UserManager<User>>>().Object
- );
+     new Mock<ILogger<UserManager<User>>>().Object);
+
+    _dbContextMock = new Mock<AppDbContext>(new DbContextOptions<AppDbContext>());
 
         _formServiceMock = new Mock<IFormsInterface>();
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
@@ -37,7 +41,8 @@ public class UserRepositoryTests
         _repository = new UserRepository(
             _userManagerMock.Object,
             _formServiceMock.Object,
-            _httpContextAccessorMock.Object
+            _httpContextAccessorMock.Object,
+            _dbContextMock.Object
         );
     }
 
@@ -47,9 +52,9 @@ public class UserRepositoryTests
         _userManagerMock.Setup(m => m.FindByEmailAsync("email@test.com"))
             .ReturnsAsync((User?)null);
 
-        var result = await _repository.DisplayUserProfile("email@test.com");
+        var result = await _repository.DisplayUserProfile();
 
-        Assert.Equal(ErrorCodes.NotFound, result.Item1);
+        Assert.Equal(ErrorCodes.Unauthorized, result.Item1);
         Assert.Null(result.Item2);
     }
 
@@ -72,7 +77,7 @@ public class UserRepositoryTests
         }));
         _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(context);
 
-        var result = await _repository.DisplayUserProfile(user.Email);
+        var result = await _repository.DisplayUserProfile();
 
         Assert.Equal(ErrorCodes.Ok, result.Item1);
         Assert.NotNull(result.Item2);
@@ -95,23 +100,38 @@ public class UserRepositoryTests
         _userManagerMock.Setup(m => m.FindByEmailAsync("email@test.com"))
             .ReturnsAsync((User?)null);
 
-        var result = await _repository.GetUserForms("email@test.com");
+        var result = await _repository.GetUserForms();
 
-        Assert.Equal(ErrorCodes.NotFound, result.Item1);
+        Assert.Equal(ErrorCodes.Unauthorized, result.Item1);
         Assert.Null(result.Item2);
     }
 
     [Fact]
     public async Task GetUserForms_ReturnsForms_WhenUserExists()
     {
-        var user = new User { Email = "email@test.com" };
-        _userManagerMock.Setup(m => m.FindByEmailAsync(user.Email)).ReturnsAsync(user);
-        _formServiceMock.Setup(f => f.GetAll()).ReturnsAsync(Array.Empty<Form>());
+    var userEmail = "email@test.com";
+    var user = new User { Email = userEmail };
 
-        var result = await _repository.GetUserForms(user.Email);
+    var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Email, userEmail)
+    };
+    var identity = new ClaimsIdentity(claims, "TestAuthType");
+    var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        Assert.Equal(ErrorCodes.Ok, result.Item1);
-        Assert.NotNull(result.Item2);
+    var context = new DefaultHttpContext
+    {
+        User = claimsPrincipal
+    };
+    _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(context);
+
+    _userManagerMock.Setup(m => m.FindByEmailAsync(userEmail)).ReturnsAsync(user);
+    _formServiceMock.Setup(f => f.GetAll()).ReturnsAsync(Array.Empty<Form>());
+
+    var result = await _repository.GetUserForms();
+
+    Assert.Equal(ErrorCodes.Ok, result.Item1);
+    Assert.NotNull(result.Item2);
     }
 
     [Fact]

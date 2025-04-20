@@ -17,6 +17,8 @@ public enum ErrorCodes
     UpdateUserDbFailed,
     Forbidden,
     Ok,
+    Unauthorized,
+    BadRequest
 }
 
 public class UserRepository : IUserInterface
@@ -25,21 +27,28 @@ public class UserRepository : IUserInterface
     private readonly IFormsInterface _formService;
     // private readonly FormFiller _formFiller;
     private readonly IHttpContextAccessor _contextAccessor;
-
+    private readonly AppDbContext _appDbContext;
     public UserRepository(
         UserManager<User> userManager,
         IFormsInterface formService,
         // FormFiller formFiller,
-        IHttpContextAccessor contextAccessor)
+        IHttpContextAccessor contextAccessor,
+        AppDbContext appDbContext)
     {
         _userManager = userManager;
         _formService = formService;
         _contextAccessor = contextAccessor;
+        _appDbContext = appDbContext;
         // _formFiller = formFiller;
     }
 
-    public async Task<Tuple<ErrorCodes, ProfileDisplayDto?>> DisplayUserProfile(string email)
+    public async Task<Tuple<ErrorCodes, ProfileDisplayDto?>> DisplayUserProfile()
     {
+        var email = _contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+
+        if (string.IsNullOrEmpty(email))
+            return new Tuple<ErrorCodes, ProfileDisplayDto?> (ErrorCodes.Unauthorized, null);
+
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
             return new Tuple<ErrorCodes, ProfileDisplayDto?>(ErrorCodes.NotFound, null);
@@ -64,8 +73,13 @@ public class UserRepository : IUserInterface
         return ErrorCodes.UpdateUserDbFailed;
     }
 
-    public async Task<Tuple<ErrorCodes, Form[]?>> GetUserForms(string email)
+    public async Task<Tuple<ErrorCodes, Form[]?>> GetUserForms()
     {
+        var email = _contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+
+        if (string.IsNullOrEmpty(email))
+            return new Tuple<ErrorCodes, Form[]?>(ErrorCodes.Unauthorized, null);
+            
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
             return new Tuple<ErrorCodes, Form[]?>(ErrorCodes.NotFound, null);
@@ -120,5 +134,41 @@ public class UserRepository : IUserInterface
             DisplayPhoneNumber = preferences.DisplayPhoneNumber
         };
         return dto;
+    }
+
+    public async Task<ErrorCodes> SubmitAnswerForForms(AnswerDto dto)
+    {
+        var email = _contextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+        if (email is null)
+            return ErrorCodes.Unauthorized;
+        
+        // Fetch the form
+        var form = await _appDbContext.Forms
+            .FirstOrDefaultAsync(f => f.FormId == dto.FormId);
+        
+        if (form is null)
+            return ErrorCodes.NotFound;
+
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+            return ErrorCodes.Unauthorized;
+
+        var chosenOptions = await _appDbContext.OptionsForQuestions
+            .Where(o => dto.ChosenOptionIds.Contains(o.OptionForQuestionId))
+            .ToListAsync();
+
+        var answer = new Answer
+        {
+            CorrespondingForm = form,
+            ChosenOptions = chosenOptions,
+            UserId = user.Id,
+            Status = AnswerStatus.Saved
+        };
+
+        _appDbContext.Answers.Add(answer);
+        var res = await _appDbContext.SaveChangesAsync();
+        if (res > 0)
+            return ErrorCodes.Ok;
+        return ErrorCodes.BadRequest;
     }
 }

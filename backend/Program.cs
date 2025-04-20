@@ -51,7 +51,7 @@ if (builder.Environment.IsDevelopment())
     builder.Configuration.AddUserSecrets<Program>();
 }
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("AzureConnection");
 
 // Db contexts
 builder.Services.AddDbContext<AuthDbContext>(options =>

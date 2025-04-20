@@ -2,7 +2,6 @@ using backend.Models.User;
 
 public class RoomSelector
 {
-    private readonly SecurityService _securityService;
 
     public RoomSelector(SecurityService securityService)
     {
