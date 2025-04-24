@@ -93,10 +93,16 @@ public class FormService : IFormsInterface
             .FirstOrDefaultAsync(o => o.Name.ToLower() == questionName.ToLower());
     }
 
-    private async Task<Form?> FindForm(string formName)
+    public async Task<Form?> FindForm(string formName)
     {
         return await _appDbContext.Forms
             .FirstOrDefaultAsync(f => f.NameOfForm == formName);
+    }
+
+    public async Task<Form?> FindForm(int id)
+    {
+        return await _appDbContext.Forms
+            .FirstOrDefaultAsync(f => f.FormId == id);
     }
 
     private async Task<Form?> FindFormWithQuestions(string formName)
@@ -105,5 +111,17 @@ public class FormService : IFormsInterface
             .Include(f => f.Questions)
             .ThenInclude(o => o.Options)
             .FirstOrDefaultAsync(f => f.NameOfForm == formName);
+    }
+
+    public async Task<List<OptionForQuestion>> FindOptions(List<int> ids)
+    {
+        return await _appDbContext.OptionsForQuestions
+            .Where(o => ids.Contains(o.OptionForQuestionId))
+            .ToListAsync();
+    }
+
+    public Task<AnswerStatus> FindStatusForAnswer(List<OptionForQuestion> options, Form form)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -141,11 +141,9 @@ public class UserRepository : IUserInterface
         var email = _contextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
         if (email is null)
             return ErrorCodes.Unauthorized;
-        
+
         // Fetch the form
-        var form = await _appDbContext.Forms
-            .FirstOrDefaultAsync(f => f.FormId == dto.FormId);
-        
+        var form = await _formService.FindForm(dto.FormId);
         if (form is null)
             return ErrorCodes.NotFound;
 
@@ -153,10 +151,9 @@ public class UserRepository : IUserInterface
         if (user is null)
             return ErrorCodes.Unauthorized;
 
-        var chosenOptions = await _appDbContext.OptionsForQuestions
-            .Where(o => dto.ChosenOptionIds.Contains(o.OptionForQuestionId))
-            .ToListAsync();
-
+        var chosenOptions = await _formService.FindOptions(dto.ChosenOptionIds);
+        // TODO: Check if every answer has it's answer!
+        // TODO: Change that we find an answer that already exist, not create a new one. 
         var answer = new Answer
         {
             CorrespondingForm = form,
