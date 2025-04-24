@@ -85,12 +85,34 @@ public class FormService : IFormsInterface
             .ThenInclude(q => q.Options)
             .ToArrayAsync();
     }
+
+    public async Task<Form?> FindFormWithQuestions(int formId)
+    {
+        return await _appDbContext.Forms
+            .Where(f => f.FormId == formId)
+            .Include(f => f.Questions)
+            .FirstAsync();
+    }
     
+    public async Task<List<Question>> FindQuestionsForForm(int formId)
+    {
+        return await _appDbContext.Questions
+            .Where(q => q.FormForWhichCorrespond!.FormId == formId)
+            .ToListAsync();
+    }
+
     private async Task<Question?> FindQuestionWithAnswers(string questionName)
     {
         return await _appDbContext.Questions
             .Include(o => o.Options)
             .FirstOrDefaultAsync(o => o.Name.ToLower() == questionName.ToLower());
+    }
+
+    private async Task<List<Question>> FindQuestionsWithAnswers()
+    {
+        return await _appDbContext.Questions
+            .Include(o => o.Options)
+            .ToListAsync();
     }
 
     public async Task<Form?> FindForm(string formName)
@@ -120,8 +142,38 @@ public class FormService : IFormsInterface
             .ToListAsync();
     }
 
-    public Task<AnswerStatus> FindStatusForAnswer(List<OptionForQuestion> options, Form form)
+    private async Task<HashSet<Question>> FindQuestionsForOptions(List<OptionForQuestion> options)
     {
-        throw new NotImplementedException();
+        List<Question> questions = await FindQuestionsWithAnswers();
+        Dictionary<int, Question> tmpDict = new Dictionary<int, Question>();
+        foreach (var question in questions) 
+        {
+            tmpDict.Add(question.QuestionId, question);
+        }
+        HashSet<Question> resultSet = new HashSet<Question>(questions.Count);
+        foreach (var option in options)
+        {
+            if (tmpDict.ContainsKey(option.Question.QuestionId))
+            {
+                resultSet.Add(tmpDict[option.Question.QuestionId]);
+            }
+        }
+        return resultSet;
+    }
+
+    public async Task<AnswerStatus> FindStatusForAnswer(List<OptionForQuestion> options, Form form)
+    {
+        // If form was found without questions for it
+        // Here we assume that it isn't null
+        List<Question> questions;
+        if (form!.Questions is null)
+            questions = await FindQuestionsForForm(form.FormId);
+        else
+            questions = form.Questions;
+
+        var setOfQuestionsWithAnswers = await FindQuestionsForOptions(options);
+        if (setOfQuestionsWithAnswers.Count == options.Count)
+            return AnswerStatus.Saved;
+        else return AnswerStatus.Editing;
     }
 }
