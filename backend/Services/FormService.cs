@@ -160,8 +160,36 @@ public class FormService : IFormsInterface
             questions = form.Questions;
 
         var setOfQuestionsWithAnswers = await FindQuestionsForOptions(options);
-        if (setOfQuestionsWithAnswers.Count == options.Count)
+        if (setOfQuestionsWithAnswers.Count == questions.Count)
             return AnswerStatus.Saved;
         else return AnswerStatus.Editing;
+    }
+
+    public async Task<int> SaveAnswer(AnswerDto dto, AnswerStatus status, Form form, int userId, List<OptionForQuestion> chosenOptions)
+    {
+        // Find answers that from this users that have status Editing
+        Answer? answerThatIsntComplete = await _appDbContext.Answers
+            .Where(a => a.UserId == userId && a.CorrespondingForm.FormId == form.FormId && a.Status == AnswerStatus.Editing)
+            .Include(a => a.ChosenOptions)
+            .FirstOrDefaultAsync();
+        
+        if (answerThatIsntComplete is null)
+        {
+            var answer = new Answer
+            {
+                CorrespondingForm = form,
+                ChosenOptions = chosenOptions,
+                UserId = userId,
+                Status = status
+            };
+            _appDbContext.Answers.Add(answer);
+        }
+        else
+        {
+            answerThatIsntComplete.ChosenOptions = chosenOptions;
+            answerThatIsntComplete.Status = status;
+        }
+        int res = await _appDbContext.SaveChangesAsync();
+        return res;
     }
 }

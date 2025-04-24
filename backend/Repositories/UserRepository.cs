@@ -27,19 +27,14 @@ public class UserRepository : IUserInterface
     private readonly IFormsInterface _formService;
     // private readonly FormFiller _formFiller;
     private readonly IHttpContextAccessor _contextAccessor;
-    private readonly AppDbContext _appDbContext;
     public UserRepository(
         UserManager<User> userManager,
         IFormsInterface formService,
-        // FormFiller formFiller,
-        IHttpContextAccessor contextAccessor,
-        AppDbContext appDbContext)
+        IHttpContextAccessor contextAccessor)
     {
         _userManager = userManager;
         _formService = formService;
         _contextAccessor = contextAccessor;
-        _appDbContext = appDbContext;
-        // _formFiller = formFiller;
     }
 
     public async Task<Tuple<ErrorCodes, ProfileDisplayDto?>> DisplayUserProfile()
@@ -152,19 +147,8 @@ public class UserRepository : IUserInterface
             return ErrorCodes.Unauthorized;
 
         var chosenOptions = await _formService.FindOptions(dto.ChosenOptionIds);
-        // TODO: Check if every answer has it's answer!
-        // TODO: Change that we find an answer that already exist, not create a new one. 
         var status = await _formService.FindStatusForAnswer(chosenOptions, form);
-        var answer = new Answer
-        {
-            CorrespondingForm = form,
-            ChosenOptions = chosenOptions,
-            UserId = user.Id,
-            Status = status
-        };
-
-        _appDbContext.Answers.Add(answer);
-        var res = await _appDbContext.SaveChangesAsync();
+        var res = await _formService.SaveAnswer(dto, status, form, user.Id, chosenOptions);
         if (res > 0)
             return ErrorCodes.Ok;
         return ErrorCodes.BadRequest;
