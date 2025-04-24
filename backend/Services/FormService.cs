@@ -108,10 +108,9 @@ public class FormService : IFormsInterface
             .FirstOrDefaultAsync(o => o.Name.ToLower() == questionName.ToLower());
     }
 
-    private async Task<List<Question>> FindQuestionsWithAnswers()
+    private async Task<List<Question>> FindQuestions()
     {
         return await _appDbContext.Questions
-            .Include(o => o.Options)
             .ToListAsync();
     }
 
@@ -142,23 +141,12 @@ public class FormService : IFormsInterface
             .ToListAsync();
     }
 
-    private async Task<HashSet<Question>> FindQuestionsForOptions(List<OptionForQuestion> options)
+    private async Task<List<Question>> FindQuestionsForOptions(List<OptionForQuestion> options)
     {
-        List<Question> questions = await FindQuestionsWithAnswers();
-        Dictionary<int, Question> tmpDict = new Dictionary<int, Question>();
-        foreach (var question in questions) 
-        {
-            tmpDict.Add(question.QuestionId, question);
-        }
-        HashSet<Question> resultSet = new HashSet<Question>(questions.Count);
-        foreach (var option in options)
-        {
-            if (tmpDict.ContainsKey(option.Question.QuestionId))
-            {
-                resultSet.Add(tmpDict[option.Question.QuestionId]);
-            }
-        }
-        return resultSet;
+        return await _appDbContext.Questions
+            .Where(o => options.Select(opt => opt.Question.QuestionId)
+            .Contains(o.QuestionId))
+            .ToListAsync();
     }
 
     public async Task<AnswerStatus> FindStatusForAnswer(List<OptionForQuestion> options, Form form)

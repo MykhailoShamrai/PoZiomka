@@ -154,12 +154,13 @@ public class UserRepository : IUserInterface
         var chosenOptions = await _formService.FindOptions(dto.ChosenOptionIds);
         // TODO: Check if every answer has it's answer!
         // TODO: Change that we find an answer that already exist, not create a new one. 
+        var status = await _formService.FindStatusForAnswer(chosenOptions, form);
         var answer = new Answer
         {
             CorrespondingForm = form,
             ChosenOptions = chosenOptions,
             UserId = user.Id,
-            Status = AnswerStatus.Saved
+            Status = status
         };
 
         _appDbContext.Answers.Add(answer);
