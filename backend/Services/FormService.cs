@@ -3,6 +3,7 @@ using backend.Dto;
 using backend.Interfaces;
 using backend.Mappers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace backend.Services;
 
@@ -138,31 +139,36 @@ public class FormService : IFormsInterface
     {
         return await _appDbContext.OptionsForQuestions
             .Where(o => ids.Contains(o.OptionForQuestionId))
+            .Include(o => o.Question)
             .ToListAsync();
     }
 
     private async Task<List<Question>> FindQuestionsForOptions(List<OptionForQuestion> options)
     {
         return await _appDbContext.Questions
-            .Where(o => options.Select(opt => opt.Question.QuestionId)
-            .Contains(o.QuestionId))
+            .Where(q => options.Select(opt => opt.Question.QuestionId)
+            .Contains(q.QuestionId))
+            .Include(q => q.FormForWhichCorrespond)
             .ToListAsync();
     }
+
 
     public async Task<AnswerStatus> FindStatusForAnswer(List<OptionForQuestion> options, Form form)
     {
         // If form was found without questions for it
         // Here we assume that it isn't null
         List<Question> questions;
-        if (form!.Questions is null)
-            questions = await FindQuestionsForForm(form.FormId);
-        else
-            questions = form.Questions;
+        questions = await FindQuestionsForForm(form.FormId);
 
-        var setOfQuestionsWithAnswers = await FindQuestionsForOptions(options);
-        if (setOfQuestionsWithAnswers.Count == questions.Count)
-            return AnswerStatus.Saved;
-        else return AnswerStatus.Editing;
+        var listOfQuestionsWithAnswers = await FindQuestionsForOptions(options);
+        var questonsFormNotThisForm = listOfQuestionsWithAnswers.Where(q => q.FormForWhichCorrespond!.FormId != form.FormId).ToList();
+        if (questonsFormNotThisForm.Count == 0)
+        {
+            if (listOfQuestionsWithAnswers.Count == questions.Count)
+                return AnswerStatus.Saved;
+            else return AnswerStatus.Editing;
+        }
+        throw new ArgumentException();
     }
 
     public async Task<int> SaveAnswer(AnswerDto dto, AnswerStatus status, Form form, int userId, List<OptionForQuestion> chosenOptions)

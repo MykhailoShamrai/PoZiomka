@@ -147,10 +147,17 @@ public class UserRepository : IUserInterface
             return ErrorCodes.Unauthorized;
 
         var chosenOptions = await _formService.FindOptions(dto.ChosenOptionIds);
-        var status = await _formService.FindStatusForAnswer(chosenOptions, form);
-        var res = await _formService.SaveAnswer(dto, status, form, user.Id, chosenOptions);
-        if (res > 0)
-            return ErrorCodes.Ok;
-        return ErrorCodes.BadRequest;
+        try
+        {
+            var status = await _formService.FindStatusForAnswer(chosenOptions, form);
+            var res = await _formService.SaveAnswer(dto, status, form, user.Id, chosenOptions);
+            if (res > 0)
+                return ErrorCodes.Ok;
+            return ErrorCodes.BadRequest;
+        }
+        catch (ArgumentException)
+        {
+            return ErrorCodes.BadRequest;
+        }
     }
 }
