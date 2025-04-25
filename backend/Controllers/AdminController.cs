@@ -35,7 +35,7 @@ public class AdminController: ControllerBase
     [HttpPost]
     [Authorize("Admin")]
     [Route("assign-student-to-room")]
-    public async Task<IActionResult> AssignStudentToRoom([FromBody] string studentId, string roomId)
+    public async Task<IActionResult> AssignStudentToRoom([FromBody] int studentId, int roomId)
     {
         throw new NotImplementedException();
     }
@@ -43,7 +43,7 @@ public class AdminController: ControllerBase
     [HttpPost]
     [Authorize("Admin")]
     [Route("checkout-student-from-room")]
-    public async Task<IActionResult> CheckoutStudentFromRoom([FromBody] string studentId, string roomId)
+    public async Task<IActionResult> CheckoutStudentFromRoom([FromBody] int studentId, int roomId)
     {
         throw new NotImplementedException();
     }

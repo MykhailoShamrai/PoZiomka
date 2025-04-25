@@ -10,22 +10,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repositories;
 
-public enum ErrorCodes
-{
-    NotFound,
-    CannotRetrieveUserFromCookie,
-    UpdateUserDbFailed,
-    Forbidden,
-    Ok,
-    Unauthorized,
-    BadRequest
-}
+// public enum ErrorCodes
+// {
+
+// }
 
 public class UserRepository : IUserInterface
 {
     private readonly UserManager<User> _userManager;
     private readonly IFormsInterface _formService;
-    // private readonly FormFiller _formFiller;
     private readonly IHttpContextAccessor _contextAccessor;
     public UserRepository(
         UserManager<User> userManager,
@@ -102,14 +95,7 @@ public class UserRepository : IUserInterface
             return ErrorCodes.Ok;
         return ErrorCodes.UpdateUserDbFailed;
     }
-
-    // public async Task<ErrorCodes> SubmitAnswers(AnswerDto answer) 
-    // {
-    //     // _formFiller.FillForm(answer);
-    //     // return ErrorCodes.Ok;
-    // }
-
-    // For now, I do not have better idea
+    
     ProfileDisplayDto CreateDisplayFromPreferences(User user)
     {
         var currentUserEmail = _contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
