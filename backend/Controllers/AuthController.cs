@@ -50,7 +50,7 @@ public class AuthController : ControllerBase
 
     [HttpGet]
     [Authorize("Admin")]
-    [Route("test_for_admin")]
+    [Route("test-for-admin")]
     public IActionResult Test()
     {
         if (User.Identity is not { IsAuthenticated: true })

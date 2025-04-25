@@ -2,7 +2,6 @@ using backend.Dto;
 using backend.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
 
 namespace backend.Controllers;
 
@@ -17,8 +16,40 @@ public class AdminController: ControllerBase
         _formsInterface = formsInterface;
     }
 
+    [HttpGet]
+    [Authorize("Admin")]
+    [Route("get-all-rooms")]
+    public async Task<IActionResult> GetAllRooms()
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpGet]
+    [Authorize("Admin")]
+    [Route("get-all-available-rooms")]
+    public async Task<IActionResult> GetAllAvailableRooms()
+    {
+        throw new NotImplementedException();
+    }
+
     [HttpPost]
-    [Route("add_new_form")]
+    [Authorize("Admin")]
+    [Route("assign-student-to-room")]
+    public async Task<IActionResult> AssignStudentToRoom([FromBody] string studentId, string roomId)
+    {
+        throw new NotImplementedException();
+    }
+    
+    [HttpPost]
+    [Authorize("Admin")]
+    [Route("checkout-student-from-room")]
+    public async Task<IActionResult> CheckoutStudentFromRoom([FromBody] string studentId, string roomId)
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpPost]
+    [Route("add-new-form")]
     public async Task<IActionResult> AddNewForm([FromBody] FormDto formDto)
     {
         try
@@ -36,7 +67,7 @@ public class AdminController: ControllerBase
     }
 
     [HttpPost]
-    [Route("add_question")]
+    [Route("add-question")]
     public async Task<IActionResult> AddNewObligatoryQuestionTo([FromBody] AddQuestionDto preferenceDto)
     {
         try
@@ -53,7 +84,7 @@ public class AdminController: ControllerBase
     }
 
     [HttpDelete]
-    [Route("delete_form")]
+    [Route("delete-form")]
     public async Task<IActionResult> DeleteForm([FromBody] string nameOfForm)
     {
         try
@@ -69,7 +100,7 @@ public class AdminController: ControllerBase
     }
 
     [HttpDelete]
-    [Route("delete_question")]
+    [Route("delete-question")]
     public async Task<IActionResult> DeleteObligatoryQuestion([FromBody] string nameOfQuestion)
     {
         try

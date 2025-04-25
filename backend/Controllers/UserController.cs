@@ -1,13 +1,9 @@
-using System.Security.Claims;
-using backend.Data;
 using backend.Dto;
 using backend.Interfaces;
 using backend.Models.User;
 using backend.Repositories;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 [Route("api/[controller]")]
 public class UserController : ControllerBase
@@ -19,6 +15,22 @@ public class UserController : ControllerBase
         _userRepository = userInterface;
     }
 
+    [HttpPost]
+    [Authorize(Roles = "User")]
+    [Route("apply-for-room")]
+    public async Task<IActionResult> ApplyForRoom([FromBody] string roomNo)
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "User")]
+    [Route("apply-for-change-of-room")]
+    public async Task<IActionResult> ApplyForChangeOfRoom([FromBody] string roomNo)
+    {
+        throw new NotImplementedException();
+    }
+    
     [HttpPost]
     [Authorize]
     [Route("preferences")]
@@ -47,7 +59,7 @@ public class UserController : ControllerBase
     {
         var (code, profile) = await _userRepository.DisplayUserProfile();
         switch (code)
-{
+        {
         case ErrorCodes.Unauthorized:
             return Unauthorized();
         case ErrorCodes.NotFound:
@@ -56,7 +68,7 @@ public class UserController : ControllerBase
             return Ok(profile);
         default:
             throw new KeyNotFoundException();
-}
+        }
     }
 
     [HttpPut]
