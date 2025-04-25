@@ -3,6 +3,7 @@ using backend.Dto;
 using backend.Interfaces;
 using backend.Mappers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace backend.Services;
 
@@ -85,7 +86,22 @@ public class FormService : IFormsInterface
             .ThenInclude(q => q.Options)
             .ToArrayAsync();
     }
+
+    public async Task<Form?> FindFormWithQuestions(int formId)
+    {
+        return await _appDbContext.Forms
+            .Where(f => f.FormId == formId)
+            .Include(f => f.Questions)
+            .FirstAsync();
+    }
     
+    public async Task<List<Question>> FindQuestionsForForm(int formId)
+    {
+        return await _appDbContext.Questions
+            .Where(q => q.FormForWhichCorrespond!.FormId == formId)
+            .ToListAsync();
+    }
+
     private async Task<Question?> FindQuestionWithAnswers(string questionName)
     {
         return await _appDbContext.Questions
@@ -93,10 +109,22 @@ public class FormService : IFormsInterface
             .FirstOrDefaultAsync(o => o.Name.ToLower() == questionName.ToLower());
     }
 
-    private async Task<Form?> FindForm(string formName)
+    private async Task<List<Question>> FindQuestions()
+    {
+        return await _appDbContext.Questions
+            .ToListAsync();
+    }
+
+    public async Task<Form?> FindForm(string formName)
     {
         return await _appDbContext.Forms
             .FirstOrDefaultAsync(f => f.NameOfForm == formName);
+    }
+
+    public async Task<Form?> FindForm(int id)
+    {
+        return await _appDbContext.Forms
+            .FirstOrDefaultAsync(f => f.FormId == id);
     }
 
     private async Task<Form?> FindFormWithQuestions(string formName)
@@ -105,5 +133,69 @@ public class FormService : IFormsInterface
             .Include(f => f.Questions)
             .ThenInclude(o => o.Options)
             .FirstOrDefaultAsync(f => f.NameOfForm == formName);
+    }
+
+    public async Task<List<OptionForQuestion>> FindOptions(List<int> ids)
+    {
+        return await _appDbContext.OptionsForQuestions
+            .Where(o => ids.Contains(o.OptionForQuestionId))
+            .Include(o => o.Question)
+            .ToListAsync();
+    }
+
+    private async Task<List<Question>> FindQuestionsForOptions(List<OptionForQuestion> options)
+    {
+        return await _appDbContext.Questions
+            .Where(q => options.Select(opt => opt.Question.QuestionId)
+            .Contains(q.QuestionId))
+            .Include(q => q.FormForWhichCorrespond)
+            .ToListAsync();
+    }
+
+
+    public async Task<AnswerStatus> FindStatusForAnswer(List<OptionForQuestion> options, Form form)
+    {
+        // If form was found without questions for it
+        // Here we assume that it isn't null
+        List<Question> questions;
+        questions = await FindQuestionsForForm(form.FormId);
+
+        var listOfQuestionsWithAnswers = await FindQuestionsForOptions(options);
+        var questonsFormNotThisForm = listOfQuestionsWithAnswers.Where(q => q.FormForWhichCorrespond!.FormId != form.FormId).ToList();
+        if (questonsFormNotThisForm.Count == 0)
+        {
+            if (listOfQuestionsWithAnswers.Count == questions.Count)
+                return AnswerStatus.Saved;
+            else return AnswerStatus.Editing;
+        }
+        throw new ArgumentException();
+    }
+
+    public async Task<int> SaveAnswer(AnswerDto dto, AnswerStatus status, Form form, int userId, List<OptionForQuestion> chosenOptions)
+    {
+        // Find answers that from this users that have status Editing
+        Answer? answerThatIsntComplete = await _appDbContext.Answers
+            .Where(a => a.UserId == userId && a.CorrespondingForm.FormId == form.FormId && a.Status == AnswerStatus.Editing)
+            .Include(a => a.ChosenOptions)
+            .FirstOrDefaultAsync();
+        
+        if (answerThatIsntComplete is null)
+        {
+            var answer = new Answer
+            {
+                CorrespondingForm = form,
+                ChosenOptions = chosenOptions,
+                UserId = userId,
+                Status = status
+            };
+            _appDbContext.Answers.Add(answer);
+        }
+        else
+        {
+            answerThatIsntComplete.ChosenOptions = chosenOptions;
+            answerThatIsntComplete.Status = status;
+        }
+        int res = await _appDbContext.SaveChangesAsync();
+        return res;
     }
 }

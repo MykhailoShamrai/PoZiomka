@@ -15,5 +15,9 @@ public interface IFormsInterface
 
     public Task<bool> DeleteForm(string nameOfForm);
     public Task<Form[]> GetAll();
-    
+    public Task<Form?> FindForm(string formName);
+    public Task<Form?> FindForm(int id);
+    public Task<List<OptionForQuestion>> FindOptions(List<int> ids);
+    public Task<AnswerStatus> FindStatusForAnswer(List<OptionForQuestion> options, Form form);
+    public Task<int> SaveAnswer(AnswerDto dto, AnswerStatus status, Form form, int userId, List<OptionForQuestion> chosenOptions);
 }

@@ -110,6 +110,8 @@ public class UserController : ControllerBase
                 return NotFound("Form not found!");
             case ErrorCodes.Ok:
                 return Ok();
+            case ErrorCodes.BadRequest:
+                return BadRequest("Option doesn't correspond to question from form!");
             default:
                 throw new KeyNotFoundException();    
         }

@@ -27,19 +27,14 @@ public class UserRepository : IUserInterface
     private readonly IFormsInterface _formService;
     // private readonly FormFiller _formFiller;
     private readonly IHttpContextAccessor _contextAccessor;
-    private readonly AppDbContext _appDbContext;
     public UserRepository(
         UserManager<User> userManager,
         IFormsInterface formService,
-        // FormFiller formFiller,
-        IHttpContextAccessor contextAccessor,
-        AppDbContext appDbContext)
+        IHttpContextAccessor contextAccessor)
     {
         _userManager = userManager;
         _formService = formService;
         _contextAccessor = contextAccessor;
-        _appDbContext = appDbContext;
-        // _formFiller = formFiller;
     }
 
     public async Task<Tuple<ErrorCodes, ProfileDisplayDto?>> DisplayUserProfile()
@@ -141,11 +136,9 @@ public class UserRepository : IUserInterface
         var email = _contextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
         if (email is null)
             return ErrorCodes.Unauthorized;
-        
+
         // Fetch the form
-        var form = await _appDbContext.Forms
-            .FirstOrDefaultAsync(f => f.FormId == dto.FormId);
-        
+        var form = await _formService.FindForm(dto.FormId);
         if (form is null)
             return ErrorCodes.NotFound;
 
@@ -153,22 +146,18 @@ public class UserRepository : IUserInterface
         if (user is null)
             return ErrorCodes.Unauthorized;
 
-        var chosenOptions = await _appDbContext.OptionsForQuestions
-            .Where(o => dto.ChosenOptionIds.Contains(o.OptionForQuestionId))
-            .ToListAsync();
-
-        var answer = new Answer
+        var chosenOptions = await _formService.FindOptions(dto.ChosenOptionIds);
+        try
         {
-            CorrespondingForm = form,
-            ChosenOptions = chosenOptions,
-            UserId = user.Id,
-            Status = AnswerStatus.Saved
-        };
-
-        _appDbContext.Answers.Add(answer);
-        var res = await _appDbContext.SaveChangesAsync();
-        if (res > 0)
-            return ErrorCodes.Ok;
-        return ErrorCodes.BadRequest;
+            var status = await _formService.FindStatusForAnswer(chosenOptions, form);
+            var res = await _formService.SaveAnswer(dto, status, form, user.Id, chosenOptions);
+            if (res > 0)
+                return ErrorCodes.Ok;
+            return ErrorCodes.BadRequest;
+        }
+        catch (ArgumentException)
+        {
+            return ErrorCodes.BadRequest;
+        }
     }
 }
