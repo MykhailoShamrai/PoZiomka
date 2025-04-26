@@ -7,6 +7,7 @@ public class Room
     public int Number { get; set; }
     public int Capacity { get; set; }
     public List<int> ResidentsIds { get; set; } = new List<int>();
+    public RoomStatus Status { get; set; }
 }
 
 public enum RoomStatus
