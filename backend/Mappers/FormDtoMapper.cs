@@ -3,7 +3,7 @@ using backend.Dto;
 namespace backend.Mappers;
 public static class FormDtoMapper
 {
-    public static Form DtoToForm(this FormDto dto)
+    public static Form DtoToForm(this FormCreateDto dto)
     {
         var NameOfForm = dto.FormName;
         var Questions = dto.Questions;

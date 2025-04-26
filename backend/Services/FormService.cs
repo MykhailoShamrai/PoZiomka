@@ -15,7 +15,7 @@ public class FormService : IFormsInterface
         _appDbContext = appDbContext;
     }
 
-    public async Task<bool> CreateNewForm(FormDto formDto)
+    public async Task<bool> CreateNewForm(FormCreateDto formDto)
     {
         // Error handling is on controller level
         var form = formDto.DtoToForm();
@@ -85,6 +85,15 @@ public class FormService : IFormsInterface
             .Include(f => f.Questions)
             .ThenInclude(q => q.Options)
             .ToArrayAsync();
+    }
+
+    public async Task<Answer> GetAnswers(int userId, int formId)
+    {
+        return await _appDbContext.Answers
+                    .Where(a => a.UserId == userId && a.CorrespondingForm.FormId == formId)
+                    .Include(a => a.ChosenOptions)
+                    .ThenInclude(o => o.Question)
+                    .FirstOrDefaultAsync();
     }
 
     public async Task<Form?> FindFormWithQuestions(int formId)

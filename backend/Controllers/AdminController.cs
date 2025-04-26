@@ -26,7 +26,7 @@ public class AdminController: ControllerBase
 
     [HttpPost]
     [Route("add_new_form")]
-    public async Task<IActionResult> AddNewForm([FromBody] FormDto formDto)
+    public async Task<IActionResult> AddNewForm([FromBody] FormCreateDto formDto)
     {
         try
         {

@@ -83,6 +83,7 @@ builder.Services.AddAuthentication(options =>
         options.LoginPath = "/api/Auth/login";
         options.Cookie.Name = Settings.AuthCookieName;
         options.Cookie.HttpOnly = true;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(180);
     });
 
 builder.Services.AddAuthorization(

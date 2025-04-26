@@ -25,7 +25,7 @@ public class FormServiceTests
 
         var service = new FormService(dbContext);
 
-        var dto = new FormDto
+        var dto = new FormCreateDto
         {
             FormName = "ExistingForm",
             Questions = [],
@@ -44,7 +44,7 @@ public class FormServiceTests
         var dbContext = GetInMemoryDbContext();
         var service = new FormService(dbContext);
 
-        var dto = new FormDto
+        var dto = new FormCreateDto
         {
             FormName = "NewForm",
             Questions = [],
