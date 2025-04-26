@@ -2,7 +2,6 @@ using backend.Dto;
 using backend.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
 
 namespace backend.Controllers;
 
@@ -30,7 +29,6 @@ public class AdminController: ControllerBase
         }
         catch (Exception ex)
         {
-            // Is it okay to send it in such form?
             return BadRequest(ex.Message);
         }
     }
@@ -83,4 +81,6 @@ public class AdminController: ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    
 }

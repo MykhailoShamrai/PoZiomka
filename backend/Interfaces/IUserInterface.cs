@@ -14,5 +14,4 @@ public interface IUserInterface
     public Task<Tuple<ErrorCodes, Form[]?>> GetUserForms();
 
     public Task<ErrorCodes> SubmitAnswerForForms(AnswerDto dto);
-    // public Task<ErrorCodes> SubmitAnswers(AnswerDto answer);
 }
