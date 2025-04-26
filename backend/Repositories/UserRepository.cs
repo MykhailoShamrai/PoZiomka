@@ -79,7 +79,7 @@ public class UserRepository : IUserInterface
                 return (ErrorCodes.NotFound, null);
 
             var forms = await _formService.GetAll();
-            if (forms == null || !forms.Any())
+            if (forms == null)
                 return (ErrorCodes.NotFound, null);
 
             var formDtos = new List<FormDto>();
