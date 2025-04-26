@@ -80,19 +80,18 @@ public class RoomRepository : IRoomInterface
         var room = await _appDbContext.Rooms.FindAsync(dto.RoomId);
         if (room is null)
             return ErrorCodes.NotFound;
-        if (room.ResidentsIds.Count < room.Capacity && !room.ResidentsIds.Contains(user.Id)) 
-        {
-            room.ResidentsIds.Add(user.Id);
-        }
-        else
-            return ErrorCodes.BadRequest;
 
-        var roomWhereUserLives = await _appDbContext.Rooms.Where(r => r.ResidentsIds.Contains(dto.RoomId) && r.Id != dto.RoomId).FirstOrDefaultAsync();
+        if (room.ResidentsIds.Count < room.Capacity && !room.ResidentsIds.Contains(user.Id)) 
+            room.ResidentsIds.Add(user.Id);
+
+        if (room.ResidentsIds.Count == room.Capacity)
+            room.Status = RoomStatus.Unavailable;
+
+        var roomWhereUserLives = await _appDbContext.Rooms.Where(r => r.ResidentsIds.Contains(user.Id) && r.Id != dto.RoomId).FirstOrDefaultAsync();
+
         if (roomWhereUserLives is not null)
-        {
             roomWhereUserLives.ResidentsIds.Remove(user.Id);
-        }
-        var res = _appDbContext.SaveChangesAsync();
+        var res = await _appDbContext.SaveChangesAsync();
         return ErrorCodes.Ok;
     }
 
@@ -107,6 +106,10 @@ public class RoomRepository : IRoomInterface
             return ErrorCodes.NotFound;
         
         room.ResidentsIds.Remove(user.Id);
+
+        if (room.Capacity == room.ResidentsIds.Count + 1)
+            room.Status = RoomStatus.Available;
+
         var res = await _appDbContext.SaveChangesAsync();
         if (res > 0)
             return ErrorCodes.Ok;
