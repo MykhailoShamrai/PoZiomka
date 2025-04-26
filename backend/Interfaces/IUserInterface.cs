@@ -11,7 +11,7 @@ public interface IUserInterface
     public Task<Tuple<ErrorCodes, ProfileDisplayDto?>> DisplayUserProfile();
     public Task<ErrorCodes> ChangeUserProfile(UpdateUserDto user);
 
-    public Task<Tuple<ErrorCodes, Form[]?>> GetUserForms();
+    public Task<(ErrorCodes, FormDto[]?)> GetUserForms();
 
     public Task<ErrorCodes> SubmitAnswerForForms(AnswerDto dto);
     // public Task<ErrorCodes> SubmitAnswers(AnswerDto answer);

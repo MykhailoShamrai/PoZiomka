@@ -8,6 +8,7 @@ interface Form {
   formId: number;
   nameOfForm: string;
   questions: Question[];
+  answers?: Answer;
 }
 
 interface Question {
@@ -26,9 +27,8 @@ interface OptionForQuestion {
 }
 
 interface Answer {
-  answerId: number;
-  correspondingForm: Form;
-  chosenOptions: OptionForQuestion[];
+  formId: number;
+  chosenOptionIds: number[];
   status: string;
 }
 
@@ -42,6 +42,7 @@ interface Answer {
 export class UserFormsComponent implements OnInit {
   forms: Form[] = [];
   selectedOptions: { [questionId: number]: number } = {};
+  openForms: { [key: string]: boolean } = {};
   private apiUrl = `${environment.apiUrl}User`;
 
   constructor(private http: HttpClient) {}
@@ -50,15 +51,36 @@ export class UserFormsComponent implements OnInit {
     this.loadForms();
   }
 
+  toggleForm(formId: number): void {
+    this.openForms[formId] = !this.openForms[formId];
+  }
+
+  isFormOpen(formId: number): boolean {
+    return this.openForms[formId] || false;
+  }
+
   loadForms(): void {
     this.http.get<Form[]>(`${this.apiUrl}/forms`, { withCredentials: true })
       .subscribe({
         next: (forms) => {
           this.forms = forms;
           this.forms.forEach(form => {
+            this.openForms[form.formId] = false;
+
             form.questions.forEach(question => {
               this.selectedOptions[question.questionId] = 0;
             });
+
+            if (form.answers && form.answers.chosenOptionIds?.length > 0) {
+              form.questions.forEach(question => {
+                const selectedOptionId = form.answers!.chosenOptionIds.find(optionId =>
+                  question.options.some(opt => opt.optionForQuestionId === optionId)
+                );
+                if (selectedOptionId) {
+                  this.selectedOptions[question.questionId] = selectedOptionId;
+                }
+              });
+            }
           });
         },
         error: (err) => {

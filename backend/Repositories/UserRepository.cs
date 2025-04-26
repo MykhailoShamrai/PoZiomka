@@ -68,19 +68,49 @@ public class UserRepository : IUserInterface
         return ErrorCodes.UpdateUserDbFailed;
     }
 
-    public async Task<Tuple<ErrorCodes, Form[]?>> GetUserForms()
-    {
-        var email = _contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+    public async Task<(ErrorCodes, FormDto[]?)> GetUserForms()
+        {
+            var email = _contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                return (ErrorCodes.Unauthorized, null);
 
-        if (string.IsNullOrEmpty(email))
-            return new Tuple<ErrorCodes, Form[]?>(ErrorCodes.Unauthorized, null);
-            
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
-            return new Tuple<ErrorCodes, Form[]?>(ErrorCodes.NotFound, null);
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return (ErrorCodes.NotFound, null);
 
-        return new Tuple<ErrorCodes, Form[]?>(ErrorCodes.Ok, await _formService.GetAll());
-    }
+            var forms = await _formService.GetAll();
+            if (forms == null || !forms.Any())
+                return (ErrorCodes.NotFound, null);
+
+            var formDtos = new List<FormDto>();
+            foreach (var form in forms)
+            {
+                var answers = await _formService.GetAnswers(user.Id, form.FormId);
+
+                AnswerDto? answerDto = null;
+                if (answers != null)
+                {
+                    answerDto = new AnswerDto
+                    {
+                        FormId = form.FormId,
+                        ChosenOptionIds = answers.ChosenOptions.Select(o => o.OptionForQuestionId).ToList(),
+                        Status = answers.Status
+                    };
+                }
+
+                var formDto = new FormDto
+                {
+                    FormId = form.FormId,
+                    NameOfForm = form.NameOfForm,
+                    Questions = form.Questions,
+                    Answers = answerDto
+                };
+
+                formDtos.Add(formDto);
+            }
+
+            return (ErrorCodes.Ok, formDtos.ToArray());
+        }
 
     public async Task<ErrorCodes> ChangeUserProfile(UpdateUserDto userDto)
     {

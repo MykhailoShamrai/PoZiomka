@@ -21,7 +21,7 @@ namespace backend.Tests.Controllers
         public async Task AddNewForm_ReturnsOk_WhenCreationSucceeds()
         {
             // Arrange
-            var formDto = new FormDto();
+            var formDto = new FormCreateDto();
             _formsMock.Setup(f => f.CreateNewForm(formDto)).ReturnsAsync(true);
 
             // Act
@@ -34,7 +34,7 @@ namespace backend.Tests.Controllers
         [Fact]
         public async Task AddNewForm_ReturnsBadRequest_WhenCreationFails()
         {
-            var formDto = new FormDto();
+            var formDto = new FormCreateDto();
             _formsMock.Setup(f => f.CreateNewForm(formDto)).ReturnsAsync(false);
 
             var result = await _controller.AddNewForm(formDto);
