@@ -138,4 +138,37 @@ public class AdminController: ControllerBase
         }
         return BadRequest("Something went wrong while adding new room information!");
     }
+
+    [HttpDelete]
+    [Route("delete_room")]
+    public async Task<IActionResult> DeleteRoom([FromBody] RoomInDto dto)
+    {
+        var res = await _roomInterface.DeleteRoom(dto);
+        switch (res)
+        {
+            case ErrorCodes.Ok:
+                return Ok();
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong while deleting a room!");
+            case ErrorCodes.NotFound:
+                return NotFound("There is no such a room in a database!");
+        }
+        return BadRequest("Something went wrong while deleting room!");
+    }
+
+    [HttpGet]
+    [Route("get_all_rooms")]
+    public async Task<IActionResult> GetRooms()
+    {
+        var res = await _roomInterface.GetRooms();
+        switch (res.Item2)
+        {
+            case ErrorCodes.Ok:
+                return Ok(res.Item1);
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong in getting information about rooms!");
+        }
+        return BadRequest("Something went wrong in getting information about rooms!");
+    }
+
 }
