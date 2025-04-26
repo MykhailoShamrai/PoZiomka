@@ -1,31 +1,34 @@
 <div class="container mt-4">
-    <h2>Your Forms</h2>
-    <div *ngIf="forms.length === 0" class="alert alert-info">
-      No forms available.
+  <h2>Your Forms</h2>
+  <div *ngIf="forms.length === 0" class="alert alert-info">
+    No forms available.
+  </div>
+
+  <div *ngFor="let form of forms" class="card mb-3">
+    <div class="card-header" (click)="toggleForm(form.formId)" style="cursor: pointer;">
+      <h3 style="display: flex; justify-content: space-between; align-items: center;">
+        <span>{{ form.nameOfForm }} <span>{{ isFormOpen(form.formId) ? '▼' : '▶' }}</span></span>
+        <span *ngIf="form.answers" class="checkmark" style="color: green">✔</span>
+      </h3>
     </div>
-  
-    <div *ngFor="let form of forms" class="card mb-3">
-      <div class="card-header">
-        <h3>{{ form.nameOfForm }}</h3>
-      </div>
-      <div class="card-body">
-        <div *ngFor="let question of form.questions" class="mb-3">
-          <h5>{{ question.name }} {{ question.isObligatory ? '(Required)' : '' }}</h5>
-          <div *ngFor="let option of question.options" class="form-check">
-            <input 
-              class="form-check-input" 
-              type="radio" 
-              [name]="'question-' + question.questionId" 
-              [id]="'option-' + option.optionForQuestionId" 
-              [value]="option.optionForQuestionId"
-              [(ngModel)]="selectedOptions[question.questionId]"
-              (change)="onOptionChange(question.questionId, option.optionForQuestionId)">
-            <label class="form-check-label" [for]="'option-' + option.optionForQuestionId">
-              {{ option.name }}
-            </label>
-          </div>
+    <div *ngIf="isFormOpen(form.formId)" class="card-body">
+      <div *ngFor="let question of form.questions" class="mb-3">
+        <h5>{{ question.name }} {{ question.isObligatory ? '(Required)' : '' }}</h5>
+        <div *ngFor="let option of question.options" class="form-check">
+          <input 
+            class="form-check-input" 
+            type="radio" 
+            [name]="'question-' + question.questionId" 
+            [id]="'option-' + option.optionForQuestionId" 
+            [value]="option.optionForQuestionId"
+            [(ngModel)]="selectedOptions[question.questionId]"
+            (change)="onOptionChange(question.questionId, option.optionForQuestionId)">
+          <label class="form-check-label" [for]="'option-' + option.optionForQuestionId">
+            {{ option.name }}
+          </label>
         </div>
-        <button class="btn btn-primary" (click)="submitForm(form)">Submit Form</button>
       </div>
+      <button class="btn btn-primary" (click)="submitForm(form)">Submit Form</button>
     </div>
   </div>
+</div>
