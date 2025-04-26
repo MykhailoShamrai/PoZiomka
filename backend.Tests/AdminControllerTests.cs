@@ -9,12 +9,16 @@ namespace backend.Tests.Controllers
     public class AdminControllerTests
     {
         private readonly Mock<IFormsInterface> _formsMock;
+        private readonly Mock<IAdminInterface> _adminMock;
+        private readonly Mock<IRoomInterface> _roomsMock;
         private readonly AdminController _controller;
 
         public AdminControllerTests()
         {
             _formsMock = new Mock<IFormsInterface>();
-            _controller = new AdminController(_formsMock.Object);
+            _adminMock = new Mock<IAdminInterface>();
+            _roomsMock = new Mock<IRoomInterface>();
+            _controller = new AdminController(_formsMock.Object, _adminMock.Object, _roomsMock.Object);
         }
 
         [Fact]

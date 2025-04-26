@@ -1,8 +1,9 @@
+using System.ComponentModel;
 using backend.Dto;
 using backend.Interfaces;
+using backend.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
 
 namespace backend.Controllers;
 
@@ -11,10 +12,16 @@ namespace backend.Controllers;
 public class AdminController: ControllerBase
 {
     private readonly IFormsInterface _formsInterface;
+    private readonly IAdminInterface _adminInterface;
+    private readonly IRoomInterface _roomInterface;
 
-    public AdminController(IFormsInterface formsInterface)
+    public AdminController(IFormsInterface formsInterface,
+                            IAdminInterface adminInterface,
+                            IRoomInterface roomInterface)
     {
         _formsInterface = formsInterface;
+        _adminInterface = adminInterface;
+        _roomInterface = roomInterface;
     }
 
     [HttpPost]
@@ -30,7 +37,6 @@ public class AdminController: ControllerBase
         }
         catch (Exception ex)
         {
-            // Is it okay to send it in such form?
             return BadRequest(ex.Message);
         }
     }
@@ -83,4 +89,86 @@ public class AdminController: ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpGet]
+    [Route("users_information")]
+    public async Task<IActionResult> GetUsersInformation()
+    {
+        var res = await _adminInterface.GetInformationAboutUsers();
+        switch(res.Item2)
+        {
+            case ErrorCodes.Ok:
+               return Ok(res.Item1);
+            case ErrorCodes.NotFound:
+                return NotFound("Information about users not found");
+        }
+        return BadRequest("Something went wrong during obtaining information about users!   ");
+    }
+    
+    [HttpPut]
+    [Route("add_role_to_user")]
+    public async Task<IActionResult> AddRoleToUser([FromBody] AddRoleToUserDto dto)
+    {
+        if (!AddRoleToUserDto.CheckIfRoleIsProper(dto.Role))
+            return BadRequest("There is no role as providen in request!");
+        var res = await _adminInterface.SetRoleToUser(dto);
+        switch (res)
+        {
+            case ErrorCodes.NotFound:
+                return NotFound("Data about user was not found!");
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong while adding a role to user!");
+            case ErrorCodes.Ok:
+                return Ok();
+        }
+        return BadRequest("Something went wrong!");   
+    }
+
+    [HttpPost]
+    [Route("add_new_room")]
+    public async Task<IActionResult> AddNewRoom([FromBody] RoomInDto dto)
+    {
+        var res = await _roomInterface.AddRoom(dto);
+        switch (res)
+        {
+            case ErrorCodes.Ok:
+                return Ok();
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong while adding new room information!");
+        }
+        return BadRequest("Something went wrong while adding new room information!");
+    }
+
+    [HttpDelete]
+    [Route("delete_room")]
+    public async Task<IActionResult> DeleteRoom([FromBody] RoomInDto dto)
+    {
+        var res = await _roomInterface.DeleteRoom(dto);
+        switch (res)
+        {
+            case ErrorCodes.Ok:
+                return Ok();
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong while deleting a room!");
+            case ErrorCodes.NotFound:
+                return NotFound("There is no such a room in a database!");
+        }
+        return BadRequest("Something went wrong while deleting room!");
+    }
+
+    [HttpGet]
+    [Route("get_all_rooms")]
+    public async Task<IActionResult> GetRooms()
+    {
+        var res = await _roomInterface.GetRooms();
+        switch (res.Item2)
+        {
+            case ErrorCodes.Ok:
+                return Ok(res.Item1);
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong in getting information about rooms!");
+        }
+        return BadRequest("Something went wrong in getting information about rooms!");
+    }
+
 }
