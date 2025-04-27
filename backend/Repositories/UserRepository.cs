@@ -1,25 +1,10 @@
 using System.Security.Claims;
-using backend.Data;
 using backend.Dto;
 using backend.Interfaces;
 using backend.Models.User;
-using backend.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repositories;
-
-public enum ErrorCodes
-{
-    NotFound,
-    CannotRetrieveUserFromCookie,
-    UpdateUserDbFailed,
-    Forbidden,
-    Ok,
-    Unauthorized,
-    BadRequest
-}
 
 public class UserRepository : IUserInterface
 {
