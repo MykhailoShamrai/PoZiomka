@@ -1,0 +1,124 @@
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- Header section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Room Proposals</h2>
+                <div>
+                    <a routerLink="/profile" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-person"></i> My Profile
+                    </a>
+                    <button (click)="logout()" class="btn btn-outline-danger">
+                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading state -->
+            <div *ngIf="loading" class="text-center my-5">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading proposals...</p>
+            </div>
+
+            <!-- Success and error messages -->
+            <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ successMessage }}
+                <button type="button" class="btn-close" (click)="successMessage = null"></button>
+            </div>
+
+            <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ errorMessage }}
+                <button type="button" class="btn-close" (click)="errorMessage = null"></button>
+            </div>
+
+            <!-- No proposals message -->
+            <div *ngIf="!loading && proposals.length === 0" class="alert alert-info">
+                You don't have any room proposals at the moment. New proposals will appear here when available.
+            </div>
+
+            <!-- Proposals list -->
+            <div *ngIf="!loading && proposals.length > 0">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="h5 mb-0">Room Matching Proposals</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            Below are your potential room assignments and roommates. Review each proposal and accept or
+                            reject based on your preferences.
+                        </p>
+                    </div>
+                </div>
+
+                <div *ngFor="let proposal of proposals" class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="h5 mb-0">
+                            Room {{ proposal.room.number }} (Floor {{ proposal.room.floor }})
+                        </h4>
+                        <span class="badge" [ngClass]="getStatusClass(proposal.status)">
+                            {{ getStatusText(proposal.status) }}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h5 class="h6">Room Details</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Room Number: {{ proposal.room.number }}</li>
+                                    <li class="list-group-item">Floor: {{ proposal.room.floor }}</li>
+                                    <li class="list-group-item">Capacity: {{ proposal.room.capacity }} people</li>
+                                    <li class="list-group-item">Current Occupancy: {{ proposal.room.currentOccupancy }}
+                                        / {{ proposal.room.capacity }}</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="h6">Potential Roommates</h5>
+                                <div class="list-group">
+                                    <div *ngFor="let roommate of proposal.potentialRoommates" class="list-group-item">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">{{ roommate.firstName }} {{ roommate.lastName }}</h6>
+                                        </div>
+                                        <p class="mb-1">{{ roommate.email }}</p>
+                                        <small *ngIf="roommate.phoneNumber">{{ roommate.phoneNumber }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <small class="text-muted me-auto">Proposed on: {{ proposal.createdAt | date:'mediumDate'
+                                }}</small>
+
+                            <!-- Action buttons - only shown for pending proposals -->
+                            <div *ngIf="canAcceptOrReject(proposal)">
+                                <button class="btn btn-outline-danger me-2" (click)="rejectProposal(proposal)">
+                                    <i class="bi bi-x-circle me-1"></i> Reject
+                                </button>
+                                <button class="btn btn-success" (click)="acceptProposal(proposal)">
+                                    <i class="bi bi-check-circle me-1"></i> Accept
+                                </button>
+                            </div>
+
+                            <!-- For accepted by admin proposals -->
+                            <div *ngIf="proposal.status === 'AcceptedByAdmin'" class="text-success">
+                                <i class="bi bi-check-circle-fill me-1"></i> Approved and Finalized
+                            </div>
+
+                            <!-- For accepted by user but pending admin approval -->
+                            <div *ngIf="proposal.status === 'Accepted'" class="text-primary">
+                                <i class="bi bi-hourglass-split me-1"></i> Awaiting Admin Approval
+                            </div>
+
+                            <!-- For rejected proposals -->
+                            <div *ngIf="proposal.status === 'Rejected'" class="text-danger">
+                                <i class="bi bi-x-circle-fill me-1"></i> You've Rejected This Proposal
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
