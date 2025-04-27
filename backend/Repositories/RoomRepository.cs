@@ -61,7 +61,7 @@ public class RoomRepository : IRoomInterface
             return ErrorCodes.Ok;
         return ErrorCodes.BadRequest;
     }
-
+    
     public async Task<Tuple<List<RoomOutDto>, ErrorCodes>> GetRooms()
     {
         List<Room> rooms = await _appDbContext.Rooms.ToListAsync();
