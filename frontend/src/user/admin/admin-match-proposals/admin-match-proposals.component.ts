@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { AuthGatewayService } from '../../auth/auth-gateway.service';
+import { AuthGatewayService } from '../../../auth/auth-gateway.service';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environment/environment';
 
 interface Student {
   id: number;
@@ -19,10 +20,10 @@ interface Room {
   floor: number;
   capacity: number;
   currentOccupancy: number;
-  status?: string;
+  status: string;
 }
 
-interface RoomProposal {
+interface MatchProposal {
   id: number;
   status: 'Pending' | 'Accepted' | 'Rejected' | 'AcceptedByAdmin' | 'RejectedByAdmin';
   room: Room;
@@ -32,17 +33,17 @@ interface RoomProposal {
 }
 
 @Component({
-  selector: 'app-admin-room-proposals',
+  selector: 'app-admin-match-proposals',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule],
-  templateUrl: './admin-room-proposals.component.html',
-  styleUrl: './admin-room-proposals.component.css'
+  templateUrl: './admin-match-proposals.component.html',
+  styleUrl: './admin-match-proposals.component.css'
 })
-export class AdminRoomProposalsComponent implements OnInit {
-  proposals: RoomProposal[] = [];
-  pendingProposals: RoomProposal[] = [];
-  approvedProposals: RoomProposal[] = [];
-  rejectedProposals: RoomProposal[] = [];
+export class AdminMatchProposalsComponent implements OnInit {
+  proposals: MatchProposal[] = [];
+  pendingProposals: MatchProposal[] = [];
+  approvedProposals: MatchProposal[] = [];
+  rejectedProposals: MatchProposal[] = [];
   
   loading = true;
   errorMessage: string | null = null;
@@ -62,9 +63,20 @@ export class AdminRoomProposalsComponent implements OnInit {
   loadProposals(): void {
     this.loading = true;
     
-    // In a real application, you would fetch from an API
-    // this.http.get<RoomProposal[]>(`${environment.apiUrl}admin/roomProposals`)
-    //   .subscribe({ ... });
+    // In a real application, we would fetch from an API
+    // this.http.get<MatchProposal[]>(`${environment.apiUrl}admin/matchProposals`)
+    //   .subscribe({
+    //     next: (data) => {
+    //       this.proposals = data;
+    //       this.filterProposals();
+    //       this.loading = false;
+    //     },
+    //     error: (err) => {
+    //       console.error('Error loading match proposals:', err);
+    //       this.errorMessage = 'Failed to load match proposals. Please try again.';
+    //       this.loading = false;
+    //     }
+    //   });
     
     // Using mock data for now
     setTimeout(() => {
@@ -76,7 +88,8 @@ export class AdminRoomProposalsComponent implements OnInit {
 
   filterProposals(): void {
     this.pendingProposals = this.proposals.filter(p => 
-      p.status === 'Pending' || p.status === 'Accepted');
+      (p.status === 'Pending' && p.acceptedByAllUsers === false) || 
+      (p.status === 'Accepted' && p.acceptedByAllUsers === true));
     
     this.approvedProposals = this.proposals.filter(p => 
       p.status === 'AcceptedByAdmin');
@@ -85,12 +98,25 @@ export class AdminRoomProposalsComponent implements OnInit {
       p.status === 'Rejected' || p.status === 'RejectedByAdmin');
   }
 
-  approveProposal(proposal: RoomProposal): void {
+  approveProposal(proposal: MatchProposal): void {
     this.loading = true;
     
     // In a real implementation:
     // this.http.patch(`${environment.apiUrl}admin/match-proposals/${proposal.id}/status`, { status: 'AcceptedByAdmin' })
-    //   .subscribe({ ... });
+    //   .subscribe({
+    //     next: () => {
+    //       proposal.status = 'AcceptedByAdmin';
+    //       this.successMessage = `Proposal for Room ${proposal.room.number} approved successfully.`;
+    //       this.loading = false;
+    //       this.filterProposals();
+    //       setTimeout(() => this.successMessage = null, 3000);
+    //     },
+    //     error: (err) => {
+    //       console.error('Error approving proposal:', err);
+    //       this.errorMessage = 'Failed to approve proposal. Please try again.';
+    //       this.loading = false;
+    //     }
+    //   });
     
     // Mock implementation
     setTimeout(() => {
@@ -104,12 +130,25 @@ export class AdminRoomProposalsComponent implements OnInit {
     }, 1000);
   }
 
-  rejectProposal(proposal: RoomProposal): void {
+  rejectProposal(proposal: MatchProposal): void {
     this.loading = true;
     
     // In a real implementation:
     // this.http.patch(`${environment.apiUrl}admin/match-proposals/${proposal.id}/status`, { status: 'RejectedByAdmin' })
-    //   .subscribe({ ... });
+    //   .subscribe({
+    //     next: () => {
+    //       proposal.status = 'RejectedByAdmin';
+    //       this.successMessage = `Proposal for Room ${proposal.room.number} rejected.`;
+    //       this.loading = false;
+    //       this.filterProposals();
+    //       setTimeout(() => this.successMessage = null, 3000);
+    //     },
+    //     error: (err) => {
+    //       console.error('Error rejecting proposal:', err);
+    //       this.errorMessage = 'Failed to reject proposal. Please try again.';
+    //       this.loading = false;
+    //     }
+    //   });
     
     // Mock implementation
     setTimeout(() => {
@@ -123,7 +162,7 @@ export class AdminRoomProposalsComponent implements OnInit {
     }, 1000);
   }
 
-  getMockProposals(): RoomProposal[] {
+  getMockProposals(): MatchProposal[] {
     return [
       {
         id: 1,
@@ -291,9 +330,9 @@ export class AdminRoomProposalsComponent implements OnInit {
     }
   }
 
-  getStatusText(status: string): string {
+  getStatusText(status: string, acceptedByAllUsers: boolean): string {
     switch (status) {
-      case 'Pending': return 'Pending user response';
+      case 'Pending': return acceptedByAllUsers ? 'Waiting for admin approval' : 'Pending user response';
       case 'Accepted': return 'Accepted by users (waiting for your approval)';
       case 'Rejected': return 'Rejected by at least one user';
       case 'RejectedByAdmin': return 'Rejected by administrator';
@@ -302,7 +341,7 @@ export class AdminRoomProposalsComponent implements OnInit {
     }
   }
 
-  canApproveOrReject(proposal: RoomProposal): boolean {
+  canApproveOrReject(proposal: MatchProposal): boolean {
     return proposal.status === 'Accepted' && proposal.acceptedByAllUsers;
   }
 

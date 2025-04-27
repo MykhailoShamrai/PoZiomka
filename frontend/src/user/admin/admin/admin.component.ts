@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AddQuestionDto, AdminService, FormCreateDto } from '../admin.service';
+import { AuthGatewayService } from '../../../auth/auth-gateway.service';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css']
 })
@@ -16,8 +18,20 @@ export class AdminComponent {
   deleteFormName: string = '';
   deleteQuestionFormName: string = '';
   deleteQuestionName: string = '';
+  activeTab: string = 'add-form';
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private authService: AuthGatewayService
+  ) {}
+
+  setActiveTab(tabId: string): void {
+    this.activeTab = tabId;
+  }
+
+  logout(): void {
+    this.authService.logout();
+  }
 
   addNewForm(): void {
     if (!this.newForm.formName.trim()) {

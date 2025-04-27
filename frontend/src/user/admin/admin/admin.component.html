@@ -1,126 +1,185 @@
-<div class="container mt-4">
-    <h2>Admin Dashboard - Manage Forms</h2>
-  
-    <div class="card mb-3">
-      <div class="card-header">
-        <h3>Add New Form</h3>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <!-- Header section -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Administrator Panel</h2>
+        <div>
+          <a routerLink="/profile" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-person"></i> My Profile
+          </a>
+          <button (click)="logout()" class="btn btn-outline-danger">
+            <i class="bi bi-box-arrow-right me-2"></i>Logout
+          </button>
+        </div>
       </div>
-      <div class="card-body">
-        <form (ngSubmit)="addNewForm()">
-          <div class="mb-3">
-            <label for="formName" class="form-label">Form Name</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="formName" 
-              [(ngModel)]="newForm.formName" 
-              name="formName" 
-              placeholder="Enter form name">
-          </div>
-          <button type="submit" class="btn btn-primary">Add Form</button>
-        </form>
-      </div>
-    </div>
-  
-    <div class="card mb-3">
-      <div class="card-header">
-        <h3>Add Obligatory Question to Form</h3>
-      </div>
-      <div class="card-body">
-        <form (ngSubmit)="addQuestion()">
-          <div class="mb-3">
-            <label for="formNameForQuestion" class="form-label">Form Name</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="formNameForQuestion" 
-              [(ngModel)]="newQuestion.formName" 
-              name="formNameForQuestion" 
-              placeholder="Enter form name to add question to">
-          </div>
-          <div class="mb-3">
-            <label for="questionName" class="form-label">Question Name</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="questionName" 
-              [(ngModel)]="newQuestion.name" 
-              name="questionName" 
-              placeholder="Enter question name">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Options</label>
-            <div *ngFor="let option of newQuestion.answers; let i = index" class="input-group mb-2">
-              <input 
-                type="text" 
-                class="form-control" 
-                [(ngModel)]="newQuestion.answers[i]" 
-                [name]="'option-' + i" 
-                placeholder="Enter option">
-              <button 
-                type="button" 
-                class="btn btn-danger" 
-                (click)="removeOption(i)" 
-                *ngIf="newQuestion.answers.length > 1">
-                Remove
-              </button>
+
+      <!-- Quick actions card -->
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h3 class="h5 mb-0">Quick Actions</h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <div class="d-grid">
+                <a routerLink="/admin/match-proposals" class="btn btn-outline-primary">
+                  <i class="bi bi-people-fill me-2"></i>Manage Match Proposals
+                  <span class="badge bg-primary ms-2">New</span>
+                </a>
+              </div>
             </div>
-            <button type="button" class="btn btn-secondary" (click)="addOption()">Add Option</button>
+            <div class="col-md-6 mb-3">
+              <div class="d-grid">
+                <a href="#" class="btn btn-outline-primary">
+                  <i class="bi bi-house-door me-2"></i>Manage Rooms
+                </a>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="d-grid">
+                <a href="#" class="btn btn-outline-primary">
+                  <i class="bi bi-person-gear me-2"></i>User Management
+                </a>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="d-grid">
+                <button (click)="setActiveTab('add-form')" class="btn btn-outline-primary">
+                  <i class="bi bi-file-text me-2"></i>Form Management
+                </button>
+              </div>
+            </div>
           </div>
-          <button type="submit" class="btn btn-primary">Add Question</button>
-        </form>
+        </div>
       </div>
-    </div>
-  
-    <div class="card mb-3">
-      <div class="card-header">
-        <h3>Delete Form</h3>
-      </div>
-      <div class="card-body">
-        <form (ngSubmit)="deleteForm()">
-          <div class="mb-3">
-            <label for="deleteFormName" class="form-label">Form Name</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="deleteFormName" 
-              [(ngModel)]="deleteFormName" 
-              name="deleteFormName" 
-              placeholder="Enter form name to delete">
+
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h3 class="h5 mb-0">Form Management</h3>
+        </div>
+        <div class="card-body p-0">
+          <!-- Navigation tabs using ngClass instead of Bootstrap's data attributes -->
+          <ul class="nav nav-tabs nav-fill">
+            <li class="nav-item">
+              <button class="nav-link" [ngClass]="{'active': activeTab === 'add-form'}"
+                (click)="setActiveTab('add-form')">
+                <i class="bi bi-plus-circle me-2"></i>Add Form
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" [ngClass]="{'active': activeTab === 'add-question'}"
+                (click)="setActiveTab('add-question')">
+                <i class="bi bi-plus-square me-2"></i>Add Question
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" [ngClass]="{'active': activeTab === 'delete-form'}"
+                (click)="setActiveTab('delete-form')">
+                <i class="bi bi-trash me-2"></i>Delete Form
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" [ngClass]="{'active': activeTab === 'delete-question'}"
+                (click)="setActiveTab('delete-question')">
+                <i class="bi bi-trash-fill me-2"></i>Delete Question
+              </button>
+            </li>
+          </ul>
+
+          <!-- Tab content using ngIf instead of Bootstrap's tab panes -->
+          <div class="p-4">
+            <!-- Add Form Tab -->
+            <div *ngIf="activeTab === 'add-form'">
+              <form (ngSubmit)="addNewForm()">
+                <div class="mb-3">
+                  <label for="formName" class="form-label">Form Name</label>
+                  <input type="text" class="form-control" id="formName" [(ngModel)]="newForm.formName" name="formName"
+                    placeholder="Enter form name">
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-primary">Add Form</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Add Question Tab -->
+            <div *ngIf="activeTab === 'add-question'">
+              <form (ngSubmit)="addQuestion()">
+                <div class="mb-3">
+                  <label for="formNameForQuestion" class="form-label">Form Name</label>
+                  <input type="text" class="form-control" id="formNameForQuestion" [(ngModel)]="newQuestion.formName"
+                    name="formNameForQuestion" placeholder="Enter form name to add question to">
+                </div>
+                <div class="mb-3">
+                  <label for="questionName" class="form-label">Question Name</label>
+                  <input type="text" class="form-control" id="questionName" [(ngModel)]="newQuestion.name"
+                    name="questionName" placeholder="Enter question name">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Options</label>
+                  <div *ngFor="let option of newQuestion.answers; let i = index" class="input-group mb-2">
+                    <input type="text" class="form-control" [(ngModel)]="newQuestion.answers[i]" [name]="'option-' + i"
+                      placeholder="Enter option">
+                    <button type="button" class="btn btn-outline-danger" (click)="removeOption(i)"
+                      *ngIf="newQuestion.answers.length > 1">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                  <button type="button" class="btn btn-outline-secondary w-100 mb-3" (click)="addOption()">
+                    <i class="bi bi-plus"></i> Add Option
+                  </button>
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-primary">Add Question</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Delete Form Tab -->
+            <div *ngIf="activeTab === 'delete-form'">
+              <form (ngSubmit)="deleteForm()">
+                <div class="mb-3">
+                  <label for="deleteFormName" class="form-label">Form Name</label>
+                  <input type="text" class="form-control" id="deleteFormName" [(ngModel)]="deleteFormName"
+                    name="deleteFormName" placeholder="Enter form name to delete">
+                </div>
+                <div class="alert alert-warning">
+                  <i class="bi bi-exclamation-triangle me-2"></i>
+                  Deleting a form will remove all associated questions. This action cannot be undone.
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-danger">Delete Form</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Delete Question Tab -->
+            <div *ngIf="activeTab === 'delete-question'">
+              <form (ngSubmit)="deleteQuestion()">
+                <div class="mb-3">
+                  <label for="deleteQuestionFormName" class="form-label">Form Name</label>
+                  <input type="text" class="form-control" id="deleteQuestionFormName"
+                    [(ngModel)]="deleteQuestionFormName" name="deleteQuestionFormName"
+                    placeholder="Enter form name containing the question">
+                </div>
+                <div class="mb-3">
+                  <label for="deleteQuestionName" class="form-label">Question Name</label>
+                  <input type="text" class="form-control" id="deleteQuestionName" [(ngModel)]="deleteQuestionName"
+                    name="deleteQuestionName" placeholder="Enter question name to delete">
+                </div>
+                <div class="alert alert-warning">
+                  <i class="bi bi-exclamation-triangle me-2"></i>
+                  Deleting a question will remove all associated options. This action cannot be undone.
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-danger">Delete Question</button>
+                </div>
+              </form>
+            </div>
           </div>
-          <button type="submit" class="btn btn-danger">Delete Form</button>
-        </form>
-      </div>
-    </div>
-  
-    <div class="card mb-3">
-      <div class="card-header">
-        <h3>Delete Question</h3>
-      </div>
-      <div class="card-body">
-        <form (ngSubmit)="deleteQuestion()">
-          <div class="mb-3">
-            <label for="deleteQuestionFormName" class="form-label">Form Name</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="deleteQuestionFormName" 
-              [(ngModel)]="deleteQuestionFormName" 
-              name="deleteQuestionFormName" 
-              placeholder="Enter form name containing the question">
-          </div>
-          <div class="mb-3">
-            <label for="deleteQuestionName" class="form-label">Question Name</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="deleteQuestionName" 
-              [(ngModel)]="deleteQuestionName" 
-              name="deleteQuestionName" 
-              placeholder="Enter question name to delete">
-          </div>
-          <button type="submit" class="btn btn-danger">Delete Question</button>
-        </form>
+        </div>
       </div>
     </div>
   </div>
+</div>

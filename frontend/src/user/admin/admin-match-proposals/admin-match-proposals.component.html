@@ -3,8 +3,11 @@
         <div class="col-12">
             <!-- Header section -->
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0">Administrator Panel - Room Proposals Management</h2>
+                <h2 class="mb-0">Administrator Panel - Match Proposals Management</h2>
                 <div>
+                    <a routerLink="/admin" class="btn btn-outline-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Admin
+                    </a>
                     <button (click)="logout()" class="btn btn-outline-danger">
                         <i class="bi bi-box-arrow-right me-2"></i>Logout
                     </button>
@@ -16,7 +19,7 @@
                 <div class="spinner-border" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
-                <p class="mt-2">Loading proposals...</p>
+                <p class="mt-2">Loading match proposals...</p>
             </div>
 
             <!-- Success and error messages -->
@@ -66,7 +69,7 @@
                     <div class="tab-pane fade show active" id="pending-proposals" role="tabpanel"
                         aria-labelledby="pending-tab">
                         <div class="alert alert-info" *ngIf="pendingProposals.length === 0">
-                            There are no pending proposals that require your review at this time.
+                            There are no pending match proposals that require your review at this time.
                         </div>
 
                         <div *ngFor="let proposal of pendingProposals" class="card mb-3">
@@ -75,7 +78,7 @@
                                     Room {{ proposal.room.number }} (Floor {{ proposal.room.floor }})
                                 </h4>
                                 <span class="badge" [ngClass]="getStatusClass(proposal.status)">
-                                    {{ getStatusText(proposal.status) }}
+                                    {{ getStatusText(proposal.status, proposal.acceptedByAllUsers) }}
                                 </span>
                             </div>
                             <div class="card-body">
@@ -90,7 +93,7 @@
                                             <li class="list-group-item">Current Occupancy: {{
                                                 proposal.room.currentOccupancy }} / {{ proposal.room.capacity }}</li>
                                             <li class="list-group-item">Status: <span
-                                                    [ngClass]="getRoomStatusClass(proposal.room.status || '')">{{
+                                                    [ngClass]="getRoomStatusClass(proposal.room.status)">{{
                                                     proposal.room.status }}</span></li>
                                         </ul>
                                     </div>
@@ -144,7 +147,7 @@
                     <!-- Approved proposals tab -->
                     <div class="tab-pane fade" id="approved-proposals" role="tabpanel" aria-labelledby="approved-tab">
                         <div class="alert alert-info" *ngIf="approvedProposals.length === 0">
-                            There are no approved proposals at this time.
+                            There are no approved match proposals at this time.
                         </div>
 
                         <div *ngFor="let proposal of approvedProposals" class="card mb-3">
@@ -154,7 +157,7 @@
                                     Room {{ proposal.room.number }} (Floor {{ proposal.room.floor }})
                                 </h4>
                                 <span class="badge bg-white text-success">
-                                    {{ getStatusText(proposal.status) }}
+                                    {{ getStatusText(proposal.status, proposal.acceptedByAllUsers) }}
                                 </span>
                             </div>
                             <div class="card-body">
@@ -169,7 +172,7 @@
                                             <li class="list-group-item">Current Occupancy: {{
                                                 proposal.room.currentOccupancy }} / {{ proposal.room.capacity }}</li>
                                             <li class="list-group-item">Status: <span
-                                                    [ngClass]="getRoomStatusClass(proposal.room.status || '')">{{
+                                                    [ngClass]="getRoomStatusClass(proposal.room.status)">{{
                                                     proposal.room.status }}</span></li>
                                         </ul>
                                     </div>
@@ -210,7 +213,7 @@
                     <!-- Rejected proposals tab -->
                     <div class="tab-pane fade" id="rejected-proposals" role="tabpanel" aria-labelledby="rejected-tab">
                         <div class="alert alert-info" *ngIf="rejectedProposals.length === 0">
-                            There are no rejected proposals at this time.
+                            There are no rejected match proposals at this time.
                         </div>
 
                         <div *ngFor="let proposal of rejectedProposals" class="card mb-3">
@@ -220,7 +223,7 @@
                                     Room {{ proposal.room.number }} (Floor {{ proposal.room.floor }})
                                 </h4>
                                 <span class="badge bg-white text-danger">
-                                    {{ getStatusText(proposal.status) }}
+                                    {{ getStatusText(proposal.status, proposal.acceptedByAllUsers) }}
                                 </span>
                             </div>
                             <div class="card-body">
@@ -235,7 +238,7 @@
                                             <li class="list-group-item">Current Occupancy: {{
                                                 proposal.room.currentOccupancy }} / {{ proposal.room.capacity }}</li>
                                             <li class="list-group-item">Status: <span
-                                                    [ngClass]="getRoomStatusClass(proposal.room.status || '')">{{
+                                                    [ngClass]="getRoomStatusClass(proposal.room.status)">{{
                                                     proposal.room.status }}</span></li>
                                         </ul>
                                     </div>
