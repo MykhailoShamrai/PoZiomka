@@ -16,6 +16,7 @@ export interface UserProfile {
   lastName?: string;
   phoneNumber?: string;
   preferences?: UserPreferences;
+  isAdmin: boolean;
 }
 
 export interface UserForm {

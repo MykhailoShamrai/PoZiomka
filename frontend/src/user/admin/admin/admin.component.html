@@ -1,0 +1,126 @@
+<div class="container mt-4">
+    <h2>Admin Dashboard - Manage Forms</h2>
+  
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3>Add New Form</h3>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="addNewForm()">
+          <div class="mb-3">
+            <label for="formName" class="form-label">Form Name</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="formName" 
+              [(ngModel)]="newForm.formName" 
+              name="formName" 
+              placeholder="Enter form name">
+          </div>
+          <button type="submit" class="btn btn-primary">Add Form</button>
+        </form>
+      </div>
+    </div>
+  
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3>Add Obligatory Question to Form</h3>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="addQuestion()">
+          <div class="mb-3">
+            <label for="formNameForQuestion" class="form-label">Form Name</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="formNameForQuestion" 
+              [(ngModel)]="newQuestion.formName" 
+              name="formNameForQuestion" 
+              placeholder="Enter form name to add question to">
+          </div>
+          <div class="mb-3">
+            <label for="questionName" class="form-label">Question Name</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="questionName" 
+              [(ngModel)]="newQuestion.name" 
+              name="questionName" 
+              placeholder="Enter question name">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Options</label>
+            <div *ngFor="let option of newQuestion.answers; let i = index" class="input-group mb-2">
+              <input 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="newQuestion.answers[i]" 
+                [name]="'option-' + i" 
+                placeholder="Enter option">
+              <button 
+                type="button" 
+                class="btn btn-danger" 
+                (click)="removeOption(i)" 
+                *ngIf="newQuestion.answers.length > 1">
+                Remove
+              </button>
+            </div>
+            <button type="button" class="btn btn-secondary" (click)="addOption()">Add Option</button>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Question</button>
+        </form>
+      </div>
+    </div>
+  
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3>Delete Form</h3>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="deleteForm()">
+          <div class="mb-3">
+            <label for="deleteFormName" class="form-label">Form Name</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="deleteFormName" 
+              [(ngModel)]="deleteFormName" 
+              name="deleteFormName" 
+              placeholder="Enter form name to delete">
+          </div>
+          <button type="submit" class="btn btn-danger">Delete Form</button>
+        </form>
+      </div>
+    </div>
+  
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3>Delete Question</h3>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="deleteQuestion()">
+          <div class="mb-3">
+            <label for="deleteQuestionFormName" class="form-label">Form Name</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="deleteQuestionFormName" 
+              [(ngModel)]="deleteQuestionFormName" 
+              name="deleteQuestionFormName" 
+              placeholder="Enter form name containing the question">
+          </div>
+          <div class="mb-3">
+            <label for="deleteQuestionName" class="form-label">Question Name</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="deleteQuestionName" 
+              [(ngModel)]="deleteQuestionName" 
+              name="deleteQuestionName" 
+              placeholder="Enter question name to delete">
+          </div>
+          <button type="submit" class="btn btn-danger">Delete Question</button>
+        </form>
+      </div>
+    </div>
+  </div>

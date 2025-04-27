@@ -49,6 +49,11 @@ public class UserRepository : IUserInterface
             return new Tuple<ErrorCodes, ProfileDisplayDto?>(ErrorCodes.NotFound, null);
 
         var display = CreateDisplayFromPreferences(user);
+        var roles = await _userManager.GetRolesAsync(user);
+        if (roles != null)
+        {
+            display.isAdmin = roles.Contains("Admin");
+        }
         return new Tuple<ErrorCodes, ProfileDisplayDto?>(ErrorCodes.Ok, display);
     }
     public async Task<ErrorCodes> ChangeUserPreferences(UserPreferences newUserPreferences)
@@ -158,6 +163,7 @@ public class UserRepository : IUserInterface
             DisplayLastName = preferences.DisplayLastName,
             DisplayPhoneNumber = preferences.DisplayPhoneNumber
         };
+        dto.isAdmin = false;
         return dto;
     }
 

@@ -19,7 +19,9 @@ export class UserProfileComponent implements OnInit {
   successMessage: string | null = null;
   loading = true;
   editMode = false;
-  
+
+  isAdmin = false;
+
   // Default user data in case of API failure
   defaultUserData = {
     email: 'user@example.com',
@@ -78,6 +80,7 @@ export class UserProfileComponent implements OnInit {
             displayPhoneNumber: userData.preferences.displayPhoneNumber,
           });
         }
+        this.isAdmin = userData.isAdmin;
         this.loading = false;
       },
       error: (err) => {

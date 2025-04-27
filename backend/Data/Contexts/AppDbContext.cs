@@ -14,8 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<Answer> Answers {get; set;}
     public DbSet<Form> Forms {get; set;}
     public DbSet<Question> Questions {get; set;}
-    public DbSet<OptionForQuestion> OptionsForQuestions {get; set;}  
-
+    public DbSet<OptionForQuestion> OptionsForQuestions {get; set;}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,11 +32,11 @@ public class AppDbContext : DbContext
             j => j.HasOne<Answer>()
                   .WithMany()
                   .HasForeignKey("AnswerId")
-                  .OnDelete(DeleteBehavior.ClientCascade),
+                  .OnDelete(DeleteBehavior.Restrict),
             j => j.HasOne<OptionForQuestion>()
                   .WithMany()
                   .HasForeignKey("OptionForQuestionId")
-                  .OnDelete(DeleteBehavior.ClientCascade),
+                  .OnDelete(DeleteBehavior.Cascade),
             j => 
             {
                 j.HasKey("AnswerId", "OptionForQuestionId");

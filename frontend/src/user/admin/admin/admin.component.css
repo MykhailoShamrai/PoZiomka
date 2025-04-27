@@ -1,0 +1,19 @@
+.container {
+max-width: 800px;
+}
+
+.card-header h3 {
+margin: 0;
+}
+
+.form-check {
+margin-left: 20px;
+}
+
+.input-group .btn-danger {
+margin-left: 5px;
+}
+
+.btn-secondary {
+margin-top: 10px;
+}

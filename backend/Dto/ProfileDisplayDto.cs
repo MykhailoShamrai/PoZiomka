@@ -10,4 +10,5 @@ public class ProfileDisplayDto
     public string? Email { get; set; } = string.Empty;
     public string? PhoneNumber { get; set; } = string.Empty;
     public UserPreferencesDto Preferences { get; set; } = new UserPreferencesDto();
+    public bool isAdmin { get; set; } = false;
 }

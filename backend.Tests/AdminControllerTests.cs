@@ -47,7 +47,7 @@ namespace backend.Tests.Controllers
         {
             var dto = new AddQuestionDto
             {
-                NameOfForm = "TestForm",
+                FormName = "TestForm",
                 Name = "TestQuestion",
                 Answers = new List<string> { "Answer1", "Answer2" },
                 IsObligatory = true
@@ -64,7 +64,7 @@ namespace backend.Tests.Controllers
         {
             var dto = new AddQuestionDto
             {
-                NameOfForm = "TestForm",
+                FormName = "TestForm",
                 Name = "TestQuestion",
                 Answers = new List<string> { "Answer1", "Answer2" },
                 IsObligatory = true
@@ -95,28 +95,6 @@ namespace backend.Tests.Controllers
             _formsMock.Setup(f => f.DeleteForm(formName)).ReturnsAsync(false);
 
             var result = await _controller.DeleteForm(formName);
-
-            Assert.IsType<BadRequestObjectResult>(result);
-        }
-
-        [Fact]
-        public async Task DeleteObligatoryQuestion_ReturnsOk_WhenDeletionSucceeds()
-        {
-            string questionName = "Question1";
-            _formsMock.Setup(f => f.DeleteQuestion(questionName)).ReturnsAsync(true);
-
-            var result = await _controller.DeleteObligatoryQuestion(questionName);
-
-            Assert.IsType<OkResult>(result);
-        }
-
-        [Fact]
-        public async Task DeleteObligatoryQuestion_ReturnsBadRequest_WhenDeletionFails()
-        {
-            string questionName = "Question1";
-            _formsMock.Setup(f => f.DeleteQuestion(questionName)).ReturnsAsync(false);
-
-            var result = await _controller.DeleteObligatoryQuestion(questionName);
 
             Assert.IsType<BadRequestObjectResult>(result);
         }

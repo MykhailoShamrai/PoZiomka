@@ -29,7 +29,7 @@ public class FormService : IFormsInterface
 
     public async Task<bool> AddNewObligatoryQuestionToForm(AddQuestionDto dto)
     {
-        var form = await FindFormWithQuestions(dto.NameOfForm);
+        var form = await FindFormWithQuestions(dto.FormName);
         if (form is null)
             throw new ArgumentException("There is no form with provided name!");
         var tmpQuestion = new Question
@@ -68,13 +68,23 @@ public class FormService : IFormsInterface
     }
 
 
-    public async Task<bool> DeleteQuestion(string question)
+    public async Task<bool> DeleteQuestion(DeleteQuestionDto deleteQuestionDto)
     {
-        var tmpQuestion = await FindQuestionWithAnswers(question);
-        if (tmpQuestion is null)
-            throw new ArgumentException("There is no question with such name!");
+        var form = await _appDbContext.Forms
+            .Include(f => f.Questions)
+            .ThenInclude(q => q.Options)
+            .FirstOrDefaultAsync(f => f.NameOfForm == deleteQuestionDto.FormName);
+
+        if (form == null)
+            throw new ArgumentException("There is no form with such name!");
+
+        var tmpQuestion = form.Questions.FirstOrDefault(q => q.Name == deleteQuestionDto.QuestionName);
+        if (tmpQuestion == null)
+            throw new ArgumentException("There is no question with such name in the specified form!");
+
         _appDbContext.OptionsForQuestions.RemoveRange(tmpQuestion.Options);
-        _appDbContext.Questions.Remove(tmpQuestion);
+        form.Questions.Remove(tmpQuestion);
+
         var res = await _appDbContext.SaveChangesAsync();
         return res > 0;
     }
