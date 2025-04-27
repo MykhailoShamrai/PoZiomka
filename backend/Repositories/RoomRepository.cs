@@ -2,6 +2,9 @@ using backend.Data;
 using backend.Dto;
 using backend.Interfaces;
 using backend.Mappers;
+using backend.Models.User;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repositories;
@@ -9,9 +12,11 @@ namespace backend.Repositories;
 public class RoomRepository : IRoomInterface
 {
     private readonly AppDbContext _appDbContext;
-    public RoomRepository(AppDbContext appDbContext)
+    private readonly UserManager<User> _userManager;
+    public RoomRepository(AppDbContext appDbContext, UserManager<User> userManager)
     {
         _appDbContext = appDbContext;
+        _userManager = userManager;
     }
     public async Task<ErrorCodes> AddRoom(RoomInDto dto)
     {
@@ -45,12 +50,18 @@ public class RoomRepository : IRoomInterface
         }
     }
 
-    public Task<ErrorCodes> ChangeStatusForRoom(RoomStatus status, int roomId)
+    public async Task<ErrorCodes> ChangeStatusForRoom(SetStatusToRoomDto dto)
     {
-        throw new NotImplementedException();
+        var room = await _appDbContext.Rooms.FindAsync(dto.RoomId);
+        if (room is null)
+            return ErrorCodes.NotFound;
+        room.Status = dto.Status;
+        var res = await _appDbContext.SaveChangesAsync();
+        if (res > 0)
+            return ErrorCodes.Ok;
+        return ErrorCodes.BadRequest;
     }
-
-
+    
     public async Task<Tuple<List<RoomOutDto>, ErrorCodes>> GetRooms()
     {
         List<Room> rooms = await _appDbContext.Rooms.ToListAsync();
@@ -60,8 +71,58 @@ public class RoomRepository : IRoomInterface
         return new Tuple<List<RoomOutDto>, ErrorCodes>(resList, ErrorCodes.Ok);
     }
 
-    public Task<List<int>> GetUserIdsFromRoom(int roomId)
+    public async Task<ErrorCodes> ApplyUserToRoom(UserRoomDto dto)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByEmailAsync(dto.UserEmail);
+        if (user is null)
+            return ErrorCodes.NotFound;
+        
+        var room = await _appDbContext.Rooms.FindAsync(dto.RoomId);
+        if (room is null)
+            return ErrorCodes.NotFound;
+
+        if (room.ResidentsIds.Count < room.Capacity)     
+        {    
+            if (!room.ResidentsIds.Contains(user.Id))
+                room.ResidentsIds.Add(user.Id);
+        }
+        else
+            return ErrorCodes.BadRequest;
+
+
+        if (room.ResidentsIds.Count == room.Capacity)
+            room.Status = RoomStatus.Unavailable;
+
+        var roomWhereUserLives = await _appDbContext.Rooms.Where(r => r.ResidentsIds.Contains(user.Id) && r.Id != dto.RoomId).FirstOrDefaultAsync();
+
+        if (roomWhereUserLives is not null)
+        {
+            roomWhereUserLives.ResidentsIds.Remove(user.Id);
+            if (roomWhereUserLives.Capacity == roomWhereUserLives.ResidentsIds.Count + 1)
+                roomWhereUserLives.Status = RoomStatus.Available;
+        }
+        var res = await _appDbContext.SaveChangesAsync();
+        return ErrorCodes.Ok;
+    }
+
+    public async Task<ErrorCodes> RemoveUserFromRoom(UserRoomDto dto)
+    {
+        var user = await _userManager.FindByEmailAsync(dto.UserEmail);
+        if (user is null)
+            return ErrorCodes.NotFound;
+
+        var room = await _appDbContext.Rooms.Where(r => r.Id == dto.RoomId && r.ResidentsIds.Contains(user.Id)).FirstOrDefaultAsync();
+        if (room is null)
+            return ErrorCodes.NotFound;
+        
+        room.ResidentsIds.Remove(user.Id);
+
+        if (room.Capacity == room.ResidentsIds.Count + 1)
+            room.Status = RoomStatus.Available;
+
+        var res = await _appDbContext.SaveChangesAsync();
+        if (res > 0)
+            return ErrorCodes.Ok;
+        return ErrorCodes.BadRequest;
     }
 }

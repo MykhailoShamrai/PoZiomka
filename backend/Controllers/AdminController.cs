@@ -171,4 +171,54 @@ public class AdminController: ControllerBase
         return BadRequest("Something went wrong in getting information about rooms!");
     }
 
+    [HttpPut]
+    [Route("set_status_to_room")]
+    public async Task<IActionResult> SetStatusToRoom([FromBody] SetStatusToRoomDto dto)
+    {
+        var res = await _roomInterface.ChangeStatusForRoom(dto);
+        switch (res)
+        {
+            case ErrorCodes.Ok:
+                return Ok();
+            case ErrorCodes.NotFound:
+                return NotFound("There is no room with such address");
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong while changing status to room!");
+        }
+        return BadRequest("Something went wrong while changing status to room!");
+    }   
+
+    [HttpPut]
+    [Route("add_user_to_room")]
+    public async Task<IActionResult> AddUserToRoom([FromBody] UserRoomDto dto)
+    {
+        var res = await _roomInterface.ApplyUserToRoom(dto);
+        switch (res)
+        {
+            case ErrorCodes.Ok:
+                return Ok();
+            case ErrorCodes.NotFound:
+                return NotFound("There is no user or room provided in request!");
+            case ErrorCodes.BadRequest:
+                return BadRequest("Capacity of a room is not enough!");
+        }
+        return BadRequest("Something went wrong while adding user to room!");
+    }
+
+    [HttpPut]
+    [Route("remove_user_from_room")]
+    public async Task<IActionResult> RemoveUserFromRoom([FromBody] UserRoomDto dto)
+    {
+        var res = await _roomInterface.RemoveUserFromRoom(dto);
+        switch (res)
+        {
+            case ErrorCodes.Ok:
+                return Ok();
+            case ErrorCodes.NotFound:
+                return NotFound("There is no such user or such room!");
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong while changing in database!");
+        }
+        return BadRequest("Something went wrong while removing user from a room!");
+    }
 }
