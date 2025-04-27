@@ -10,5 +10,4 @@ public interface IRoomInterface
     public Task<ErrorCodes> ChangeStatusForRoom(SetStatusToRoomDto dto);
     public Task<ErrorCodes> ApplyUserToRoom(UserRoomDto dto);
     public Task<ErrorCodes> RemoveUserFromRoom(UserRoomDto dto);
-    public Task<List<int>> GetUserIdsFromRoom(int roomId);
 }
