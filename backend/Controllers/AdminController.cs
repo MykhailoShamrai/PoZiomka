@@ -126,9 +126,9 @@ public class AdminController: ControllerBase
 
     [HttpPost]
     [Route("add_new_room")]
-    public async Task<IActionResult> AddNewRoom([FromBody] RoomInDto dto)
+    public async Task<IActionResult> AddNewRoom([FromBody] List<RoomInDto> dtos)
     {
-        var res = await _roomInterface.AddRoom(dto);
+        var res = await _roomInterface.AddRoom(dtos);
         switch (res)
         {
             case ErrorCodes.Ok:

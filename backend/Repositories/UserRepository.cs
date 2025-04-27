@@ -6,17 +6,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace backend.Repositories;
 
-public enum ErrorCodes
-{
-    NotFound,
-    CannotRetrieveUserFromCookie,
-    UpdateUserDbFailed,
-    Forbidden,
-    Ok,
-    Unauthorized,
-    BadRequest
-}
-
 public class UserRepository : IUserInterface
 {
     private readonly UserManager<User> _userManager;

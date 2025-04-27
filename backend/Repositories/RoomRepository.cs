@@ -18,14 +18,17 @@ public class RoomRepository : IRoomInterface
         _appDbContext = appDbContext;
         _userManager = userManager;
     }
-    public async Task<ErrorCodes> AddRoom(RoomInDto dto)
+    public async Task<ErrorCodes> AddRoom(List<RoomInDto> dtos)
     {
-        Room newRoom = dto.RoomInDtoToRoom();
-        _appDbContext.Rooms.Add(newRoom);
-        var res = await _appDbContext.SaveChangesAsync();
-        if (res > 0)
-            return ErrorCodes.Ok;
-        return ErrorCodes.BadRequest;
+        foreach (var dto in dtos)
+        {
+            Room newRoom = dto.RoomInDtoToRoom();
+            _appDbContext.Rooms.Add(newRoom);
+            var res = await _appDbContext.SaveChangesAsync();
+            if (res < 0)
+                return ErrorCodes.BadRequest;
+        }
+        return ErrorCodes.Ok;
     }
 
     private async Task<Room?> FindRoomFromNumberAndFloor(int floor, int number)
