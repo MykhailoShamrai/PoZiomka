@@ -81,8 +81,14 @@ public class RoomRepository : IRoomInterface
         if (room is null)
             return ErrorCodes.NotFound;
 
-        if (room.ResidentsIds.Count < room.Capacity && !room.ResidentsIds.Contains(user.Id)) 
-            room.ResidentsIds.Add(user.Id);
+        if (room.ResidentsIds.Count < room.Capacity)     
+        {    
+            if (!room.ResidentsIds.Contains(user.Id))
+                room.ResidentsIds.Add(user.Id);
+        }
+        else
+            return ErrorCodes.BadRequest;
+
 
         if (room.ResidentsIds.Count == room.Capacity)
             room.Status = RoomStatus.Unavailable;
@@ -90,7 +96,11 @@ public class RoomRepository : IRoomInterface
         var roomWhereUserLives = await _appDbContext.Rooms.Where(r => r.ResidentsIds.Contains(user.Id) && r.Id != dto.RoomId).FirstOrDefaultAsync();
 
         if (roomWhereUserLives is not null)
+        {
             roomWhereUserLives.ResidentsIds.Remove(user.Id);
+            if (roomWhereUserLives.Capacity == roomWhereUserLives.ResidentsIds.Count + 1)
+                roomWhereUserLives.Status = RoomStatus.Available;
+        }
         var res = await _appDbContext.SaveChangesAsync();
         return ErrorCodes.Ok;
     }
