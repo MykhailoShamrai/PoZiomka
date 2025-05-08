@@ -1,0 +1,80 @@
+.application-container {
+max-width: 600px;
+margin: 20px auto;
+padding: 20px;
+background-color: #f9f9f9;
+border-radius: 8px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+color: #333;
+margin-bottom: 20px;
+text-align: center;
+}
+
+.form-group {
+margin-bottom: 20px;
+}
+
+label {
+display: block;
+margin-bottom: 8px;
+font-weight: 500;
+color: #555;
+}
+
+textarea {
+width: 100%;
+padding: 12px;
+border: 1px solid #ddd;
+border-radius: 4px;
+resize: vertical;
+font-family: inherit;
+font-size: 16px;
+}
+
+textarea:focus {
+outline: none;
+border-color: #4a90e2;
+box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.submit-button {
+background-color: #4a90e2;
+color: white;
+border: none;
+padding: 12px 20px;
+border-radius: 4px;
+cursor: pointer;
+font-size: 16px;
+font-weight: 500;
+transition: background-color 0.2s;
+}
+
+.submit-button:hover:not(:disabled) {
+background-color: #3a7bc8;
+}
+
+.submit-button:disabled {
+background-color: #a0a0a0;
+cursor: not-allowed;
+}
+
+.success-message {
+margin-top: 16px;
+padding: 12px;
+background-color: #e6f7e6;
+color: #2e7d32;
+border-radius: 4px;
+text-align: center;
+}
+
+.error-message {
+margin-top: 16px;
+padding: 12px;
+background-color: #ffebee;
+color: #c62828;
+border-radius: 4px;
+text-align: center;
+}

@@ -1,0 +1,31 @@
+<div class="application-container">
+    <h2>Submit Your Question/Application</h2>
+    
+    <div class="form-group">
+      <label for="applicationText">Your question or application:</label>
+      <textarea 
+        id="applicationText" 
+        rows="6" 
+        [(ngModel)]="applicationText" 
+        placeholder="Type your question or application here..."
+        [disabled]="isSubmitting"
+      ></textarea>
+    </div>
+    
+    <button 
+      (click)="submitApplication()" 
+      [disabled]="isSubmitting || !applicationText.trim()"
+      class="submit-button"
+    >
+      {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+    </button>
+    
+    <div *ngIf="submitSuccess" class="success-message">
+      Your application has been submitted successfully!
+    </div>
+    
+    <div *ngIf="submitError" class="error-message">
+      {{ submitError }}
+    </div>
+  </div>
+  
