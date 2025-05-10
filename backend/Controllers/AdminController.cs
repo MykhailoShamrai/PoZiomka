@@ -14,14 +14,16 @@ public class AdminController: ControllerBase
     private readonly IFormsInterface _formsInterface;
     private readonly IAdminInterface _adminInterface;
     private readonly IRoomInterface _roomInterface;
-
+    private readonly IProposalInterface _proposalInterface;
     public AdminController(IFormsInterface formsInterface,
                             IAdminInterface adminInterface,
-                            IRoomInterface roomInterface)
+                            IRoomInterface roomInterface,
+                            IProposalInterface proposalInterface)
     {
         _formsInterface = formsInterface;
         _adminInterface = adminInterface;
         _roomInterface = roomInterface;
+        _proposalInterface = proposalInterface;
     }
 
     [HttpPost]
@@ -220,5 +222,41 @@ public class AdminController: ControllerBase
                 return BadRequest("Something went wrong while changing in database!");
         }
         return BadRequest("Something went wrong while removing user from a room!");
+    }
+
+    [HttpPost]
+    [Route("add_test_proposal")]
+    public async Task<IActionResult> AddTestProposal([FromBody] ProposalInDto dto)
+    {
+        var res = await _proposalInterface.AddTestProposal(dto);
+        
+        switch (res)
+        {
+            case ErrorCodes.Ok:
+                return Ok();
+            case ErrorCodes.NotFound:
+                return NotFound("There is no such room in database!");
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong while changing in database!");
+        }
+        return BadRequest("Something went wrong while removing user from a room!");
+    }
+
+    [HttpGet]
+    [Route("get_all_proposals")]
+    public async Task<IActionResult> GetAllProposals()
+    {
+        var res = await _proposalInterface.ReturnAllProposals();
+
+        switch(res.Item2)
+        {
+            case ErrorCodes.Ok:
+                return Ok(res.Item1);
+            case ErrorCodes.NotFound:
+                return NotFound("There are no any proposals in database");
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong fetching data about proposals!");
+        }
+        return BadRequest("Something went wrong fetching data about proposals!");
     }
 }
