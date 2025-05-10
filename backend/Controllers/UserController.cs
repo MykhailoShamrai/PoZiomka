@@ -13,10 +13,12 @@ using Microsoft.EntityFrameworkCore;
 public class UserController : ControllerBase
 {
     private readonly IUserInterface _userRepository;
+    private readonly IProposalInterface _proposalInterface;
 
-    public UserController(IUserInterface userInterface)
+    public UserController(IUserInterface userInterface, IProposalInterface proposalInterface)
     {
         _userRepository = userInterface;
+        _proposalInterface = proposalInterface;
     }
 
     [HttpPost]
@@ -115,5 +117,23 @@ public class UserController : ControllerBase
             default:
                 throw new KeyNotFoundException();    
         }
+    }
+
+    [HttpGet]
+    [Authorize]
+    [Route("get_my_proposals")]
+    public async Task<IActionResult> GetMyProposals()
+    {
+        var (list, errorCode) = await _proposalInterface.ReturnUsersProposals();
+        switch(errorCode)
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong while fethcing information about proposals!");
+            case ErrorCodes.Ok:
+                return Ok(list);
+        }
+        return BadRequest("Something went wrong while fethcing information about proposals!");
     }
 }
