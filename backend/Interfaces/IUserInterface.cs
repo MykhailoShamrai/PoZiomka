@@ -14,4 +14,5 @@ public interface IUserInterface
     public Task<(ErrorCodes, FormDto[]?)> GetUserForms();
 
     public Task<ErrorCodes> SubmitAnswerForForms(AnswerDto dto);
+    public Task<(ErrorCodes, Communication[]?)> GetCurrentUserCommunications();
 }

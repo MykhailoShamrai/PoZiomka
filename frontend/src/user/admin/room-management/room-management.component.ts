@@ -30,6 +30,11 @@ interface NewRoom {
   status: RoomStatus;
 }
 
+interface ChangeRoomStatusRequest {
+  roomId: number;
+  status: RoomStatus;
+}
+
 @Component({
   selector: 'app-room-management',
   standalone: true,
@@ -60,6 +65,10 @@ export class RoomManagementComponent implements OnInit {
   
   // Room to delete
   roomToDelete: Room | null = null;
+  
+  // Room to change status
+  roomToChangeStatus: Room | null = null;
+  newStatus: RoomStatus = RoomStatus.Available;
   
   // Status options for display
   roomStatuses = [
@@ -235,6 +244,44 @@ export class RoomManagementComponent implements OnInit {
     });
   }
 
+  changeRoomStatus(): void {
+    if (!this.roomToChangeStatus) return;
+    
+    this.loading = true;
+    this.errorMessage = null;
+    this.successMessage = null;
+    
+    const request: ChangeRoomStatusRequest = {
+      roomId: this.roomToChangeStatus.id,
+      status: this.newStatus
+    };
+    
+    this.http.put(`${environment.apiUrl}Admin/set_status_to_room`, request)
+      .subscribe({
+        next: () => {
+          this.successMessage = `Status for Room ${this.roomToChangeStatus?.number} changed to ${this.getRoomStatusText(this.newStatus)}.`;
+          this.roomToChangeStatus = null;
+          // Reload rooms
+          this.loadRooms();
+        },
+        error: (err) => {
+          console.error('Error changing room status:', err);
+          this.errorMessage = 'Failed to change room status. Please try again.';
+          this.loading = false;
+          this.roomToChangeStatus = null;
+        }
+      });
+  }
+  
+  confirmChangeStatus(room: Room): void {
+    this.roomToChangeStatus = room;
+    this.newStatus = room.status;
+  }
+  
+  cancelChangeStatus(): void {
+    this.roomToChangeStatus = null;
+  }
+  
   logout(): void {
     this.authService.logout();
   }

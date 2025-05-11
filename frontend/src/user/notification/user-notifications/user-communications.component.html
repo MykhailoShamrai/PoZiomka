@@ -1,0 +1,19 @@
+<div class="container p-4">
+  <h2 class="h2 fw-bold mb-4 text-dark">Your Communications</h2>
+  <div *ngIf="communications.length === 0" class="text-muted">
+    No communications available.
+  </div>
+  <ul class="list-unstyled">
+    <li *ngFor="let communication of communications"
+        class="d-flex align-items-center p-3 bg-light rounded shadow-sm mb-3">
+      <span [ngClass]="{
+        'd-flex align-items-center justify-content-center text-white fw-bold rounded-circle me-3': true,
+        'bg-success': communication.type === 0,
+        'bg-danger': communication.type === 1
+      }" style="width: 24px; height: 24px;">
+        {{ communication.type === 0 ? '✓' : '✗' }}
+      </span>
+      <span class="text-dark">{{ communication.description }}</span>
+    </li>
+  </ul>
+</div>

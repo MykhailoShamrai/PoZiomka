@@ -41,7 +41,8 @@ public class UserRepositoryTests
         _repository = new UserRepository(
             _userManagerMock.Object,
             _formServiceMock.Object,
-            _httpContextAccessorMock.Object
+            _httpContextAccessorMock.Object,
+            _dbContextMock.Object
         );
     }
 

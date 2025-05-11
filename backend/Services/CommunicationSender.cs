@@ -1,10 +1,30 @@
-using backend.Models.User;
+using System.ComponentModel;
+using backend.Data;
+using backend.Models.Communications;
 
 public class CommunicationSender
 {
-    public void SendCommunication(Communication communication, List<User> users)
+    private AppDbContext _appDbContext;
+
+    public CommunicationSender(
+        AppDbContext appDbContext
+    )
     {
-        // Implementacja wysyłania powiadomień do użytkowników
-        throw new NotImplementedException();
+        _appDbContext = appDbContext;
+    }
+
+
+    public void CreateCommunication(CreateCommunicationRequest req, List<int> usersIds)
+    {
+        foreach (var userId in usersIds)
+            _appDbContext
+                .Communications
+                .Add(new Communication
+                    {
+                        Type = req.Type,
+                        Description = req.Description,
+                        UserId = userId
+                    }
+                );
     }
 }
