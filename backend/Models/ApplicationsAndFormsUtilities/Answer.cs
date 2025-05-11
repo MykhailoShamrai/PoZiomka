@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 public class Answer
 {
     public int AnswerId { get; set; }
