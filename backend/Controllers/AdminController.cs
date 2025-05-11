@@ -3,6 +3,7 @@ using backend.Dto;
 using backend.Interfaces;
 using backend.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
@@ -258,5 +259,25 @@ public class AdminController: ControllerBase
                 return BadRequest("Something went wrong fetching data about proposals!");
         }
         return BadRequest("Something went wrong fetching data about proposals!");
+    }
+
+    [HttpPut]
+    [Route("change_admin_status")]
+    public async Task<IActionResult> ChangeAdminStatus([FromBody] AdminChangesStatusProposalDto dto)
+    {
+        var res = await _proposalInterface.AdminChangesStatusTheProposal(dto);
+
+        switch(res)
+        {
+            case ErrorCodes.Ok:
+                return Ok();
+            case ErrorCodes.NotFound:
+                return NotFound("There is no such a proposal!");
+            case ErrorCodes.BadArgument:
+                return BadRequest("Status of proposal isn't proper for changing it!");
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong while changing data in database!");
+        }
+        return BadRequest("Something went wrong while changing data about proposal!");
     }
 }

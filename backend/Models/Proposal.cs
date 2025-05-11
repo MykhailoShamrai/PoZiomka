@@ -8,6 +8,7 @@ public class Proposal
     public required List<SingleStudentStatus> Statuses { get; set; } = new List<SingleStudentStatus>();
     public AdminStatus AdminStatus {get; set; } = AdminStatus.Unavailable;
     public DateTime Timestamp { get; set; } = DateTime.Now.Date;
+    public StatusOfProposal WholeStatus { get; set; } = StatusOfProposal.WaitingForRoommates;
 }
 
 public enum SingleStudentStatus
@@ -23,4 +24,13 @@ public enum AdminStatus
     Rejected,
     Pending,
     Unavailable
+}
+
+public enum StatusOfProposal
+{
+    WaitingForRoommates,
+    AcceptedByRoommates,
+    RejectedByOneOrMoreUsers,
+    AcceptedByAdmin,
+    RejectedByAdmin
 }

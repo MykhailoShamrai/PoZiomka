@@ -1,4 +1,6 @@
+using System.Dynamic;
 using System.Security.Claims;
+using System.Xml;
 using backend.Data;
 using backend.Dto;
 using backend.Interfaces;
@@ -62,7 +64,8 @@ public class ProposalRepository : IProposalInterface
             Roommates = roommates,
             Statuses = proposal.Statuses,
             AdminStatus = proposal.AdminStatus,
-            Timestamp = proposal.Timestamp
+            Timestamp = proposal.Timestamp,
+            StatusOfProposal = proposal.WholeStatus
         };
     }
 
@@ -82,7 +85,7 @@ public class ProposalRepository : IProposalInterface
             Id = proposal.Id,
             Room = proposal.Room.RoomToRoomOutDto(),
             Roommates = roommates,
-            AdminStatus = proposal.AdminStatus,
+            StatusOfProposal = proposal.WholeStatus,
             Timestamp = proposal.Timestamp
         };
     }
@@ -118,5 +121,94 @@ public class ProposalRepository : IProposalInterface
             return new Tuple<List<ProposalUserOutDto>, ErrorCodes>(new List<ProposalUserOutDto>(), ErrorCodes.BadRequest);
         
         return new Tuple<List<ProposalUserOutDto>, ErrorCodes>(proposalDtos.ToList(), ErrorCodes.Ok);
+    }
+
+    public async Task<ErrorCodes> UserAnswersTheProposal(UserChangesStatusProposalDto dto)
+    {
+        var proposal = await _appDbContext.Proposals.Where(p => p.Id == dto.ProposalId).FirstOrDefaultAsync();
+
+        if (proposal is null)
+            return ErrorCodes.NotFound;
+        
+        var email = _httpContextAccessor.HttpContext?.User?.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.Email);
+        
+        if (email is null)
+            return ErrorCodes.Unauthorized;
+        
+        var email_val = email?.Value;
+        if (email_val is null)
+            return ErrorCodes.Unauthorized;
+
+        var currentUser = await _userManager.FindByEmailAsync(email_val);
+
+        if (currentUser is null)
+            return ErrorCodes.Unauthorized;
+        
+        int index = proposal.RoommatesIds.FindIndex(rm => rm == currentUser.Id);
+        if (index < 0)
+            return ErrorCodes.BadArgument;
+        proposal.Statuses[index] = dto.Status;
+
+        // Place for notification
+        if (dto.Status == SingleStudentStatus.Rejected)
+        {
+            proposal.WholeStatus = StatusOfProposal.RejectedByOneOrMoreUsers;
+            proposal.AdminStatus = AdminStatus.Pending;
+        }
+        else if(CheckIfAllRoommatesAgree(proposal))
+        {
+            proposal.WholeStatus = StatusOfProposal.AcceptedByRoommates;
+            proposal.AdminStatus = AdminStatus.Pending;
+        }
+
+        var res = await _appDbContext.SaveChangesAsync();
+        if (res > 0)
+            return ErrorCodes.Ok;
+        return ErrorCodes.BadRequest;
+    }
+
+    private bool CheckIfAllRoommatesAgree(Proposal proposal)
+    {
+        bool areAllAgreed = true;
+        foreach (var status in proposal.Statuses)
+        {
+            if (status != SingleStudentStatus.Accepted)
+            {
+                areAllAgreed = false;
+                break;
+            }
+        }
+        return areAllAgreed;
+    }
+
+    
+    public async Task<ErrorCodes> AdminChangesStatusTheProposal(AdminChangesStatusProposalDto dto)
+    {
+        var proposal = await _appDbContext.Proposals.Where(p => p.Id == dto.ProposalId).FirstOrDefaultAsync();
+
+        if (proposal is null)
+            return ErrorCodes.NotFound;
+        
+        if (proposal.AdminStatus != AdminStatus.Pending)
+            return ErrorCodes.BadArgument;
+        
+        if (dto.Status == AdminStatus.Accepted)
+        {
+            proposal.WholeStatus = StatusOfProposal.AcceptedByAdmin;
+            // Place for changing status for all roommate, changing status of room and 
+            // Making all proposals fot that room unavailable
+            
+        }
+        else if (dto.Status == AdminStatus.Rejected)
+        {
+            proposal.WholeStatus = StatusOfProposal.RejectedByAdmin;
+        }
+        proposal.AdminStatus = dto.Status;
+
+        var res = await _appDbContext.SaveChangesAsync();
+        if (res > 0)
+            return ErrorCodes.Ok;
+        return ErrorCodes.BadRequest;
     }
 }
