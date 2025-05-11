@@ -69,11 +69,15 @@ public class ProposalRepository : IProposalInterface
         };
     }
 
-    public async Task<ProposalUserOutDto> ProposalToUserDto(Proposal proposal)
+    public async Task<ProposalUserOutDto> ProposalToUserDto(Proposal proposal, int userId)
     {
         var roommates = new List<UserDto>();
-        foreach (var id in proposal.RoommatesIds)
+        int k = 0;
+        for (int i = 0; i < proposal.RoommatesIds.Count; i++)//(var id in proposal.RoommatesIds)
         {
+            var id = proposal.RoommatesIds[i];
+            if (id == userId)
+                k = i;
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user != null)
             {
@@ -86,7 +90,8 @@ public class ProposalRepository : IProposalInterface
             Room = proposal.Room.RoomToRoomOutDto(),
             Roommates = roommates,
             StatusOfProposal = proposal.WholeStatus,
-            Timestamp = proposal.Timestamp
+            Timestamp = proposal.Timestamp,
+            StatusForUser = proposal.Statuses[k]
         };
     }
 
@@ -116,15 +121,18 @@ public class ProposalRepository : IProposalInterface
         if (currentUser is null)
             return new Tuple<List<ProposalUserOutDto>, ErrorCodes>(new List<ProposalUserOutDto>(), ErrorCodes.Unauthorized);
         
-        var proposals = await _appDbContext.Proposals.Where(p => p.RoommatesIds.Contains(currentUser.Id)).Include(p => p.Room).ToListAsync();
+        var proposals = await _appDbContext.Proposals
+            .Where(p => p.RoommatesIds.Contains(currentUser.Id) && p.WholeStatus == StatusOfProposal.WaitingForRoommates)
+            .Include(p => p.Room).ToListAsync();
         if (currentUser is null)
             return new Tuple<List<ProposalUserOutDto>, ErrorCodes>(new List<ProposalUserOutDto>(), ErrorCodes.BadRequest);
         
         var proposalDtos = new List<ProposalUserOutDto>();
         foreach (var p in proposals)
         {
-                proposalDtos.Add(await ProposalToUserDto(p));
+                proposalDtos.Add(await ProposalToUserDto(p, currentUser.Id));
         } 
+
         if (proposalDtos is null)
             return new Tuple<List<ProposalUserOutDto>, ErrorCodes>(new List<ProposalUserOutDto>(), ErrorCodes.BadRequest);
         
@@ -193,7 +201,7 @@ public class ProposalRepository : IProposalInterface
     
     public async Task<ErrorCodes> AdminChangesStatusTheProposal(AdminChangesStatusProposalDto dto)
     {
-        var proposal = await _appDbContext.Proposals.Where(p => p.Id == dto.ProposalId).FirstOrDefaultAsync();
+        var proposal = await _appDbContext.Proposals.Include(p => p.Room).Where(p => p.Id == dto.ProposalId).FirstOrDefaultAsync();
 
         if (proposal is null)
             return ErrorCodes.NotFound;
@@ -206,7 +214,19 @@ public class ProposalRepository : IProposalInterface
             proposal.WholeStatus = StatusOfProposal.AcceptedByAdmin;
             // Place for changing status for all roommate, changing status of room and 
             // Making all proposals fot that room unavailable
-            
+            var users = await _userManager.Users.Where(u => proposal.RoommatesIds.Contains(u.Id)).ToListAsync();
+            foreach (var u in users)
+            {
+                u.StudentStatus = StudentStatus.Confirmed;
+            }
+            var proposals = await _appDbContext.Proposals.Include(p => p.Room)
+                .Where(p => p.Room.Id == proposal.Room.Id && p.WholeStatus == StatusOfProposal.WaitingForRoommates && p.Id != proposal.Id)
+                .ToListAsync();
+            foreach (var p in proposals)
+            {
+                p.AdminStatus = AdminStatus.Unavailable;
+                p.WholeStatus = StatusOfProposal.Unavailable;
+            }
         }
         else if (dto.Status == AdminStatus.Rejected)
         {

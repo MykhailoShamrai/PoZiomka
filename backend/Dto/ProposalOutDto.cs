@@ -18,4 +18,5 @@ public class ProposalUserOutDto
     public required List<UserDto> Roommates { get; set; }
     public StatusOfProposal StatusOfProposal { get; set; }
     public DateTime Timestamp { get; set; }
+    public SingleStudentStatus StatusForUser { get; set; }
 }

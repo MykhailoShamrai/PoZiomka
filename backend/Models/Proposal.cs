@@ -32,5 +32,6 @@ public enum StatusOfProposal
     AcceptedByRoommates,
     RejectedByOneOrMoreUsers,
     AcceptedByAdmin,
-    RejectedByAdmin
+    RejectedByAdmin,
+    Unavailable
 }
