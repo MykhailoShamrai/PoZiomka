@@ -12,6 +12,7 @@ namespace backend.Tests.Controllers
         private readonly Mock<IAdminInterface> _adminMock;
         private readonly Mock<IRoomInterface> _roomsMock;
         private readonly Mock<IProposalInterface> _proposalMock;
+        private readonly Mock<IJudgeInterface> _judgeMock;
         private readonly AdminController _controller;
 
         public AdminControllerTests()
@@ -20,7 +21,8 @@ namespace backend.Tests.Controllers
             _adminMock = new Mock<IAdminInterface>();
             _roomsMock = new Mock<IRoomInterface>();
             _proposalMock = new Mock<IProposalInterface>();
-            _controller = new AdminController(_formsMock.Object, _adminMock.Object, _roomsMock.Object, _proposalMock.Object);
+            _judgeMock = new Mock<IJudgeInterface>();
+            _controller = new AdminController(_formsMock.Object, _adminMock.Object, _roomsMock.Object, _proposalMock.Object, _judgeMock.Object);
         }
 
         [Fact]
