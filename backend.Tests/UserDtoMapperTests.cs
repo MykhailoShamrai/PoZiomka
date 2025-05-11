@@ -1,7 +1,5 @@
-using backend.Dto;
 using backend.Mappers;
-using backend.Models.User; // User
-using Xunit;
+using backend.Models.User;
 
 public class UserDtoMapperTests
 {

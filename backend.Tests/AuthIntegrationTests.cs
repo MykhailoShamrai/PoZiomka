@@ -18,13 +18,11 @@ namespace backend.Tests
             {
                 builder.ConfigureServices(services =>
                 {
-                    // Usuwamy oryginalny DbContext
                     var descriptor = services.SingleOrDefault(
                         d => d.ServiceType == typeof(DbContextOptions<AuthDbContext>));
                     if (descriptor != null)
                         services.Remove(descriptor);
 
-                    // Dodajemy in-memory DB dla AuthDbContext
                     services.AddDbContext<AuthDbContext>(options =>
                         options.UseInMemoryDatabase("TestDb_1"));
                 });
@@ -37,7 +35,6 @@ namespace backend.Tests
         [Fact]
         public async Task Register_Then_Login_ShouldReturnOk()
         {
-            // Register
             var registerDto = new RegisterUserDto
             {
                 Email = "admin@example.com",
@@ -47,7 +44,6 @@ namespace backend.Tests
             var regRes = await _client.PostAsJsonAsync("/api/Auth/register", registerDto);
             Assert.Equal(HttpStatusCode.OK, regRes.StatusCode);
 
-            // Login
             var loginDto = new LoginUserDto
             {
                 Email = "admin@example.com",

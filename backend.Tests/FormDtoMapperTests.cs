@@ -1,17 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using backend.Mappers;
-using backend.Models;    // Form, Question, OptionForQuestion
 using backend.Dto;
-using Xunit;
 
 public class FormDtoMapperTests
 {
     [Fact]
     public void DtoToForm_CreatesCorrectForm_ForValidInput()
     {
-        // Arrange
         var dto = new FormCreateDto
         {
             FormName = "F1",
@@ -21,10 +15,8 @@ public class FormDtoMapperTests
             Options = new[] { "A1", "A2", "B1" }.ToList()
         };
 
-        // Act
         var form = dto.DtoToForm();
 
-        // Assert
         Assert.Equal("F1", form.NameOfForm);
         Assert.Equal(2, form.Questions.Count);
         Assert.Equal("Q1", form.Questions[0].Name);
@@ -41,7 +33,7 @@ public class FormDtoMapperTests
         {
             FormName = "X",
             Questions = new[] { "Q1" }.ToList(),
-            NumberOfOptions = new[] { 1, 2 }.ToList(),    // różne długości
+            NumberOfOptions = new[] { 1, 2 }.ToList(),
             Obligatoriness = new[] { true, false }.ToList(),
             Options = new[] { "A" }.ToList()
         };
@@ -52,7 +44,6 @@ public class FormDtoMapperTests
     [Fact]
     public void CheckIfNumberOfAnswersIsSameAsDeclared_WorksCorrectly()
     {
-        // suma 1+2 = 3, lista długości 3 zwraca true
         Assert.True(FormDtoMapper
             .CheckIfNumberOfAnswersIsSameAsDeclared(new[] { 1, 2 }, new[] { "a", "b", "c" }));
         Assert.False(FormDtoMapper

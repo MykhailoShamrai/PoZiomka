@@ -1,7 +1,4 @@
 using backend.Dto;
-using backend.Mappers;
-using backend.Models; // Room
-using Xunit;
 
 public class RoomInDtoMapperTests
 {

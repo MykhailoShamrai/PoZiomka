@@ -1,8 +1,4 @@
-using backend.Dto;
 using backend.Mappers;
-using backend.Models; // Room
-using System.Collections.Generic;
-using Xunit;
 
 public class RoomOutDtoMapperTests
 {
@@ -27,6 +23,6 @@ public class RoomOutDtoMapperTests
         Assert.Equal(3, dto.Capacity);
         Assert.Equal(RoomStatus.Available, dto.Status);
         Assert.Equal(new List<int> { 10, 20 }, dto.ResidentsIds);
-        Assert.Equal(1, dto.FreePlaces);  // 3 - 2
+        Assert.Equal(1, dto.FreePlaces);
     }
 }

@@ -22,7 +22,7 @@ namespace backend.Tests
         private UserManager<User> GetMockUserManager()
         {
             var store = new Mock<IUserStore<User>>();
-            var mgr = new UserManager<User>(store.Object, null, null, null, null, null, null, null, null);
+            var mgr = new UserManager<User>(store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
             return mgr;
         }
 
@@ -177,16 +177,16 @@ namespace backend.Tests
 
             Assert.Equal(ErrorCodes.Ok, result);
             Assert.DoesNotContain(user.Id, room.ResidentsIds);
-            Assert.Equal(RoomStatus.Available, room.Status); // or 0 if you're using int
+            Assert.Equal(RoomStatus.Available, room.Status);
         }
 
 
         private Mock<UserManager<User>> MockUserManager()
         {
             var store = new Mock<IUserStore<User>>();
-            var mgr = new Mock<UserManager<User>>(store.Object, null, null, null, null, null, null, null, null);
+            var mgr = new Mock<UserManager<User>>(store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
             mgr.Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
-                .Returns<string>(email => Task.FromResult(new User { Email = email, Id = 0 }));
+                .Returns<string>(email => Task.FromResult(new User { Email = email, Id = 0 })!);
 
             return mgr;
         }

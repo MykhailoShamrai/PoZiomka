@@ -142,7 +142,6 @@ namespace backend.Tests.Controllers
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        // GET /users_information
         [Fact]
         public async Task GetUsersInformation_ReturnsOk_WhenDataExists()
         {
@@ -152,7 +151,6 @@ namespace backend.Tests.Controllers
                 new UserDto { Email = "b@b.com", Id = 2 }
             };
 
-            // jeśli Twój interfejs zwraca Tuple<List<UserDto>,ErrorCodes>
             _adminMock
                 .Setup(a => a.GetInformationAboutUsers())
                 .ReturnsAsync(Tuple.Create(users, ErrorCodes.Ok));
@@ -168,18 +166,16 @@ namespace backend.Tests.Controllers
         {
             _adminMock
                 .Setup(a => a.GetInformationAboutUsers())
-                .ReturnsAsync(Tuple.Create<List<UserDto>, ErrorCodes>(null, ErrorCodes.NotFound));
+                .ReturnsAsync(Tuple.Create<List<UserDto>, ErrorCodes>(null!, ErrorCodes.NotFound));
 
             var result = await _controller.GetUsersInformation();
 
             Assert.IsType<NotFoundObjectResult>(result);
         }
 
-        // PUT /add_role_to_user
         [Fact]
         public async Task AddRoleToUser_ReturnsBadRequest_WhenRoleInvalid()
         {
-            // nie ustawiamy mocka – metoda DTO sama sprawdzi, że 'Fake' to niepoprawna rola
             var dto = new AddRoleToUserDto { Email = "x@x.com", Role = "Fake" };
 
             var result = await _controller.AddRoleToUser(dto);
@@ -239,7 +235,6 @@ namespace backend.Tests.Controllers
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        // DELETE /delete_room
         [Fact]
         public async Task DeleteRoom_ReturnsOk_WhenSuccess()
         {
@@ -276,15 +271,12 @@ namespace backend.Tests.Controllers
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        // GET /get_all_proposals
         [Fact]
         public async Task GetAllProposals_ReturnsOk_WhenSuccess()
         {
-            // 1) użyj właściwego DTO
             var list = new List<ProposalAdminOutDto>();
             _proposalMock
                 .Setup(p => p.ReturnAllProposals())
-                // 2) zwróć Tuple.Create<List<ProposalAdminOutDto>,ErrorCodes>
                 .Returns(Task.FromResult(
                     Tuple.Create<List<ProposalAdminOutDto>, ErrorCodes>(list, ErrorCodes.Ok)
                 ));
@@ -292,7 +284,6 @@ namespace backend.Tests.Controllers
             var result = await _controller.GetAllProposals();
 
             var ok = Assert.IsType<OkObjectResult>(result);
-            // 3) sprawdź, że w środku jest Twoja lista
             Assert.Equal(list, ok.Value);
         }
 
@@ -302,7 +293,7 @@ namespace backend.Tests.Controllers
             _proposalMock
                 .Setup(p => p.ReturnAllProposals())
                 .Returns(Task.FromResult(
-                    Tuple.Create<List<ProposalAdminOutDto>, ErrorCodes>(null, ErrorCodes.NotFound)
+                    Tuple.Create<List<ProposalAdminOutDto>, ErrorCodes>(null!, ErrorCodes.NotFound)
                 ));
 
             var result = await _controller.GetAllProposals();
@@ -316,7 +307,7 @@ namespace backend.Tests.Controllers
             _proposalMock
                 .Setup(p => p.ReturnAllProposals())
                 .Returns(Task.FromResult(
-                    Tuple.Create<List<ProposalAdminOutDto>, ErrorCodes>(null, ErrorCodes.BadRequest)
+                    Tuple.Create<List<ProposalAdminOutDto>, ErrorCodes>(null!, ErrorCodes.BadRequest)
                 ));
 
             var result = await _controller.GetAllProposals();
@@ -325,7 +316,6 @@ namespace backend.Tests.Controllers
         }
 
 
-        // PUT /set_status_to_room
         [Fact]
         public async Task SetStatusToRoom_ReturnsOk_WhenSuccess()
         {
@@ -362,7 +352,6 @@ namespace backend.Tests.Controllers
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        // PUT /add_user_to_room
         [Fact]
         public async Task AddUserToRoom_ReturnsOk_WhenSuccess()
         {
@@ -402,7 +391,6 @@ namespace backend.Tests.Controllers
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        // PUT /remove_user_from_room
         [Fact]
         public async Task RemoveUserFromRoom_ReturnsOk_WhenSuccess()
         {
@@ -442,7 +430,6 @@ namespace backend.Tests.Controllers
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        // POST /add_test_proposal
         [Fact]
         public async Task AddTestProposal_ReturnsOk_WhenSuccess()
         {
@@ -527,7 +514,6 @@ namespace backend.Tests.Controllers
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        // GET /generate_proposals
         [Fact]
         public async Task GenerateProposals_ReturnsOk_WhenSuccess()
         {
@@ -579,7 +565,6 @@ namespace backend.Tests.Controllers
         [Fact]
         public async Task GetRooms_ReturnsOk_WhenSuccess()
         {
-            // jeśli RoomOutDto ma required pola, ustaw je tutaj:
             var rooms = new List<RoomOutDto>
             {
                 new RoomOutDto
@@ -612,7 +597,7 @@ namespace backend.Tests.Controllers
             _roomsMock
                 .Setup(r => r.GetRooms())
                 .Returns(Task.FromResult(
-                    Tuple.Create<List<RoomOutDto>, ErrorCodes>(null, ErrorCodes.BadRequest)
+                    Tuple.Create<List<RoomOutDto>, ErrorCodes>(null!, ErrorCodes.BadRequest)
                 ));
 
             var result = await _controller.GetRooms();
