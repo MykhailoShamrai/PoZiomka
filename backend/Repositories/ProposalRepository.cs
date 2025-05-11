@@ -162,23 +162,30 @@ public class ProposalRepository : IProposalInterface
             return ErrorCodes.Unauthorized;
         
         int index = proposal.RoommatesIds.FindIndex(rm => rm == currentUser.Id);
+        
         if (index < 0)
             return ErrorCodes.BadArgument;
+        
         proposal.Statuses[index] = dto.Status;
 
-        // Place for notification
+        var communication = new CreateCommunicationRequest();
         if (dto.Status == SingleStudentStatus.Rejected)
         {
             proposal.WholeStatus = StatusOfProposal.RejectedByOneOrMoreUsers;
             proposal.AdminStatus = AdminStatus.Pending;
+            communication.Type = CommunicationType.FAILURE;
+            communication.Description = "Your proposal was rejected by one of the roommates";
         }
         else if(CheckIfAllRoommatesAgree(proposal))
         {
             proposal.WholeStatus = StatusOfProposal.AcceptedByRoommates;
             proposal.AdminStatus = AdminStatus.Pending;
+            communication.Type = CommunicationType.SUCCESS;
+            communication.Description = "Your proposal was successfully accepted by all roommates";
         }
 
         var res = await _appDbContext.SaveChangesAsync();
+        _communicationSender.CreateCommunication(communication, proposal.RoommatesIds);
         if (res > 0)
             return ErrorCodes.Ok;
         return ErrorCodes.BadRequest;
