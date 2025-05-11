@@ -135,6 +135,10 @@
                                                     </div>
                                                 </td>
                                                 <td>
+                                                    <button class="btn btn-sm btn-outline-primary me-1"
+                                                        (click)="confirmChangeStatus(room)">
+                                                        <i class="bi bi-arrow-repeat"></i>
+                                                    </button>
                                                     <button class="btn btn-sm btn-outline-danger"
                                                         (click)="confirmDelete(room)">
                                                         <i class="bi bi-trash"></i>
@@ -227,6 +231,51 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
                             <button type="button" class="btn btn-danger" (click)="deleteRoom()">Delete Room</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Change Room Status modal -->
+            <div class="modal fade show" tabindex="-1" role="dialog"
+                [ngClass]="{'d-block': roomToChangeStatus, 'd-none': !roomToChangeStatus}"
+                [ngStyle]="{'background-color': roomToChangeStatus ? 'rgba(0,0,0,0.5)' : 'transparent'}">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">Change Room Status</h5>
+                            <button type="button" class="btn-close btn-close-white"
+                                (click)="cancelChangeStatus()"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Change status for Room <strong>{{ roomToChangeStatus?.number }}</strong> on Floor
+                                <strong>{{ roomToChangeStatus?.floor }}</strong>:</p>
+
+                            <div class="mb-3">
+                                <label for="newRoomStatus" class="form-label">New Status</label>
+                                <select class="form-select" id="newRoomStatus" [(ngModel)]="newStatus"
+                                    name="newRoomStatus">
+                                    <option *ngFor="let status of roomStatuses" [value]="status.value">
+                                        {{ status.label }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="alert alert-info" *ngIf="newStatus === 1">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Setting a room to Unavailable will prevent new assignments.
+                            </div>
+
+                            <div class="alert alert-warning" *ngIf="newStatus === 2 || newStatus === 3">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                Setting a room to Under Renovation or Cleaning may affect current assignments.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                (click)="cancelChangeStatus()">Cancel</button>
+                            <button type="button" class="btn btn-primary" (click)="changeRoomStatus()">Change
+                                Status</button>
                         </div>
                     </div>
                 </div>
