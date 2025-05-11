@@ -93,7 +93,11 @@ public class ProposalRepository : IProposalInterface
     public async Task<Tuple<List<ProposalAdminOutDto>, ErrorCodes>> ReturnAllProposals()
     {
         var proposals = await _appDbContext.Proposals.Include(p => p.Room).ToListAsync();
-        var proposalDtos = await Task.WhenAll(proposals.Select(p => ProposalToAdminDto(p)));
+        var proposalDtos = new List<ProposalAdminOutDto>();
+        foreach (var p in proposals)
+        {
+            proposalDtos.Add(await ProposalToAdminDto(p));
+        }
         if (proposalDtos is null)
             return new Tuple<List<ProposalAdminOutDto>, ErrorCodes>(new List<ProposalAdminOutDto>(), ErrorCodes.BadRequest);
         if (proposalDtos.Count() == 0)
@@ -115,8 +119,12 @@ public class ProposalRepository : IProposalInterface
         var proposals = await _appDbContext.Proposals.Where(p => p.RoommatesIds.Contains(currentUser.Id)).Include(p => p.Room).ToListAsync();
         if (currentUser is null)
             return new Tuple<List<ProposalUserOutDto>, ErrorCodes>(new List<ProposalUserOutDto>(), ErrorCodes.BadRequest);
-
-        var proposalDtos =  await Task.WhenAll(proposals.Select(p => ProposalToUserDto(p)));
+        
+        var proposalDtos = new List<ProposalUserOutDto>();
+        foreach (var p in proposals)
+        {
+                proposalDtos.Add(await ProposalToUserDto(p));
+        } 
         if (proposalDtos is null)
             return new Tuple<List<ProposalUserOutDto>, ErrorCodes>(new List<ProposalUserOutDto>(), ErrorCodes.BadRequest);
         

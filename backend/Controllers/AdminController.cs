@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Windows.Markup;
 using backend.Dto;
 using backend.Interfaces;
 using backend.Repositories;
@@ -16,15 +17,18 @@ public class AdminController: ControllerBase
     private readonly IAdminInterface _adminInterface;
     private readonly IRoomInterface _roomInterface;
     private readonly IProposalInterface _proposalInterface;
+    private readonly IJudgeInterface _judgeInterface;
     public AdminController(IFormsInterface formsInterface,
                             IAdminInterface adminInterface,
                             IRoomInterface roomInterface,
-                            IProposalInterface proposalInterface)
+                            IProposalInterface proposalInterface,
+                            IJudgeInterface judgeInterface)
     {
         _formsInterface = formsInterface;
         _adminInterface = adminInterface;
         _roomInterface = roomInterface;
         _proposalInterface = proposalInterface;
+        _judgeInterface = judgeInterface;
     }
 
     [HttpPost]
@@ -279,5 +283,25 @@ public class AdminController: ControllerBase
                 return BadRequest("Something went wrong while changing data in database!");
         }
         return BadRequest("Something went wrong while changing data about proposal!");
+    }
+
+    [HttpGet]
+    [Route("generate_proposals")]
+    public async Task<IActionResult> GenerateProposals()
+    {
+        var res = await _judgeInterface.GenerateProposals();
+
+        switch (res)
+        {
+            case JudgeError.StudentsAreNull:
+                return NotFound("Something went wrong while fetching information about students!");
+            case JudgeError.RoomsAreNull:
+                return NotFound("Something went wrong while fetching information about rooms!");
+            case JudgeError.DatabaseError:
+                return BadRequest("Something went wrong while generating proposals for students");
+            case JudgeError.Ok:
+                return Ok();
+        }
+        return BadRequest("Something went wrong while generating proposals for students");
     }
 }
