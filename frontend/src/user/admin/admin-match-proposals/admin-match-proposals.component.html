@@ -40,8 +40,24 @@
                         <button class="nav-link active" id="pending-tab" data-bs-toggle="tab"
                             data-bs-target="#pending-proposals" type="button" role="tab"
                             aria-controls="pending-proposals" aria-selected="true">
-                            All Proposals
+                            Pending Proposals
                             <span class="badge text-bg-primary ms-2">{{ pendingProposals.length }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="approved-tab" data-bs-toggle="tab"
+                            data-bs-target="#approved-proposals" type="button" role="tab"
+                            aria-controls="approved-proposals" aria-selected="false">
+                            Approved
+                            <span class="badge text-bg-success ms-2">{{ approvedProposals.length }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="rejected-tab" data-bs-toggle="tab"
+                            data-bs-target="#rejected-proposals" type="button" role="tab"
+                            aria-controls="rejected-proposals" aria-selected="false">
+                            Rejected
+                            <span class="badge text-bg-danger ms-2">{{ rejectedProposals.length }}</span>
                         </button>
                     </li>
                 </ul>
@@ -49,11 +65,11 @@
                 <!-- Tab content -->
                 <div class="tab-content mt-4" id="proposalsTabContent">
 
-                    <!-- All proposals tab -->
+                    <!-- Pending proposals tab -->
                     <div class="tab-pane fade show active" id="pending-proposals" role="tabpanel"
                         aria-labelledby="pending-tab">
                         <div class="alert alert-info" *ngIf="pendingProposals.length === 0">
-                            There are no match proposals at this time.
+                            There are no pending match proposals at this time.
                         </div>
 
                         <div *ngFor="let proposal of pendingProposals" class="card mb-3">
@@ -61,8 +77,8 @@
                                 <h4 class="h5 mb-0">
                                     Room {{ proposal.room.number }} (Floor {{ proposal.room.floor }})
                                 </h4>
-                                <span class="badge" [ngClass]="getStatusClass(proposal.wholeStatus)">
-                                    {{ getStatusText(proposal.wholeStatus, proposal.statuses) }}
+                                <span class="badge" [ngClass]="getStatusClass(proposal.statusOfProposal)">
+                                    {{ getStatusText(proposal.statusOfProposal) }}
                                 </span>
                             </div>
                             <div class="card-body">
@@ -94,15 +110,23 @@
                                                 </thead>
                                                 <tbody>
                                                     <tr *ngFor="let roommate of proposal.roommates; let i = index">
-                                                        <td>{{ roommate.name }} {{ roommate.surname }}</td>
+                                                        <td>
+                                                            <span *ngIf="roommate.name && roommate.surname">
+                                                                {{ roommate.name }} {{ roommate.surname }}
+                                                            </span>
+                                                            <span *ngIf="!roommate.name || !roommate.surname"
+                                                                class="text-muted">
+                                                                Name not shared
+                                                            </span>
+                                                        </td>
                                                         <td>{{ roommate.email }}</td>
                                                         <td>
-                                                            <span *ngIf="proposal.statuses[i] === 2"
-                                                                class="badge text-bg-warning">Pending</span>
-                                                            <span *ngIf="proposal.statuses[i] === 0"
-                                                                class="badge text-bg-success">Accepted</span>
-                                                            <span *ngIf="proposal.statuses[i] === 1"
-                                                                class="badge text-bg-danger">Rejected</span>
+                                                            <span
+                                                                *ngIf="proposal.statuses && proposal.statuses[i] !== undefined"
+                                                                class="badge"
+                                                                [ngClass]="getUserStatusClass(proposal.statuses[i])">
+                                                                {{ getUserStatusText(proposal.statuses[i]) }}
+                                                            </span>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -126,7 +150,7 @@
                                     </div>
 
                                     <!-- For proposals that need student acceptance first -->
-                                    <div *ngIf="!canApproveOrReject(proposal) && proposal.wholeStatus === 0">
+                                    <div *ngIf="!canApproveOrReject(proposal) && proposal.statusOfProposal === 0">
                                         <span class="badge text-bg-warning p-2">Waiting for all students to
                                             respond</span>
                                     </div>
@@ -138,7 +162,7 @@
                     <!-- Approved proposals tab -->
                     <div class="tab-pane fade" id="approved-proposals" role="tabpanel" aria-labelledby="approved-tab">
                         <div class="alert alert-info" *ngIf="approvedProposals.length === 0">
-                            There are no match proposals at this time.
+                            There are no approved proposals at this time.
                         </div>
 
                         <div *ngFor="let proposal of approvedProposals" class="card mb-3">
@@ -148,7 +172,7 @@
                                     Room {{ proposal.room.number }} (Floor {{ proposal.room.floor }})
                                 </h4>
                                 <span class="badge bg-white text-success">
-                                    {{ getStatusText(proposal.wholeStatus, proposal.statuses) }}
+                                    {{ getStatusText(proposal.statusOfProposal) }}
                                 </span>
                             </div>
                             <div class="card-body">
@@ -180,16 +204,23 @@
                                                 </thead>
                                                 <tbody>
                                                     <tr *ngFor="let roommate of proposal.roommates; let i = index">
-                                                        <td>{{ roommate.name || 'N/A' }} {{ roommate.surname || '' }}
+                                                        <td>
+                                                            <span *ngIf="roommate.name && roommate.surname">
+                                                                {{ roommate.name }} {{ roommate.surname }}
+                                                            </span>
+                                                            <span *ngIf="!roommate.name || !roommate.surname"
+                                                                class="text-muted">
+                                                                Name not shared
+                                                            </span>
                                                         </td>
                                                         <td>{{ roommate.email }}</td>
                                                         <td>
-                                                            <span *ngIf="proposal.statuses[i] === 0"
-                                                                class="badge text-bg-warning">Pending</span>
-                                                            <span *ngIf="proposal.statuses[i] === 1"
-                                                                class="badge text-bg-success">Accepted</span>
-                                                            <span *ngIf="proposal.statuses[i] === 2"
-                                                                class="badge text-bg-danger">Rejected</span>
+                                                            <span
+                                                                *ngIf="proposal.statuses && proposal.statuses[i] !== undefined"
+                                                                class="badge"
+                                                                [ngClass]="getUserStatusClass(proposal.statuses[i])">
+                                                                {{ getUserStatusText(proposal.statuses[i]) }}
+                                                            </span>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -212,7 +243,7 @@
                     <!-- Rejected proposals tab -->
                     <div class="tab-pane fade" id="rejected-proposals" role="tabpanel" aria-labelledby="rejected-tab">
                         <div class="alert alert-info" *ngIf="rejectedProposals.length === 0">
-                            There are no match proposals at this time.
+                            There are no rejected proposals at this time.
                         </div>
 
                         <div *ngFor="let proposal of rejectedProposals" class="card mb-3">
@@ -222,7 +253,7 @@
                                     Room {{ proposal.room.number }} (Floor {{ proposal.room.floor }})
                                 </h4>
                                 <span class="badge bg-white text-danger">
-                                    {{ getStatusText(proposal.wholeStatus, proposal.statuses) }}
+                                    {{ getStatusText(proposal.statusOfProposal) }}
                                 </span>
                             </div>
                             <div class="card-body">
@@ -254,16 +285,23 @@
                                                 </thead>
                                                 <tbody>
                                                     <tr *ngFor="let roommate of proposal.roommates; let i = index">
-                                                        <td>{{ roommate.name || 'N/A' }} {{ roommate.surname || '' }}
+                                                        <td>
+                                                            <span *ngIf="roommate.name && roommate.surname">
+                                                                {{ roommate.name }} {{ roommate.surname }}
+                                                            </span>
+                                                            <span *ngIf="!roommate.name || !roommate.surname"
+                                                                class="text-muted">
+                                                                Name not shared
+                                                            </span>
                                                         </td>
                                                         <td>{{ roommate.email }}</td>
                                                         <td>
-                                                            <span *ngIf="proposal.statuses[i] === 0"
-                                                                class="badge text-bg-warning">Pending</span>
-                                                            <span *ngIf="proposal.statuses[i] === 1"
-                                                                class="badge text-bg-success">Accepted</span>
-                                                            <span *ngIf="proposal.statuses[i] === 2"
-                                                                class="badge text-bg-danger">Rejected</span>
+                                                            <span
+                                                                *ngIf="proposal.statuses && proposal.statuses[i] !== undefined"
+                                                                class="badge"
+                                                                [ngClass]="getUserStatusClass(proposal.statuses[i])">
+                                                                {{ getUserStatusText(proposal.statuses[i]) }}
+                                                            </span>
                                                         </td>
                                                     </tr>
                                                 </tbody>

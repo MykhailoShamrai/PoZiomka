@@ -9,21 +9,14 @@ import { environment } from '../../../environment/environment';
 // Enums to match API response
 enum RoomStatus {
   Available = 0,
-  Occupied = 1,
+  Unavailable = 1,
   UnderMaintenance = 2
 }
 
-enum SingleStudentStatus {
+enum UserActionStatus {
   Accepted = 0,
   Rejected = 1,
   Pending = 2
-}
-
-enum AdminStatus {
-  Accepted = 0,
-  Rejected = 1,
-  Pending = 2,
-  Unavailable = 3
 }
 
 enum StatusOfProposal {
@@ -31,10 +24,11 @@ enum StatusOfProposal {
   AcceptedByRoommates = 1,
   RejectedByOneOrMoreUsers = 2,
   AcceptedByAdmin = 3,
-  RejectedByAdmin = 4
+  RejectedByAdmin = 4,
+  Unavailable = 5
 }
 
-interface Student {
+interface Roommate {
   id: number;
   email: string;
   name: string;
@@ -44,8 +38,8 @@ interface Student {
 
 interface Room {
   id: number;
-  number: number;
   floor: number;
+  number: number;
   capacity: number;
   status: RoomStatus;
   residentsIds: number[];
@@ -55,12 +49,10 @@ interface Room {
 interface MatchProposal {
   id: number;
   room: Room;
-  roommatesIds: number[];
-  roommates: Student[];
-  statuses: SingleStudentStatus[];
-  adminStatus: AdminStatus;
+  roommates: Roommate[];
+  statuses: UserActionStatus[];  // Status dla każdego z roommates
+  statusOfProposal: StatusOfProposal;
   timestamp: string;
-  wholeStatus: StatusOfProposal;
 }
 
 @Component({
@@ -108,9 +100,16 @@ export class AdminMatchProposalsComponent implements OnInit {
   }
 
   filterProposals(): void {
-    this.pendingProposals = [...this.proposals];
-    this.approvedProposals = [...this.proposals];
-    this.rejectedProposals = [...this.proposals];
+    this.pendingProposals = this.proposals.filter(p => 
+      p.statusOfProposal === StatusOfProposal.WaitingForRoommates || 
+      p.statusOfProposal === StatusOfProposal.AcceptedByRoommates);
+      
+    this.approvedProposals = this.proposals.filter(p => 
+      p.statusOfProposal === StatusOfProposal.AcceptedByAdmin);
+      
+    this.rejectedProposals = this.proposals.filter(p => 
+      p.statusOfProposal === StatusOfProposal.RejectedByOneOrMoreUsers || 
+      p.statusOfProposal === StatusOfProposal.RejectedByAdmin);
   }
 
   approveProposal(proposal: MatchProposal): void {
@@ -119,8 +118,7 @@ export class AdminMatchProposalsComponent implements OnInit {
     this.http.post(`${environment.apiUrl}Admin/approve_proposal/${proposal.id}`, {})
       .subscribe({
         next: () => {
-          proposal.wholeStatus = StatusOfProposal.AcceptedByAdmin;
-          proposal.adminStatus = AdminStatus.Accepted;
+          proposal.statusOfProposal = StatusOfProposal.AcceptedByAdmin;
           this.successMessage = `Proposal for Room ${proposal.room.number} approved successfully.`;
           this.loading = false;
           this.filterProposals();
@@ -140,8 +138,7 @@ export class AdminMatchProposalsComponent implements OnInit {
     this.http.post(`${environment.apiUrl}Admin/reject_proposal/${proposal.id}`, {})
       .subscribe({
         next: () => {
-          proposal.wholeStatus = StatusOfProposal.RejectedByAdmin;
-          proposal.adminStatus = AdminStatus.Rejected;
+          proposal.statusOfProposal = StatusOfProposal.RejectedByAdmin;
           this.successMessage = `Proposal for Room ${proposal.room.number} rejected.`;
           this.loading = false;
           this.filterProposals();
@@ -166,7 +163,7 @@ export class AdminMatchProposalsComponent implements OnInit {
     }
   }
 
-  getStatusText(status: StatusOfProposal, statuses: SingleStudentStatus[]): string {
+  getStatusText(status: StatusOfProposal, statuses?: UserActionStatus[]): string {
     switch (status) {
       case StatusOfProposal.WaitingForRoommates: 
         return 'Waiting for student responses';
@@ -178,19 +175,39 @@ export class AdminMatchProposalsComponent implements OnInit {
         return 'Rejected by administrator';
       case StatusOfProposal.AcceptedByAdmin: 
         return 'Approved (final)';
+      case StatusOfProposal.Unavailable:
+        return 'Unavailable';
       default: 
         return 'Unknown status';
     }
   }
 
+  getUserStatusClass(status: UserActionStatus): string {
+    switch (status) {
+      case UserActionStatus.Accepted: return 'text-success';
+      case UserActionStatus.Rejected: return 'text-danger';
+      case UserActionStatus.Pending: return 'text-warning';
+      default: return '';
+    }
+  }
+
+  getUserStatusText(status: UserActionStatus): string {
+    switch (status) {
+      case UserActionStatus.Accepted: return 'Accepted';
+      case UserActionStatus.Rejected: return 'Rejected';
+      case UserActionStatus.Pending: return 'Pending';
+      default: return 'Unknown';
+    }
+  }
+
   canApproveOrReject(proposal: MatchProposal): boolean {
-    return proposal.wholeStatus === StatusOfProposal.AcceptedByRoommates;
+    return proposal.statusOfProposal === StatusOfProposal.AcceptedByRoommates;
   }
 
   getRoomStatusClass(status: RoomStatus): string {
     switch (status) {
       case RoomStatus.Available: return 'text-success';
-      case RoomStatus.Occupied: return 'text-danger';
+      case RoomStatus.Unavailable: return 'text-danger';
       case RoomStatus.UnderMaintenance: return 'text-warning';
       default: return '';
     }
@@ -199,7 +216,7 @@ export class AdminMatchProposalsComponent implements OnInit {
   getRoomStatusText(status: RoomStatus): string {
     switch(status) {
       case RoomStatus.Available: return 'Available';
-      case RoomStatus.Occupied: return 'Occupied';
+      case RoomStatus.Unavailable: return 'Unavailable';
       case RoomStatus.UnderMaintenance: return 'Under Maintenance';
       default: return 'Unknown';
     }

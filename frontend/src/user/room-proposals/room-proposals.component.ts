@@ -5,23 +5,29 @@ import { HttpClient } from '@angular/common/http';
 import { AuthGatewayService } from '../../auth/auth-gateway.service';
 import { environment } from '../../environment/environment';
 
-// Enum dla statusu propozycji zgodnie z API
-enum ProposalStatus {
-  Pending = 0,
-  Accepted = 1,
-  Rejected = 2,
-  AcceptedByAdmin = 3,
-  RejectedByAdmin = 4
-}
-
-// Enum dla statusu pokoju zgodnie z API
+// Enums to match API response
 enum RoomStatus {
   Available = 0,
-  Occupied = 1,
+  Unavailable = 1,
   UnderMaintenance = 2
 }
 
-// Interfejsy dostosowane do formatu API
+enum UserActionStatus {
+  Accepted = 0,
+  Rejected = 1,
+  Pending = 2
+}
+
+enum StatusOfProposal {
+  WaitingForRoommates = 0,
+  AcceptedByRoommates = 1,
+  RejectedByOneOrMoreUsers = 2,
+  AcceptedByAdmin = 3,
+  RejectedByAdmin = 4,
+  Unavailable = 5
+}
+
+// Interfaces dostosowane do formatu API
 interface Roommate {
   id: number;
   email: string;
@@ -33,7 +39,7 @@ interface Roommate {
 interface Room {
   id: number;
   floor: number;
-  number: string;
+  number: number;
   capacity: number;
   status: RoomStatus;
   residentsIds: number[];
@@ -44,8 +50,9 @@ interface RoomProposal {
   id: number;
   room: Room;
   roommates: Roommate[];
-  statusOfProposal: ProposalStatus;
+  statusOfProposal: StatusOfProposal;
   timestamp: string;
+  statusForUser: UserActionStatus;
 }
 
 @Component({
@@ -107,10 +114,10 @@ export class RoomProposalsComponent implements OnInit {
       .subscribe({
         next: () => {
           if (status === 0) {
-            proposal.statusOfProposal = ProposalStatus.Accepted;
+            proposal.statusForUser = UserActionStatus.Accepted;
             this.successMessage = 'Proposal accepted! Waiting for administrator approval.';
           } else {
-            proposal.statusOfProposal = ProposalStatus.Rejected;
+            proposal.statusForUser = UserActionStatus.Rejected;
             this.successMessage = 'Proposal rejected successfully.';
           }
           
@@ -128,24 +135,43 @@ export class RoomProposalsComponent implements OnInit {
       });
   }
 
-  getStatusClass(status: ProposalStatus): string {
+  getStatusClass(status: StatusOfProposal): string {
     switch (status) {
-      case ProposalStatus.Pending: return 'text-warning';
-      case ProposalStatus.Accepted: return 'text-primary';
-      case ProposalStatus.Rejected: return 'text-danger';
-      case ProposalStatus.RejectedByAdmin: return 'text-danger';
-      case ProposalStatus.AcceptedByAdmin: return 'text-success';
+      case StatusOfProposal.WaitingForRoommates: return 'text-warning';
+      case StatusOfProposal.AcceptedByRoommates: return 'text-primary';
+      case StatusOfProposal.RejectedByOneOrMoreUsers: return 'text-danger';
+      case StatusOfProposal.RejectedByAdmin: return 'text-danger';
+      case StatusOfProposal.AcceptedByAdmin: return 'text-success';
       default: return '';
     }
   }
 
-  getStatusText(status: ProposalStatus): string {
+  getStatusText(status: StatusOfProposal): string {
     switch (status) {
-      case ProposalStatus.Pending: return 'Pending your response';
-      case ProposalStatus.Accepted: return 'Accepted (waiting for admin approval)';
-      case ProposalStatus.Rejected: return 'Rejected by you';
-      case ProposalStatus.RejectedByAdmin: return 'Rejected by administrator';
-      case ProposalStatus.AcceptedByAdmin: return 'Approved (final)';
+      case StatusOfProposal.WaitingForRoommates: return 'Waiting for all roommates to respond';
+      case StatusOfProposal.AcceptedByRoommates: return 'Accepted (waiting for admin approval)';
+      case StatusOfProposal.RejectedByOneOrMoreUsers: return 'Rejected by at least one roommate';
+      case StatusOfProposal.RejectedByAdmin: return 'Rejected by administrator';
+      case StatusOfProposal.AcceptedByAdmin: return 'Approved (final)';
+      case StatusOfProposal.Unavailable: return 'Unavailable';
+      default: return 'Unknown status';
+    }
+  }
+
+  getUserStatusClass(status: UserActionStatus): string {
+    switch (status) {
+      case UserActionStatus.Accepted: return 'text-success';
+      case UserActionStatus.Rejected: return 'text-danger';
+      case UserActionStatus.Pending: return 'text-warning';
+      default: return '';
+    }
+  }
+
+  getUserStatusText(status: UserActionStatus): string {
+    switch (status) {
+      case UserActionStatus.Accepted: return 'You accepted this proposal';
+      case UserActionStatus.Rejected: return 'You rejected this proposal';
+      case UserActionStatus.Pending: return 'Pending your response';
       default: return 'Unknown status';
     }
   }
@@ -153,7 +179,7 @@ export class RoomProposalsComponent implements OnInit {
   getRoomStatusClass(status: RoomStatus): string {
     switch (status) {
       case RoomStatus.Available: return 'text-success';
-      case RoomStatus.Occupied: return 'text-danger';
+      case RoomStatus.Unavailable: return 'text-danger';
       case RoomStatus.UnderMaintenance: return 'text-warning';
       default: return '';
     }
@@ -162,14 +188,14 @@ export class RoomProposalsComponent implements OnInit {
   getRoomStatusText(status: RoomStatus): string {
     switch (status) {
       case RoomStatus.Available: return 'Available';
-      case RoomStatus.Occupied: return 'Occupied';
+      case RoomStatus.Unavailable: return 'Unavailable';
       case RoomStatus.UnderMaintenance: return 'Under Maintenance';
       default: return 'Unknown';
     }
   }
 
   canAcceptOrReject(proposal: RoomProposal): boolean {
-    return proposal.statusOfProposal === ProposalStatus.Pending;
+    return proposal.statusForUser === UserActionStatus.Pending;
   }
 
   logout(): void {

@@ -57,9 +57,14 @@
                         <h4 class="h5 mb-0">
                             Room {{ proposal.room.number }} (Floor {{ proposal.room.floor }})
                         </h4>
-                        <span class="badge" [ngClass]="getStatusClass(proposal.statusOfProposal)">
-                            {{ getStatusText(proposal.statusOfProposal) }}
-                        </span>
+                        <div class="d-flex">
+                            <span class="badge me-2" [ngClass]="getUserStatusClass(proposal.statusForUser)">
+                                {{ getUserStatusText(proposal.statusForUser) }}
+                            </span>
+                            <span class="badge" [ngClass]="getStatusClass(proposal.statusOfProposal)">
+                                {{ getStatusText(proposal.statusOfProposal) }}
+                            </span>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
@@ -83,7 +88,14 @@
                                 <div class="list-group">
                                     <div *ngFor="let roommate of proposal.roommates" class="list-group-item">
                                         <div class="d-flex w-100 justify-content-between">
-                                            <h6 class="mb-1">{{ roommate.name }} {{ roommate.surname }}</h6>
+                                            <h6 class="mb-1">
+                                                <span *ngIf="roommate.name && roommate.surname">
+                                                    {{ roommate.name }} {{ roommate.surname }}
+                                                </span>
+                                                <span *ngIf="!roommate.name || !roommate.surname" class="text-muted">
+                                                    User has not shared their name
+                                                </span>
+                                            </h6>
                                         </div>
                                         <p class="mb-1">{{ roommate.email }}</p>
                                         <small *ngIf="roommate.phoneNumber">{{ roommate.phoneNumber }}</small>
@@ -112,12 +124,13 @@
                             </div>
 
                             <!-- For accepted by user but pending admin approval -->
-                            <div *ngIf="proposal.statusOfProposal === 1" class="text-primary">
-                                <i class="bi bi-hourglass-split me-1"></i> Awaiting Admin Approval
+                            <div *ngIf="proposal.statusForUser === 0 && proposal.statusOfProposal !== 3"
+                                class="text-primary">
+                                <i class="bi bi-hourglass-split me-1"></i> You've accepted - awaiting final approval
                             </div>
 
                             <!-- For rejected proposals -->
-                            <div *ngIf="proposal.statusOfProposal === 2" class="text-danger">
+                            <div *ngIf="proposal.statusForUser === 1" class="text-danger">
                                 <i class="bi bi-x-circle-fill me-1"></i> You've Rejected This Proposal
                             </div>
 
