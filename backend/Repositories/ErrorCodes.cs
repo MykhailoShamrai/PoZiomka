@@ -8,5 +8,6 @@ public enum ErrorCodes
     Forbidden,
     Ok,
     Unauthorized,
-    BadRequest
+    BadRequest,
+    BadArgument
 }
