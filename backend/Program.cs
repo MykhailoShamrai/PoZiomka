@@ -70,6 +70,7 @@ builder.Services.AddScoped<FormFiller>();
 builder.Services.AddScoped<IUserInterface, UserRepository>();
 builder.Services.AddScoped<IAdminInterface, AdminRepository>();
 builder.Services.AddScoped<IRoomInterface, RoomRepository>();
+builder.Services.AddScoped<IProposalInterface, ProposalRepository>();
 
 builder.Services.AddAuthentication(options =>
     {
