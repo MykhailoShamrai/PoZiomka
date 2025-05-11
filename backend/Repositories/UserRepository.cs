@@ -1,8 +1,10 @@
 using System.Security.Claims;
+using backend.Data;
 using backend.Dto;
 using backend.Interfaces;
 using backend.Models.User;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repositories;
 
@@ -12,14 +14,17 @@ public class UserRepository : IUserInterface
     private readonly IFormsInterface _formService;
     // private readonly FormFiller _formFiller;
     private readonly IHttpContextAccessor _contextAccessor;
+    private readonly AppDbContext _appDbContext;
     public UserRepository(
         UserManager<User> userManager,
         IFormsInterface formService,
-        IHttpContextAccessor contextAccessor)
+        IHttpContextAccessor contextAccessor,
+        AppDbContext appDbContext)
     {
         _userManager = userManager;
         _formService = formService;
         _contextAccessor = contextAccessor;
+        _appDbContext = appDbContext;
     }
 
     public async Task<Tuple<ErrorCodes, ProfileDisplayDto?>> DisplayUserProfile()
@@ -180,5 +185,20 @@ public class UserRepository : IUserInterface
         {
             return ErrorCodes.BadRequest;
         }
+    }
+    
+    public async Task<(ErrorCodes, Communication[]?)> GetCurrentUserCommunications()
+    {
+        var email = _contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (string.IsNullOrEmpty(email) || user == null)
+            return (ErrorCodes.Unauthorized, null);
+
+        var communications = await _appDbContext.Communications
+            .Where(c => c.UserId == user.Id)
+            .ToListAsync();
+        
+        return (ErrorCodes.Ok, communications.ToArray());
     }
 }

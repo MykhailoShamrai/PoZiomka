@@ -1,5 +1,5 @@
-public class CommunicationType
+public enum CommunicationType
 {
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    SUCCESS,
+    FAILURE,
 }

@@ -5,6 +5,7 @@ using backend.Data;
 using backend.Dto;
 using backend.Interfaces;
 using backend.Mappers;
+using backend.Models.Communications;
 using backend.Models.User;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
@@ -16,12 +17,19 @@ public class ProposalRepository : IProposalInterface
 {
     private AppDbContext _appDbContext;
     private UserManager<User> _userManager;
+    private CommunicationSender _communicationSender;
     private IHttpContextAccessor _httpContextAccessor;
     
-    public ProposalRepository(AppDbContext appDbContext, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor)
+    public ProposalRepository(
+        AppDbContext appDbContext, 
+        UserManager<User> userManager, 
+        CommunicationSender communicationSender,
+        IHttpContextAccessor httpContextAccessor
+        )
     {
         _appDbContext = appDbContext;
         _userManager = userManager;
+        _communicationSender = communicationSender;
         _httpContextAccessor = httpContextAccessor;
     }
 
@@ -200,9 +208,12 @@ public class ProposalRepository : IProposalInterface
         
         if (proposal.AdminStatus != AdminStatus.Pending)
             return ErrorCodes.BadArgument;
-        
+
+        var communication = new CreateCommunicationRequest();
         if (dto.Status == AdminStatus.Accepted)
         {
+            communication.Type = CommunicationType.SUCCESS;
+            communication.Description = "Your proposal was successfully accepted";
             proposal.WholeStatus = StatusOfProposal.AcceptedByAdmin;
             // Place for changing status for all roommate, changing status of room and 
             // Making all proposals fot that room unavailable
@@ -210,11 +221,14 @@ public class ProposalRepository : IProposalInterface
         }
         else if (dto.Status == AdminStatus.Rejected)
         {
+            communication.Type = CommunicationType.FAILURE;
+            communication.Description = "Your proposal was rejected";
             proposal.WholeStatus = StatusOfProposal.RejectedByAdmin;
         }
         proposal.AdminStatus = dto.Status;
 
         var res = await _appDbContext.SaveChangesAsync();
+        _communicationSender.CreateCommunication(communication, proposal.RoommatesIds);
         if (res > 0)
             return ErrorCodes.Ok;
         return ErrorCodes.BadRequest;

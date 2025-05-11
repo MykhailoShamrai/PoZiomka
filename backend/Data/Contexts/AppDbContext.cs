@@ -17,9 +17,11 @@ public class AppDbContext : DbContext
     public DbSet<OptionForQuestion> OptionsForQuestions {get; set;}
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Proposal> Proposals { get; set; }
+    public DbSet<Communication> Communications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Communication>().ToTable("Communications");
         modelBuilder.Entity<Proposal>().ToTable("Proposals");
         modelBuilder.Entity<Room>().ToTable("Rooms");
         modelBuilder.Entity<Answer>().ToTable("Answers");

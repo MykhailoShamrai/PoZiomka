@@ -158,4 +158,20 @@ public class UserController : ControllerBase
         }
         return BadRequest("Something went wrong while changing data!");
     }
+    
+    [HttpGet]
+    [Authorize]
+    [Route("get_my_communications")]
+    public async Task<IActionResult> GetMyCommunications()
+    {
+        var (errorCode, list) = await _userRepository.GetCurrentUserCommunications();
+        switch(errorCode)
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.Ok:
+                return Ok(list);
+        }
+        return BadRequest("Something went wrong while fethcing information about proposals!");
+    }
 }
