@@ -12,10 +12,4 @@ public class ApplicationService
         // Tworzenie wniosku
         throw new NotImplementedException();
     }
-
-    public void ResolveAnApplication(Application application)
-    {
-        // Obsługa zatwierdzania lub odrzucania wniosku
-        throw new NotImplementedException();
-    }
 }
