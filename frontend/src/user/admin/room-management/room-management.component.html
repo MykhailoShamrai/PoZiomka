@@ -1,0 +1,236 @@
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Administrator Panel - Room Management</h2>
+                <div>
+                    <a routerLink="/admin" class="btn btn-outline-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Admin
+                    </a>
+                    <button (click)="logout()" class="btn btn-outline-danger">
+                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading state -->
+            <div *ngIf="loading" class="text-center my-5">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading rooms...</p>
+            </div>
+
+            <!-- Success and error messages -->
+            <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ successMessage }}
+                <button type="button" class="btn-close" (click)="successMessage = null"></button>
+            </div>
+
+            <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ errorMessage }}
+                <button type="button" class="btn-close" (click)="errorMessage = null"></button>
+            </div>
+
+            <!-- Main content when not loading -->
+            <div *ngIf="!loading">
+                <div class="row">
+                    <!-- Left side - Room management -->
+                    <div class="col-md-8">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h3 class="h5 mb-0">Room Directory</h3>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-secondary me-2" (click)="resetFilters()">
+                                        <i class="bi bi-x-circle me-1"></i> Reset Filters
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <!-- Filters -->
+                                <div class="bg-light p-3 border-bottom">
+                                    <div class="row g-2">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Floor</label>
+                                            <select class="form-select" [(ngModel)]="floorFilter"
+                                                (change)="applyFilters()">
+                                                <option [ngValue]="null">All Floors</option>
+                                                <option *ngFor="let floor of getUniqueFloors()" [ngValue]="floor">
+                                                    {{ floor }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Capacity</label>
+                                            <select class="form-select" [(ngModel)]="capacityFilter"
+                                                (change)="applyFilters()">
+                                                <option [ngValue]="null">All Capacities</option>
+                                                <option *ngFor="let capacity of getUniqueCapacities()"
+                                                    [ngValue]="capacity">
+                                                    {{ capacity }} people
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Status</label>
+                                            <select class="form-select" [(ngModel)]="statusFilter"
+                                                (change)="applyFilters()">
+                                                <option [ngValue]="null">All Statuses</option>
+                                                <option *ngFor="let status of roomStatuses" [ngValue]="status.value">
+                                                    {{ status.label }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Availability</label>
+                                            <select class="form-select" [(ngModel)]="availabilityFilter"
+                                                (change)="applyFilters()">
+                                                <option [ngValue]="null">All</option>
+                                                <option [ngValue]="true">Has Free Places</option>
+                                                <option [ngValue]="false">Fully Occupied</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Room list table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Room #</th>
+                                                <th>Floor</th>
+                                                <th>Capacity</th>
+                                                <th>Status</th>
+                                                <th>Occupancy</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngIf="filteredRooms.length === 0">
+                                                <td colspan="6" class="text-center py-3">
+                                                    No rooms match the current filters
+                                                </td>
+                                            </tr>
+                                            <tr *ngFor="let room of filteredRooms">
+                                                <td><strong>{{ room.number }}</strong></td>
+                                                <td>{{ room.floor }}</td>
+                                                <td>{{ room.capacity }} people</td>
+                                                <td>
+                                                    <span class="badge" [ngClass]="getRoomStatusClass(room.status) === 'text-success' ? 'bg-success text-white' : 
+                                                                  getRoomStatusClass(room.status) === 'text-warning' ? 'bg-warning text-dark' : 
+                                                                  getRoomStatusClass(room.status) === 'text-info' ? 'bg-info text-dark' :
+                                                                  'bg-danger text-white'">
+                                                        {{ getRoomStatusText(room.status) }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {{ room.capacity - room.freePlaces }} / {{ room.capacity }}
+                                                    <div class="progress mt-1" style="height: 6px;">
+                                                        <div class="progress-bar" role="progressbar"
+                                                            [style.width.%]="((room.capacity - room.freePlaces) / room.capacity) * 100"
+                                                            [ngClass]="{'bg-success': room.freePlaces > 0, 'bg-danger': room.freePlaces === 0}">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-danger"
+                                                        (click)="confirmDelete(room)">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination would go here if needed -->
+                                <div class="p-3 border-top">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">Showing {{ filteredRooms.length }} of {{ rooms.length
+                                            }}
+                                            rooms</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right side - Add new room -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h3 class="h5 mb-0">Add New Room</h3>
+                            </div>
+                            <div class="card-body">
+                                <form (ngSubmit)="addRoom()">
+                                    <div class="mb-3">
+                                        <label for="roomNumber" class="form-label">Room Number</label>
+                                        <input type="number" class="form-control" id="roomNumber"
+                                            [(ngModel)]="newRoom.number" name="roomNumber" min="1" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="roomFloor" class="form-label">Floor</label>
+                                        <input type="number" class="form-control" id="roomFloor"
+                                            [(ngModel)]="newRoom.floor" name="roomFloor" min="1" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="roomCapacity" class="form-label">Capacity</label>
+                                        <input type="number" class="form-control" id="roomCapacity"
+                                            [(ngModel)]="newRoom.capacity" name="roomCapacity" min="1" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="roomStatus" class="form-label">Status</label>
+                                        <select class="form-select" id="roomStatus" [(ngModel)]="newRoom.status"
+                                            name="roomStatus" required>
+                                            <option *ngFor="let status of roomStatuses" [value]="status.value">
+                                                {{ status.label }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-plus-circle me-2"></i>Add Room
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete confirmation modal -->
+            <div class="modal fade show" tabindex="-1" role="dialog"
+                [ngClass]="{'d-block': roomToDelete, 'd-none': !roomToDelete}"
+                [ngStyle]="{'background-color': roomToDelete ? 'rgba(0,0,0,0.5)' : 'transparent'}">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">Confirm Deletion</h5>
+                            <button type="button" class="btn-close btn-close-white" (click)="cancelDelete()"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete Room <strong>{{ roomToDelete?.number }}</strong> on Floor
+                                <strong>{{ roomToDelete?.floor }}</strong>?</p>
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                This action cannot be undone. Any students assigned to this room will need to be
+                                relocated.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+                            <button type="button" class="btn btn-danger" (click)="deleteRoom()">Delete Room</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
