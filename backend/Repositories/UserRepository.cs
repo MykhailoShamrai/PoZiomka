@@ -32,7 +32,7 @@ public class UserRepository : IUserInterface
         var email = _contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
 
         if (string.IsNullOrEmpty(email))
-            return new Tuple<ErrorCodes, ProfileDisplayDto?> (ErrorCodes.Unauthorized, null);
+            return new Tuple<ErrorCodes, ProfileDisplayDto?>(ErrorCodes.Unauthorized, null);
 
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
@@ -64,48 +64,48 @@ public class UserRepository : IUserInterface
     }
 
     public async Task<(ErrorCodes, FormDto[]?)> GetUserForms()
+    {
+        var email = _contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+        if (string.IsNullOrEmpty(email))
+            return (ErrorCodes.Unauthorized, null);
+
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+            return (ErrorCodes.NotFound, null);
+
+        var forms = await _formService.GetAll();
+        if (forms == null)
+            return (ErrorCodes.NotFound, null);
+
+        var formDtos = new List<FormDto>();
+        foreach (var form in forms)
         {
-            var email = _contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
-            if (string.IsNullOrEmpty(email))
-                return (ErrorCodes.Unauthorized, null);
+            var answers = await _formService.GetAnswers(user.Id, form.FormId);
 
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-                return (ErrorCodes.NotFound, null);
-
-            var forms = await _formService.GetAll();
-            if (forms == null)
-                return (ErrorCodes.NotFound, null);
-
-            var formDtos = new List<FormDto>();
-            foreach (var form in forms)
+            AnswerDto? answerDto = null;
+            if (answers != null)
             {
-                var answers = await _formService.GetAnswers(user.Id, form.FormId);
-
-                AnswerDto? answerDto = null;
-                if (answers != null)
-                {
-                    answerDto = new AnswerDto
-                    {
-                        FormId = form.FormId,
-                        ChosenOptionIds = answers.ChosenOptions.Select(o => o.OptionForQuestionId).ToList(),
-                        Status = answers.Status
-                    };
-                }
-
-                var formDto = new FormDto
+                answerDto = new AnswerDto
                 {
                     FormId = form.FormId,
-                    NameOfForm = form.NameOfForm,
-                    Questions = form.Questions,
-                    Answers = answerDto
+                    ChosenOptionIds = answers.ChosenOptions.Select(o => o.OptionForQuestionId).ToList(),
+                    Status = answers.Status
                 };
-
-                formDtos.Add(formDto);
             }
 
-            return (ErrorCodes.Ok, formDtos.ToArray());
+            var formDto = new FormDto
+            {
+                FormId = form.FormId,
+                NameOfForm = form.NameOfForm,
+                Questions = form.Questions,
+                Answers = answerDto
+            };
+
+            formDtos.Add(formDto);
         }
+
+        return (ErrorCodes.Ok, formDtos.ToArray());
+    }
 
     public async Task<ErrorCodes> ChangeUserProfile(UpdateUserDto userDto)
     {
@@ -186,11 +186,11 @@ public class UserRepository : IUserInterface
             return ErrorCodes.BadRequest;
         }
     }
-    
+
     public async Task<(ErrorCodes, Communication[]?)> GetCurrentUserCommunications()
     {
         var email = _contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await _userManager.FindByEmailAsync(email!);
 
         if (string.IsNullOrEmpty(email) || user == null)
             return (ErrorCodes.Unauthorized, null);
@@ -198,7 +198,7 @@ public class UserRepository : IUserInterface
         var communications = await _appDbContext.Communications
             .Where(c => c.UserId == user.Id)
             .ToListAsync();
-        
+
         return (ErrorCodes.Ok, communications.ToArray());
     }
 }

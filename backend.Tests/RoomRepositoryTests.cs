@@ -88,13 +88,13 @@ namespace backend.Tests
             var dto = new SetStatusToRoomDto { RoomId = room.Id, Status = RoomStatus.Unavailable };
 
             var result = await repo.ChangeStatusForRoom(dto);
-            
+
             Assert.Equal(ErrorCodes.Ok, result);
 
             var updatedRoom = await dbContext.Rooms.FindAsync(room.Id);
 
             Assert.Equal(ErrorCodes.Ok, result);
-            Assert.Equal(RoomStatus.Unavailable, updatedRoom.Status);
+            Assert.Equal(RoomStatus.Unavailable, updatedRoom?.Status);
         }
 
         [Fact]
@@ -137,7 +137,7 @@ namespace backend.Tests
             var room = new Room { Floor = 1, Number = 101, Capacity = 2, Status = RoomStatus.Available, ResidentsIds = new List<int>() };
 
             userManager.Setup(m => m.FindByEmailAsync("user@example.com"))
-                .ReturnsAsync(user); 
+                .ReturnsAsync(user);
 
             dbContext.Rooms.Add(room);
             await dbContext.SaveChangesAsync();
