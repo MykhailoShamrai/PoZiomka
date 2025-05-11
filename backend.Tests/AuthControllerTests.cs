@@ -3,6 +3,9 @@ using backend.Controllers;
 using backend.Interfaces;
 using backend.Dto;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+
 
 namespace backend.Tests
 {
@@ -117,6 +120,56 @@ namespace backend.Tests
 
             // Act
             var result = await controller.Logout();
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+        }
+        [Fact]
+        public void Test_ReturnsUnauthorized_WhenNotAuthenticated()
+        {
+            // Arrange
+            var mockAuth = new Mock<IAuthInterface>();
+            var controller = new AuthController(mockAuth.Object);
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    // User.Identity.IsAuthenticated == false
+                    User = new ClaimsPrincipal(new ClaimsIdentity())
+                }
+            };
+
+            // Act
+            var result = controller.Test();
+
+            // Assert
+            var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("User is not authenticated!", unauthorized.Value);
+        }
+
+        [Fact]
+        public void Test_ReturnsOk_WhenAuthenticated()
+        {
+            // Arrange
+            var mockAuth = new Mock<IAuthInterface>();
+            var controller = new AuthController(mockAuth.Object);
+
+            // tworzymy zalogowanego użytkownika
+            var identity = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.Name, "admin@example.com")
+            }, authenticationType: "TestAuth");
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(identity)  // IsAuthenticated == true
+                }
+            };
+
+            // Act
+            var result = controller.Test();
 
             // Assert
             Assert.IsType<OkResult>(result);
