@@ -57,8 +57,8 @@
                         <h4 class="h5 mb-0">
                             Room {{ proposal.room.number }} (Floor {{ proposal.room.floor }})
                         </h4>
-                        <span class="badge" [ngClass]="getStatusClass(proposal.status)">
-                            {{ getStatusText(proposal.status) }}
+                        <span class="badge" [ngClass]="getStatusClass(proposal.statusOfProposal)">
+                            {{ getStatusText(proposal.statusOfProposal) }}
                         </span>
                     </div>
                     <div class="card-body">
@@ -69,16 +69,21 @@
                                     <li class="list-group-item">Room Number: {{ proposal.room.number }}</li>
                                     <li class="list-group-item">Floor: {{ proposal.room.floor }}</li>
                                     <li class="list-group-item">Capacity: {{ proposal.room.capacity }} people</li>
-                                    <li class="list-group-item">Current Occupancy: {{ proposal.room.currentOccupancy }}
-                                        / {{ proposal.room.capacity }}</li>
+                                    <li class="list-group-item">Free Places: {{ proposal.room.freePlaces }} / {{
+                                        proposal.room.capacity }}</li>
+                                    <li class="list-group-item">Status:
+                                        <span [ngClass]="getRoomStatusClass(proposal.room.status)">
+                                            {{ getRoomStatusText(proposal.room.status) }}
+                                        </span>
+                                    </li>
                                 </ul>
                             </div>
                             <div class="col-md-6">
                                 <h5 class="h6">Potential Roommates</h5>
                                 <div class="list-group">
-                                    <div *ngFor="let roommate of proposal.potentialRoommates" class="list-group-item">
+                                    <div *ngFor="let roommate of proposal.roommates" class="list-group-item">
                                         <div class="d-flex w-100 justify-content-between">
-                                            <h6 class="mb-1">{{ roommate.firstName }} {{ roommate.lastName }}</h6>
+                                            <h6 class="mb-1">{{ roommate.name }} {{ roommate.surname }}</h6>
                                         </div>
                                         <p class="mb-1">{{ roommate.email }}</p>
                                         <small *ngIf="roommate.phoneNumber">{{ roommate.phoneNumber }}</small>
@@ -88,7 +93,7 @@
                         </div>
 
                         <div class="d-flex justify-content-end">
-                            <small class="text-muted me-auto">Proposed on: {{ proposal.createdAt | date:'mediumDate'
+                            <small class="text-muted me-auto">Proposed on: {{ proposal.timestamp | date:'mediumDate'
                                 }}</small>
 
                             <!-- Action buttons - only shown for pending proposals -->
@@ -102,18 +107,23 @@
                             </div>
 
                             <!-- For accepted by admin proposals -->
-                            <div *ngIf="proposal.status === 'AcceptedByAdmin'" class="text-success">
+                            <div *ngIf="proposal.statusOfProposal === 3" class="text-success">
                                 <i class="bi bi-check-circle-fill me-1"></i> Approved and Finalized
                             </div>
 
                             <!-- For accepted by user but pending admin approval -->
-                            <div *ngIf="proposal.status === 'Accepted'" class="text-primary">
+                            <div *ngIf="proposal.statusOfProposal === 1" class="text-primary">
                                 <i class="bi bi-hourglass-split me-1"></i> Awaiting Admin Approval
                             </div>
 
                             <!-- For rejected proposals -->
-                            <div *ngIf="proposal.status === 'Rejected'" class="text-danger">
+                            <div *ngIf="proposal.statusOfProposal === 2" class="text-danger">
                                 <i class="bi bi-x-circle-fill me-1"></i> You've Rejected This Proposal
+                            </div>
+
+                            <!-- For rejected by admin proposals -->
+                            <div *ngIf="proposal.statusOfProposal === 4" class="text-danger">
+                                <i class="bi bi-x-circle-fill me-1"></i> Rejected by Administrator
                             </div>
                         </div>
                     </div>

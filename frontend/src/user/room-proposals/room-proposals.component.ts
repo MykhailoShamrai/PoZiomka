@@ -3,29 +3,49 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthGatewayService } from '../../auth/auth-gateway.service';
+import { environment } from '../../environment/environment';
 
-interface Student {
+// Enum dla statusu propozycji zgodnie z API
+enum ProposalStatus {
+  Pending = 0,
+  Accepted = 1,
+  Rejected = 2,
+  AcceptedByAdmin = 3,
+  RejectedByAdmin = 4
+}
+
+// Enum dla statusu pokoju zgodnie z API
+enum RoomStatus {
+  Available = 0,
+  Occupied = 1,
+  UnderMaintenance = 2
+}
+
+// Interfejsy dostosowane do formatu API
+interface Roommate {
   id: number;
   email: string;
-  firstName: string;
-  lastName: string;
+  name: string;
+  surname: string;
   phoneNumber?: string;
 }
 
 interface Room {
   id: number;
-  number: string;
   floor: number;
+  number: string;
   capacity: number;
-  currentOccupancy: number;
+  status: RoomStatus;
+  residentsIds: number[];
+  freePlaces: number;
 }
 
 interface RoomProposal {
   id: number;
-  status: 'Pending' | 'Accepted' | 'Rejected' | 'AcceptedByAdmin';
   room: Room;
-  potentialRoommates: Student[];
-  createdAt: Date;
+  roommates: Roommate[];
+  statusOfProposal: ProposalStatus;
+  timestamp: string;
 }
 
 @Component({
@@ -53,146 +73,103 @@ export class RoomProposalsComponent implements OnInit {
   loadProposals(): void {
     this.loading = true;
     
-    // In a real application, you would fetch from an API
-    // this.http.get<RoomProposal[]>(`${environment.apiUrl}roomProposals`)
-    //   .subscribe({ ... });
-    
-    // Using mock data for now
-    setTimeout(() => {
-      this.proposals = this.getMockProposals();
-      this.loading = false;
-    }, 1000);
+    this.http.get<RoomProposal[]>(`${environment.apiUrl}User/get_my_proposals`, { withCredentials: true })
+      .subscribe({
+        next: (data) => {
+          this.proposals = data;
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Error loading room proposals:', err);
+          this.errorMessage = 'Failed to load room proposals. Please try again.';
+          this.loading = false;
+        }
+      });
   }
 
   acceptProposal(proposal: RoomProposal): void {
-    this.loading = true;
-    
-    // In a real application:
-    // this.http.patch(`${environment.apiUrl}match-proposals/${proposal.id}/status`, { status: 'Accepted' })
-    //   .subscribe({ ... });
-    
-    // Mock implementation
-    setTimeout(() => {
-      proposal.status = 'Accepted';
-      this.successMessage = 'Proposal accepted! Waiting for administrator approval.';
-      this.loading = false;
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => this.successMessage = null, 3000);
-    }, 1000);
+    this.answerProposal(proposal, 0);
   }
 
   rejectProposal(proposal: RoomProposal): void {
+    this.answerProposal(proposal, 1);
+  }
+
+  private answerProposal(proposal: RoomProposal, status: number): void {
     this.loading = true;
     
-    // In a real implementation:
-    // this.http.patch(`${environment.apiUrl}match-proposals/${proposal.id}/status`, { status: 'Rejected' })
-    //   .subscribe({ ... });
+    const requestBody = {
+      proposalId: proposal.id,
+      status: status
+    };
     
-    // Mock implementation
-    setTimeout(() => {
-      proposal.status = 'Rejected';
-      this.successMessage = 'Proposal rejected successfully.';
-      this.loading = false;
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => this.successMessage = null, 3000);
-    }, 1000);
+    this.http.put(`${environment.apiUrl}User/answer_prop`, requestBody, { withCredentials: true })
+      .subscribe({
+        next: () => {
+          if (status === 0) {
+            proposal.statusOfProposal = ProposalStatus.Accepted;
+            this.successMessage = 'Proposal accepted! Waiting for administrator approval.';
+          } else {
+            proposal.statusOfProposal = ProposalStatus.Rejected;
+            this.successMessage = 'Proposal rejected successfully.';
+          }
+          
+          this.loading = false;
+          
+          // Clear success message after 3 seconds
+          setTimeout(() => this.successMessage = null, 3000);
+        },
+        error: (err) => {
+          console.error(`Error ${status === 0 ? 'accepting' : 'rejecting'} proposal:`, err);
+          this.errorMessage = `Failed to ${status === 0 ? 'accept' : 'reject'} proposal. Please try again.`;
+          this.loading = false;
+          setTimeout(() => this.errorMessage = null, 3000);
+        }
+      });
   }
 
-  getMockProposals(): RoomProposal[] {
-    return [
-      {
-        id: 1,
-        status: 'Pending',
-        room: {
-          id: 101,
-          number: '101',
-          floor: 1,
-          capacity: 2,
-          currentOccupancy: 1
-        },
-        potentialRoommates: [
-          {
-            id: 2,
-            email: 'anna.kowalska@example.com',
-            firstName: 'Anna',
-            lastName: 'Kowalska'
-          }
-        ],
-        createdAt: new Date('2025-03-15')
-      },
-      {
-        id: 2,
-        status: 'AcceptedByAdmin',
-        room: {
-          id: 203,
-          number: '203',
-          floor: 2,
-          capacity: 3,
-          currentOccupancy: 2
-        },
-        potentialRoommates: [
-          {
-            id: 3,
-            email: 'jan.nowak@example.com',
-            firstName: 'Jan',
-            lastName: 'Nowak'
-          },
-          {
-            id: 4,
-            email: 'maria.wójcik@example.com',
-            firstName: 'Maria',
-            lastName: 'Wójcik'
-          }
-        ],
-        createdAt: new Date('2025-03-10')
-      },
-      {
-        id: 3,
-        status: 'Accepted',
-        room: {
-          id: 305,
-          number: '305',
-          floor: 3,
-          capacity: 2,
-          currentOccupancy: 1
-        },
-        potentialRoommates: [
-          {
-            id: 5,
-            email: 'piotr.kowalczyk@example.com',
-            firstName: 'Piotr',
-            lastName: 'Kowalczyk'
-          }
-        ],
-        createdAt: new Date('2025-03-12')
-      }
-    ];
-  }
-
-  getStatusClass(status: string): string {
+  getStatusClass(status: ProposalStatus): string {
     switch (status) {
-      case 'Pending': return 'text-warning';
-      case 'Accepted': return 'text-primary';
-      case 'Rejected': return 'text-danger';
-      case 'AcceptedByAdmin': return 'text-success';
+      case ProposalStatus.Pending: return 'text-warning';
+      case ProposalStatus.Accepted: return 'text-primary';
+      case ProposalStatus.Rejected: return 'text-danger';
+      case ProposalStatus.RejectedByAdmin: return 'text-danger';
+      case ProposalStatus.AcceptedByAdmin: return 'text-success';
       default: return '';
     }
   }
 
-  getStatusText(status: string): string {
+  getStatusText(status: ProposalStatus): string {
     switch (status) {
-      case 'Pending': return 'Pending your response';
-      case 'Accepted': return 'Accepted (waiting for admin approval)';
-      case 'Rejected': return 'Rejected by you';
-      case 'AcceptedByAdmin': return 'Approved (final)';
-      default: return status;
+      case ProposalStatus.Pending: return 'Pending your response';
+      case ProposalStatus.Accepted: return 'Accepted (waiting for admin approval)';
+      case ProposalStatus.Rejected: return 'Rejected by you';
+      case ProposalStatus.RejectedByAdmin: return 'Rejected by administrator';
+      case ProposalStatus.AcceptedByAdmin: return 'Approved (final)';
+      default: return 'Unknown status';
+    }
+  }
+
+  getRoomStatusClass(status: RoomStatus): string {
+    switch (status) {
+      case RoomStatus.Available: return 'text-success';
+      case RoomStatus.Occupied: return 'text-danger';
+      case RoomStatus.UnderMaintenance: return 'text-warning';
+      default: return '';
+    }
+  }
+
+  getRoomStatusText(status: RoomStatus): string {
+    switch (status) {
+      case RoomStatus.Available: return 'Available';
+      case RoomStatus.Occupied: return 'Occupied';
+      case RoomStatus.UnderMaintenance: return 'Under Maintenance';
+      default: return 'Unknown';
     }
   }
 
   canAcceptOrReject(proposal: RoomProposal): boolean {
-    return proposal.status === 'Pending';
+    return proposal.statusOfProposal === ProposalStatus.Pending;
   }
 
   logout(): void {
