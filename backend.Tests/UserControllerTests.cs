@@ -12,7 +12,6 @@ using backend.Repositories;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 
-
 namespace backend.Tests.Controllers
 {
     public class UserControllerTests
@@ -43,8 +42,8 @@ namespace backend.Tests.Controllers
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
             _controller = new UserController(
-                _userRepoMock.Object, _proposalMock.Object);}
-
+                _userRepoMock.Object, _proposalMock.Object);
+        }
         [Fact]
         public async Task ChangeMyPreferences_ReturnsOk_WhenSuccessful()
         {
@@ -55,18 +54,6 @@ namespace backend.Tests.Controllers
 
             Assert.IsType<OkResult>(result);
         }
-
-        //[Fact]
-        //public async Task DisplayProfile_ReturnsUnauthorized_WhenEmailIsMissing()
-        //{
-        //    var emptyPrincipal = new ClaimsPrincipal(new ClaimsIdentity());
-        //    _httpContextAccessorMock.Setup(c => c.HttpContext)
-        //        .Returns(new DefaultHttpContext { User = emptyPrincipal });
-        //
-        //    var result = await _controller.DisplayProfile();
-        //
-        //    Assert.IsType<UnauthorizedResult>(result);
-        //}
 
         [Fact]
         public async Task DisplayProfile_ReturnsOk_WhenSuccessful()
@@ -105,15 +92,215 @@ namespace backend.Tests.Controllers
             Assert.IsType<OkResult>(result);
         }
 
-        //[Fact]
-        //public async Task GetForms_ReturnsUnauthorized_WhenEmailMissing()
-        //{
-        //    var emptyPrincipal = new ClaimsPrincipal(new ClaimsIdentity());
-        //    _httpContextAccessorMock.Setup(c => c.HttpContext)
-        //        .Returns(new DefaultHttpContext { User = emptyPrincipal });
-        //    var result = await _controller.GetForms();
-        //    Assert.IsType<UnauthorizedResult>(result);
-        //}
+        [Fact]
+        public async Task ChangeMyPreferences_ReturnsNotFound_WhenUserMissing()
+        {
+            var prefs = new UserPreferences();
+            _userRepoMock.Setup(r => r.ChangeUserPreferences(prefs))
+                         .ReturnsAsync(ErrorCodes.NotFound);
 
+            var result = await _controller.ChangeMyPreferences(prefs);
+
+            var nf = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("User not found.", nf.Value);
+        }
+
+        [Fact]
+        public async Task ChangeMyPreferences_ReturnsUnauthorized_WhenCookieFails()
+        {
+            var prefs = new UserPreferences();
+            _userRepoMock.Setup(r => r.ChangeUserPreferences(prefs))
+                         .ReturnsAsync(ErrorCodes.CannotRetrieveUserFromCookie);
+
+            var result = await _controller.ChangeMyPreferences(prefs);
+
+            var ua = Assert.IsType<UnauthorizedObjectResult>(result);
+            Assert.Equal("Cookie retrieval failed.", ua.Value);
+        }
+
+        [Fact]
+        public async Task ChangeMyPreferences_ReturnsBadRequest_WhenDbFails()
+        {
+            var prefs = new UserPreferences();
+            _userRepoMock.Setup(r => r.ChangeUserPreferences(prefs))
+                         .ReturnsAsync(ErrorCodes.UpdateUserDbFailed);
+
+            var result = await _controller.ChangeMyPreferences(prefs);
+
+            var br = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Db update failed.", br.Value);
+        }
+
+        [Fact]
+        public async Task DisplayProfile_ReturnsUnauthorized_WhenRepoSaysUnauthorized()
+        {
+            _userRepoMock.Setup(r => r.DisplayUserProfile())
+                         .Returns(Task.FromResult(
+                             Tuple.Create<ErrorCodes, ProfileDisplayDto?>(ErrorCodes.Unauthorized, null)
+                         ));
+
+            var result = await _controller.DisplayProfile();
+
+            Assert.IsType<UnauthorizedResult>(result);
+        }
+
+        [Fact]
+        public async Task DisplayProfile_ReturnsNotFound_WhenRepoSaysNotFound()
+        {
+            _userRepoMock.Setup(r => r.DisplayUserProfile())
+                         .Returns(Task.FromResult(
+                             Tuple.Create<ErrorCodes, ProfileDisplayDto?>(ErrorCodes.NotFound, null)
+                         ));
+
+            var result = await _controller.DisplayProfile();
+
+            var nf = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("User not found.", nf.Value);
+        }
+
+        [Fact]
+        public async Task ChangeProfile_ReturnsNotFound_WhenForbidden()
+        {
+            var dto = new UpdateUserDto();
+            _userRepoMock.Setup(r => r.ChangeUserProfile(dto))
+                         .ReturnsAsync(ErrorCodes.Forbidden);
+
+            var result = await _controller.ChangeProfile(dto);
+
+            var nf = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("Forbidden", nf.Value);
+        }
+
+
+        [Fact]
+        public async Task GetForms_ReturnsUnauthorized_WhenUnauthorized()
+        {
+            _userRepoMock
+                .Setup(r => r.GetUserForms())
+                .ReturnsAsync((ErrorCodes.Unauthorized, Array.Empty<FormDto>()));
+
+            Assert.IsType<UnauthorizedResult>(await _controller.GetForms());
+        }
+
+        [Fact]
+        public async Task GetForms_ReturnsNotFound_WhenEmpty()
+        {
+            _userRepoMock
+                .Setup(r => r.GetUserForms())
+                .ReturnsAsync((ErrorCodes.NotFound, Array.Empty<FormDto>()));
+
+            var nf = await _controller.GetForms();
+            Assert.IsType<NotFoundObjectResult>(nf);
+        }
+
+        [Fact]
+        public async Task GetForms_ReturnsOk_WithForms()
+        {
+            var arr = new[]
+            {
+        new FormDto
+        {
+            FormId     = 1,
+            NameOfForm = "Pierwszy formularz",
+            Questions  = new List<Question>()
+        },
+        new FormDto
+        {
+            FormId     = 2,
+            NameOfForm = "Drugi formularz",
+            Questions  = new List<Question>()
+        }
+    };
+            _userRepoMock
+                .Setup(r => r.GetUserForms())
+                .ReturnsAsync((ErrorCodes.Ok, arr));
+
+            var ok = await _controller.GetForms() as OkObjectResult;
+            Assert.Equal(arr, ok?.Value);
+        }
+
+        [Fact]
+        public async Task SubmitAnswer_ReturnsNotFound_WhenFormMissing()
+        {
+            var dto = new AnswerDto();
+            _userRepoMock.Setup(r => r.SubmitAnswerForForms(dto))
+                         .ReturnsAsync(ErrorCodes.NotFound);
+
+            var result = await _controller.SubmitAnswer(dto);
+
+            var nf = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("Form not found!", nf.Value);
+        }
+
+        [Fact]
+        public async Task SubmitAnswer_ReturnsBadRequest_WhenOptionInvalid()
+        {
+            var dto = new AnswerDto();
+            _userRepoMock.Setup(r => r.SubmitAnswerForForms(dto))
+                         .ReturnsAsync(ErrorCodes.BadRequest);
+
+            var result = await _controller.SubmitAnswer(dto);
+
+            var br = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Option doesn't correspond to question from form!", br.Value);
+        }
+
+        [Fact]
+        public async Task GetMyProposals_ReturnsUnauthorized_WhenUnauthorized()
+        {
+            _proposalMock
+              .Setup(p => p.ReturnUsersProposals())
+              .Returns(Task.FromResult(
+                  Tuple.Create<List<ProposalUserOutDto>, ErrorCodes>(null!, ErrorCodes.Unauthorized)
+              ));
+
+            var result = await _controller.GetMyProposals();
+
+            Assert.IsType<UnauthorizedResult>(result);
+        }
+
+        [Fact]
+        public async Task GetMyProposals_ReturnsBadRequest_WhenBadRequest()
+        {
+            _proposalMock
+              .Setup(p => p.ReturnUsersProposals())
+              .Returns(Task.FromResult(
+                  Tuple.Create<List<ProposalUserOutDto>, ErrorCodes>(null!, ErrorCodes.BadRequest)
+              ));
+
+            var result = await _controller.GetMyProposals();
+
+            var br = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(
+              "Something went wrong while fetching information about proposals!",
+              br.Value
+            );
+        }
+
+        [Fact]
+        public async Task AnswerProposal_ReturnsNotFound_WhenMissing()
+        {
+            var dto = new UserChangesStatusProposalDto();
+            _proposalMock.Setup(p => p.UserAnswersTheProposal(dto))
+                         .ReturnsAsync(ErrorCodes.NotFound);
+
+            var result = await _controller.AnswerProposal(dto);
+
+            var nf = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("Something went wrong in fetching proposal information!", nf.Value);
+        }
+
+        [Fact]
+        public async Task AnswerProposal_ReturnsBadRequest_WhenBadArgument()
+        {
+            var dto = new UserChangesStatusProposalDto();
+            _proposalMock.Setup(p => p.UserAnswersTheProposal(dto))
+                         .ReturnsAsync(ErrorCodes.BadArgument);
+
+            var result = await _controller.AnswerProposal(dto);
+
+            var br = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("it is not Your proposal!", br.Value);
+        }
     }
 }

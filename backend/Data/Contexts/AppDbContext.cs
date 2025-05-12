@@ -1,6 +1,7 @@
 using backend.Models.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Builder;
+using backend.Models;
 
 namespace backend.Data;
 
@@ -11,15 +12,21 @@ public class AppDbContext : DbContext
         
     }
     
+    public DbSet<Application> Applications { get; set; }
+    public DbSet<ApplicationAnswer> ApplicationAnswers { get; set; } 
     public DbSet<Answer> Answers {get; set;}
     public DbSet<Form> Forms {get; set;}
     public DbSet<Question> Questions {get; set;}
     public DbSet<OptionForQuestion> OptionsForQuestions {get; set;}
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Proposal> Proposals { get; set; }
+    public DbSet<Communication> Communications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Application>().ToTable("Applications");
+        modelBuilder.Entity<ApplicationAnswer>().ToTable("ApplicationAnswers");
+        modelBuilder.Entity<Communication>().ToTable("Communication");
         modelBuilder.Entity<Proposal>().ToTable("Proposals");
         modelBuilder.Entity<Room>().ToTable("Rooms");
         modelBuilder.Entity<Answer>().ToTable("Answers");
@@ -44,5 +51,11 @@ public class AppDbContext : DbContext
             {
                 j.HasKey("AnswerId", "OptionForQuestionId");
             });
+
+        modelBuilder.Entity<Application>()
+            .HasOne(a => a.Answer)
+            .WithOne(aa => aa.Application)
+            .HasForeignKey<ApplicationAnswer>(aa => aa.ApplicationAnswerId);
+        
     }
 }

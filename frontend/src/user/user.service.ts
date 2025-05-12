@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError, of, delay } from 'rxjs';
 import { environment } from '../environment/environment';
+import { Communication } from './notification/user-notifications/user-communications.component';
 
 export interface UserPreferences {
   displayFirstName: boolean;
@@ -58,9 +59,15 @@ export class UserService {
     );
   }
 
+  fetchCurrentUserCommunications(): Observable<Communication[]> {
+    return this.http.get<Communication[]>(`${this.apiUrl}/get_my_communications`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred';
-    
+
     if (error.error instanceof ErrorEvent) {
       // Client-side error
       errorMessage = `Error: ${error.error.message}`;
@@ -68,7 +75,7 @@ export class UserService {
       // Server-side error
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
-    
+
     console.error(errorMessage);
     return throwError(() => new Error(errorMessage));
   }

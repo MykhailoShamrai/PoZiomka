@@ -20,27 +20,53 @@
                         </h3>
                         <p class="text-muted mb-0">{{ userForm.value.email || 'user@example.com' }}</p>
                     </div>
-                    <div class="ms-auto d-flex">
-                        <a routerLink="/application" class="btn btn-outline-info me-2">
-                            <i class="bi bi-file-text me-2"></i>Application
+                  <div class="container mt-4">
+                    <div class="row row-cols-4 g-3">
+                      <div class="col">
+                        <a routerLink="/communications" class="btn menu-btn btn-primary d-flex flex-column align-items-center justify-content-center shadow-sm rounded p-3 h-100">
+                          <i class="bi bi-chat-square-text fs-2 mb-2"></i>
+                          <span>Communications</span>
                         </a>
-                        <a *ngIf="isAdmin" routerLink="/admin" class="btn btn-outline-warning me-2">
-                            <i class="bi bi-file-text me-2"></i>Admin page
+                      </div>
+                      <div class="col">
+                        <a routerLink="/application" class="btn menu-btn btn-secondary d-flex flex-column align-items-center justify-content-center shadow-sm rounded p-3 h-100">
+                          <i class="bi bi-file-earmark-text fs-2 mb-2"></i>
+                          <span>Application</span>
                         </a>
-                        <a routerLink="/forms" class="btn btn-outline-info me-2">
-                            <i class="bi bi-file-text me-2"></i>My Forms
+                      </div>
+                      <div class="col" *ngIf="isAdmin">
+                        <a routerLink="/admin" class="btn menu-btn btn-warning d-flex flex-column align-items-center justify-content-center shadow-sm rounded p-3 h-100">
+                          <i class="bi bi-shield-lock fs-2 mb-2"></i>
+                          <span>Admin Page</span>
                         </a>
-                        <a routerLink="/room-proposals" class="btn btn-outline-success me-2">
-                            <i class="bi bi-house-door me-2"></i>Room Proposals
+                      </div>
+                      <div class="col">
+                        <a routerLink="/forms" class="btn menu-btn btn-info d-flex flex-column align-items-center justify-content-center shadow-sm rounded p-3 h-100">
+                          <i class="bi bi-ui-checks fs-2 mb-2"></i>
+                          <span>My Forms</span>
                         </a>
-                        <button *ngIf="!editMode" (click)="toggleEditMode()" class="btn btn-outline-primary me-2"
-                            type="button">
-                            <i class="bi bi-pencil me-2"></i>Edit Profile
+                      </div>
+                      <div class="col">
+                        <a routerLink="/room-proposals" class="btn btn-success d-flex flex-column align-items-center justify-content-center shadow-sm rounded p-3 h-100">
+                          <i class="bi bi-house-check fs-2 mb-2"></i>
+                          <span>Room Proposals</span>
+                        </a>
+                      </div>
+                      <div class="col" *ngIf="!editMode">
+                        <button (click)="toggleEditMode()" class="btn menu-btn btn-dark d-flex flex-column align-items-center justify-content-center shadow-sm rounded p-3 h-100" type="button">
+                          <i class="bi bi-person-gear fs-2 mb-2"></i>
+                          <span>Edit Profile</span>
                         </button>
-                        <button (click)="logout()" class="btn btn-outline-danger" type="button">
-                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                      </div>
+                      <div class="col">
+                        <button (click)="logout()" class="btn menu-btn btn-danger d-flex flex-column align-items-center justify-content-center shadow-sm rounded p-3 h-100" type="button">
+                          <i class="bi bi-box-arrow-right fs-2 mb-2"></i>
+                          <span>Logout</span>
                         </button>
+                      </div>
+                      <div class="col" *ngIf="!isAdmin"></div>
                     </div>
+                  </div>
                 </div>
 
                 <!-- Alerts -->

@@ -1,0 +1,182 @@
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Administrator Panel - User Management</h2>
+                <div>
+                    <a routerLink="/admin" class="btn btn-outline-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Admin
+                    </a>
+                    <button (click)="logout()" class="btn btn-outline-danger">
+                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading state -->
+            <div *ngIf="loading" class="text-center my-5">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading users...</p>
+            </div>
+
+            <!-- Success and error messages -->
+            <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ successMessage }}
+                <button type="button" class="btn-close" (click)="successMessage = null"></button>
+            </div>
+
+            <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ errorMessage }}
+                <button type="button" class="btn-close" (click)="errorMessage = null"></button>
+            </div>
+
+            <!-- Main content when not loading -->
+            <div *ngIf="!loading">
+                <div class="row">
+                    <!-- Left side - User list -->
+                    <div class="col-md-8">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h3 class="h5 mb-0">User Directory</h3>
+                                <div class="input-group w-50">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" class="form-control" placeholder="Search users..."
+                                        [(ngModel)]="searchTerm">
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <!-- User list table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Room</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngIf="filteredUsers.length === 0">
+                                                <td colspan="5" class="text-center py-3">
+                                                    No users match the current search
+                                                </td>
+                                            </tr>
+                                            <tr *ngFor="let user of filteredUsers">
+                                                <td>{{ user.id }}</td>
+                                                <td>{{ user.firstName }} {{ user.lastName }}</td>
+                                                <td>{{ user.email }}</td>
+                                                <td>
+                                                    <span *ngIf="user.roomNumber">Room {{ user.roomNumber }}</span>
+                                                    <span *ngIf="!user.roomNumber" class="text-muted">Not
+                                                        assigned</span>
+                                                </td>
+                                                <td>
+                                                    <button *ngIf="user.roomId" class="btn btn-sm btn-outline-danger"
+                                                        (click)="removeUser(user)">
+                                                        <i class="bi bi-house-dash"></i> Remove from Room
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination would go here if needed -->
+                                <div class="p-3 border-top">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">Showing {{ filteredUsers.length }} of {{ users.length
+                                            }}
+                                            users</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right side - User management -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h3 class="h5 mb-0">Room Assignment</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex gap-2 mb-3">
+                                    <button class="btn btn-outline-primary w-100" (click)="showAddUserForm()">
+                                        <i class="bi bi-person-plus me-2"></i>Add User to Room
+                                    </button>
+                                    <button class="btn btn-outline-danger w-100" (click)="showRemoveUserForm()">
+                                        <i class="bi bi-person-dash me-2"></i>Remove User from Room
+                                    </button>
+                                </div>
+
+                                <!-- Add User Form -->
+                                <div *ngIf="addingUser" class="card border p-3 mb-3">
+                                    <h4 class="h6 mb-3">Add User to Room</h4>
+                                    <form (submit)="addUserToRoom()">
+                                        <div class="mb-3">
+                                            <label for="userEmail" class="form-label">User Email</label>
+                                            <input type="email" class="form-control" id="userEmail"
+                                                [(ngModel)]="userEmail" name="userEmail" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="selectedRoom" class="form-label">Select Room</label>
+                                            <select class="form-select" id="selectedRoom"
+                                                [(ngModel)]="selectedRoomForUser" name="selectedRoom" required>
+                                                <option [ngValue]="null">Select a room</option>
+                                                <option *ngFor="let room of rooms" [ngValue]="room.id"
+                                                    [disabled]="room.freePlaces === 0">
+                                                    Room {{ room.number }} ({{ room.freePlaces }} free places)
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-secondary"
+                                                (click)="cancelUserOperation()">Cancel</button>
+                                            <button type="submit" class="btn btn-primary"
+                                                [disabled]="!userEmail || !selectedRoomForUser">Add User</button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Remove User Form -->
+                                <div *ngIf="removingUser" class="card border p-3 mb-3">
+                                    <h4 class="h6 mb-3">Remove User from Room</h4>
+                                    <form (submit)="removeUserFromRoom()">
+                                        <div class="mb-3">
+                                            <label for="removeUserEmail" class="form-label">User Email</label>
+                                            <input type="email" class="form-control" id="removeUserEmail"
+                                                [(ngModel)]="userEmail" name="removeUserEmail" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="removeSelectedRoom" class="form-label">Select Room</label>
+                                            <select class="form-select" id="removeSelectedRoom"
+                                                [(ngModel)]="selectedRoomForUser" name="removeSelectedRoom" required>
+                                                <option [ngValue]="null">Select a room</option>
+                                                <option *ngFor="let room of rooms" [ngValue]="room.id">
+                                                    Room {{ room.number }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-secondary"
+                                                (click)="cancelUserOperation()">Cancel</button>
+                                            <button type="submit" class="btn btn-danger"
+                                                [disabled]="!userEmail || !selectedRoomForUser">Remove User</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

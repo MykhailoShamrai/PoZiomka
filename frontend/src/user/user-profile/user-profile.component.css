@@ -59,3 +59,13 @@
         font-size: 2rem;
     }
 }
+
+.menu-btn {
+  min-height: 120px;
+  min-width: 183px;
+  transition: transform 0.2s;
+}
+
+.menu-btn:hover {
+  transform: scale(1.05);
+}

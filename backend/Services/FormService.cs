@@ -24,7 +24,7 @@ public class FormService : IFormsInterface
             return false;
         await _appDbContext.AddAsync(form);
         var res = await _appDbContext.SaveChangesAsync();
-        return res > 0;   
+        return res > 0;
     }
 
     public async Task<bool> AddNewObligatoryQuestionToForm(AddQuestionDto dto)
@@ -113,7 +113,7 @@ public class FormService : IFormsInterface
             .Include(f => f.Questions)
             .FirstAsync();
     }
-    
+
     public async Task<List<Question>> FindQuestionsForForm(int formId)
     {
         return await _appDbContext.Questions
@@ -197,7 +197,7 @@ public class FormService : IFormsInterface
             .Where(a => a.UserId == userId && a.CorrespondingForm.FormId == form.FormId && a.Status == AnswerStatus.Editing)
             .Include(a => a.ChosenOptions)
             .FirstOrDefaultAsync();
-        
+
         if (answerThatIsntComplete is null)
         {
             var answer = new Answer

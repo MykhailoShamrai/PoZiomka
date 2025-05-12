@@ -33,7 +33,7 @@ public class UserRepositoryTests
      new Mock<IServiceProvider>().Object,
      new Mock<ILogger<UserManager<User>>>().Object);
 
-    _dbContextMock = new Mock<AppDbContext>(new DbContextOptions<AppDbContext>());
+        _dbContextMock = new Mock<AppDbContext>(new DbContextOptions<AppDbContext>());
 
         _formServiceMock = new Mock<IFormsInterface>();
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
@@ -41,7 +41,8 @@ public class UserRepositoryTests
         _repository = new UserRepository(
             _userManagerMock.Object,
             _formServiceMock.Object,
-            _httpContextAccessorMock.Object
+            _httpContextAccessorMock.Object,
+            _dbContextMock.Object
         );
     }
 
@@ -86,7 +87,7 @@ public class UserRepositoryTests
     public async Task ChangeUserPreferences_ReturnsUnauthorized_WhenNoEmail()
     {
         _httpContextAccessorMock.Setup(x => x.HttpContext)
-            .Returns(new DefaultHttpContext()); // Brak User.Claims
+            .Returns(new DefaultHttpContext());
 
         var result = await _repository.ChangeUserPreferences(new UserPreferences());
 
@@ -108,29 +109,29 @@ public class UserRepositoryTests
     [Fact]
     public async Task GetUserForms_ReturnsForms_WhenUserExists()
     {
-    var userEmail = "email@test.com";
-    var user = new User { Email = userEmail };
+        var userEmail = "email@test.com";
+        var user = new User { Email = userEmail };
 
-    var claims = new List<Claim>
+        var claims = new List<Claim>
     {
         new Claim(ClaimTypes.Email, userEmail)
     };
-    var identity = new ClaimsIdentity(claims, "TestAuthType");
-    var claimsPrincipal = new ClaimsPrincipal(identity);
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var claimsPrincipal = new ClaimsPrincipal(identity);
 
-    var context = new DefaultHttpContext
-    {
-        User = claimsPrincipal
-    };
-    _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(context);
+        var context = new DefaultHttpContext
+        {
+            User = claimsPrincipal
+        };
+        _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(context);
 
-    _userManagerMock.Setup(m => m.FindByEmailAsync(userEmail)).ReturnsAsync(user);
-    _formServiceMock.Setup(f => f.GetAll()).ReturnsAsync(Array.Empty<Form>());
+        _userManagerMock.Setup(m => m.FindByEmailAsync(userEmail)).ReturnsAsync(user);
+        _formServiceMock.Setup(f => f.GetAll()).ReturnsAsync(Array.Empty<Form>());
 
-    var result = await _repository.GetUserForms();
+        var result = await _repository.GetUserForms();
 
-    Assert.Equal(ErrorCodes.Ok, result.Item1);
-    Assert.NotNull(result.Item2);
+        Assert.Equal(ErrorCodes.Ok, result.Item1);
+        Assert.NotNull(result.Item2);
     }
 
     [Fact]
