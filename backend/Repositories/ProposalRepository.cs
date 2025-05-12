@@ -140,7 +140,6 @@ public class ProposalRepository : IProposalInterface
         {
                 proposalDtos.Add(await ProposalToUserDto(p, currentUser.Id));
         } 
-
         if (proposalDtos is null)
             return new Tuple<List<ProposalUserOutDto>, ErrorCodes>(new List<ProposalUserOutDto>(), ErrorCodes.BadRequest);
         
@@ -183,6 +182,7 @@ public class ProposalRepository : IProposalInterface
             proposal.AdminStatus = AdminStatus.Pending;
             communication.Type = CommunicationType.FAILURE;
             communication.Description = "Your proposal was rejected by one of the roommates";
+
         }
         else if(CheckIfAllRoommatesAgree(proposal))
         {
@@ -256,6 +256,7 @@ public class ProposalRepository : IProposalInterface
 
         var res = await _appDbContext.SaveChangesAsync();
         _communicationSender.CreateCommunication(communication, proposal.RoommatesIds);
+
         if (res > 0)
             return ErrorCodes.Ok;
         return ErrorCodes.BadRequest;

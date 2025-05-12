@@ -44,6 +44,7 @@ namespace backend.Tests.Controllers
             _controller = new UserController(
                 _userRepoMock.Object, _proposalMock.Object);
         }
+                _userRepoMock.Object, _proposalMock.Object);}
 
         [Fact]
         public async Task ChangeMyPreferences_ReturnsOk_WhenSuccessful()
