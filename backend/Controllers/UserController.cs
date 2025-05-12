@@ -49,16 +49,16 @@ public class UserController : ControllerBase
     {
         var (code, profile) = await _userRepository.DisplayUserProfile();
         switch (code)
-{
-        case ErrorCodes.Unauthorized:
-            return Unauthorized();
-        case ErrorCodes.NotFound:
-            return NotFound("User not found.");
-        case ErrorCodes.Ok:
-            return Ok(profile);
-        default:
-            throw new KeyNotFoundException();
-}
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.NotFound:
+                return NotFound("User not found.");
+            case ErrorCodes.Ok:
+                return Ok(profile);
+            default:
+                throw new KeyNotFoundException();
+        }
     }
 
     [HttpPut]
@@ -104,7 +104,7 @@ public class UserController : ControllerBase
     {
         var errorCode = await _userRepository.SubmitAnswerForForms(answerDto);
 
-        switch(errorCode)
+        switch (errorCode)
         {
             case ErrorCodes.Unauthorized:
                 return Unauthorized();
@@ -115,7 +115,7 @@ public class UserController : ControllerBase
             case ErrorCodes.BadRequest:
                 return BadRequest("Option doesn't correspond to question from form!");
             default:
-                throw new KeyNotFoundException();    
+                throw new KeyNotFoundException();
         }
     }
 
@@ -125,12 +125,12 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetMyProposals()
     {
         var (list, errorCode) = await _proposalInterface.ReturnUsersProposals();
-        switch(errorCode)
+        switch (errorCode)
         {
             case ErrorCodes.Unauthorized:
                 return Unauthorized();
             case ErrorCodes.BadRequest:
-                return BadRequest("Something went wrong while fethcing information about proposals!");
+                return BadRequest("Something went wrong while fetching information about proposals!");
             case ErrorCodes.Ok:
                 return Ok(list);
         }
@@ -158,14 +158,14 @@ public class UserController : ControllerBase
         }
         return BadRequest("Something went wrong while changing data!");
     }
-    
+
     [HttpGet]
     [Authorize]
     [Route("get_my_communications")]
     public async Task<IActionResult> GetMyCommunications()
     {
         var (errorCode, list) = await _userRepository.GetCurrentUserCommunications();
-        switch(errorCode)
+        switch (errorCode)
         {
             case ErrorCodes.Unauthorized:
                 return Unauthorized();
