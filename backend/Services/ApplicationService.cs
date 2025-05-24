@@ -16,8 +16,8 @@ public class ApplicationService : IApplicationInterface
 {
     private readonly AppDbContext _appDbContext;
     private readonly UserManager<User> _userManager;
-    private readonly HttpContextAccessor _contextAccessor;
-    public ApplicationService(AppDbContext appDbContext, UserManager<User> userManager, HttpContextAccessor contextAccessor)
+    private readonly IHttpContextAccessor _contextAccessor;
+    public ApplicationService(AppDbContext appDbContext, UserManager<User> userManager, IHttpContextAccessor contextAccessor)
     {
         _appDbContext = appDbContext;
         _userManager = userManager;
@@ -111,7 +111,7 @@ public class ApplicationService : IApplicationInterface
         var admin = await _userManager.FindByEmailAsync(email!);
         if (admin is null)
             return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.Unauthorized, new ApplicationAnswerOutLongDto());
-
+        
         var answer = await _appDbContext.ApplicationAnswers.Where(a => a.ApplicationAnswerId == applicationAnswerId).FirstOrDefaultAsync();
         if (answer is null)
             return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.NotFound, new ApplicationAnswerOutLongDto());
@@ -153,7 +153,7 @@ public class ApplicationService : IApplicationInterface
         return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.Ok, applications.Select(a => new ApplicationOutShortDto
         {
             ApplicationId = a.ApplicationId,
-            UserId = user.Id,
+            UserId = a.UserId,
             Status = a.Status
         }).ToList());
     }
@@ -196,5 +196,28 @@ public class ApplicationService : IApplicationInterface
             UserId = a.UserId,
             Status = a.Status
         }).ToList());
+    }
+
+    public async Task<Tuple<ErrorCodes, ApplicationAnswerOutLongDto>> ReturnAnswerForSpecificApplication(int applicationId)
+    {
+        var email = _contextAccessor.HttpContext?.User?.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        if (email is null)
+            return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.Unauthorized, new ApplicationAnswerOutLongDto());
+
+        var user = await _userManager.FindByEmailAsync(email!);
+        if (user is null)
+            return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.Unauthorized, new ApplicationAnswerOutLongDto());
+
+        var application = await _appDbContext.Applications.Include(a => a.Answer).Where(a => a.ApplicationId == applicationId && a.UserId == user.Id && a.Status == ApplicationStatus.Considered).
+                                                                FirstOrDefaultAsync();
+        if (application is null)
+            return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.NotFound, new ApplicationAnswerOutLongDto());
+
+        return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.Ok, new ApplicationAnswerOutLongDto
+        {
+            ApplicationAnswerid = application.Answer!.ApplicationAnswerId,
+            Description = application.Answer!.Description
+        });
     }
 }

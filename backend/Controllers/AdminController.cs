@@ -344,7 +344,7 @@ public class AdminController : ControllerBase
 
     [HttpGet]
     [Route("specific_application_answer")]
-    public async Task<IActionResult> GetSpecificAnswerInformation([FromBody] int applicationAnswerId)
+    public async Task<IActionResult> GetSpecificAnswerInformation([FromQuery] int applicationAnswerId)
     {
         var res = await _applicationInterface.ReturnInformationAboutSpecificAnswer(applicationAnswerId);
         var errorCode = res.Item1;
@@ -355,7 +355,7 @@ public class AdminController : ControllerBase
             case ErrorCodes.NotFound:
                 return NotFound();
             case ErrorCodes.Forbidden:
-                return Forbid("You have no access for this answer!");
+                return Forbid();
             case ErrorCodes.Ok:
                 return Ok(res.Item2);
         }
@@ -380,10 +380,10 @@ public class AdminController : ControllerBase
         return BadRequest("Error while fetching ingormation about users applications!");
     }
 
-        [HttpGet]
+    [HttpGet]
     [Authorize]
     [Route("application_spicific_info")]
-    public async Task<IActionResult> GetApplicationSpecificInfo([FromBody] int applicationId)
+    public async Task<IActionResult> GetApplicationSpecificInfo([FromQuery] int applicationId)
     {
         var res = await _applicationInterface.ReturnInformationAboutSpecificApplication(applicationId);
         var errorCode = res.Item1;
@@ -394,7 +394,7 @@ public class AdminController : ControllerBase
             case ErrorCodes.NotFound:
                 return NotFound("There is no application with such id!");
             case ErrorCodes.Forbidden:
-                return Forbid("Access forbidden!");
+                return Forbid();
             case ErrorCodes.Ok:
                 return Ok(res.Item2);
         }

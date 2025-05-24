@@ -217,7 +217,7 @@ public class UserController : ControllerBase
     [HttpGet]
     [Authorize]
     [Route("application_spicific_info")]
-    public async Task<IActionResult> GetApplicationSpecificInfo([FromBody] int applicationId)
+    public async Task<IActionResult> GetApplicationSpecificInfo([FromQuery] int applicationId)
     {
         var res = await _applicationService.ReturnInformationAboutSpecificApplication(applicationId);
         var errorCode = res.Item1;
@@ -228,10 +228,32 @@ public class UserController : ControllerBase
             case ErrorCodes.NotFound:
                 return NotFound("There is no application with such id!");
             case ErrorCodes.Forbidden:
-                return Forbid("Access forbidden!");
+                return Forbid();
             case ErrorCodes.Ok:
                 return Ok(res.Item2);
         }
-        return BadRequest("Error while fetching ingormation about this application!");
+        return BadRequest("Error while fetching information about this application!");
     }
+
+    [HttpGet]
+    [Authorize]
+    [Route("answer_for_application")]
+    public async Task<IActionResult> GetApplicationAnswer([FromQuery] int applicationId)
+    {
+        var res = await _applicationService.ReturnAnswerForSpecificApplication(applicationId);
+        var errorCode = res.Item1;
+        switch (errorCode)
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.NotFound:
+                return NotFound();
+            case ErrorCodes.Forbidden:
+                return Forbid();
+            case ErrorCodes.Ok:
+                return Ok(res.Item2);
+        }
+        return BadRequest("Error while fetching information about this asnwer!");
+    }
+
 }
