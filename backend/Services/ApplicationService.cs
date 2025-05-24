@@ -17,7 +17,7 @@ public class ApplicationService : IApplicationInterface
     private readonly AppDbContext _appDbContext;
     private readonly UserManager<User> _userManager;
     private readonly HttpContextAccessor _contextAccessor;
-    public ApplicationService (AppDbContext appDbContext, UserManager<User> userManager, HttpContextAccessor contextAccessor)
+    public ApplicationService(AppDbContext appDbContext, UserManager<User> userManager, HttpContextAccessor contextAccessor)
     {
         _appDbContext = appDbContext;
         _userManager = userManager;
@@ -34,12 +34,13 @@ public class ApplicationService : IApplicationInterface
         var admin = await _userManager.FindByEmailAsync(email!);
         if (admin is null)
             return ErrorCodes.Unauthorized;
-        
+
         var application = await _appDbContext.Applications.Where(app => app.ApplicationId == dto.ApplicationId).FirstOrDefaultAsync();
         if (application is null)
             return ErrorCodes.NotFound;
-        
-        ApplicationAnswer answ = new ApplicationAnswer{
+
+        ApplicationAnswer answ = new ApplicationAnswer
+        {
             AdminId = admin.Id,
             Application = application,
             Description = dto.Description
@@ -64,7 +65,8 @@ public class ApplicationService : IApplicationInterface
         if (user is null)
             return ErrorCodes.Unauthorized;
 
-        Application application = new Application{
+        Application application = new Application
+        {
             UserId = user.Id,
             Description = dto.Description,
         };
@@ -74,5 +76,25 @@ public class ApplicationService : IApplicationInterface
         if (res > 0)
             return ErrorCodes.Ok;
         return ErrorCodes.BadRequest;
+    }
+    
+        public Task<Tuple<ErrorCodes, List<ApplicationAnswerOutShortDto>>> ReturnAdminsAnswers()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Tuple<ErrorCodes, ApplicationAnswerOutLongDto>> ReturnInformationAboutSpecificAnswer(int applicationAnswerId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Tuple<ErrorCodes, ApplicationOutLongDto>> ReturnInformationAboutSpecificApplication(int applicationId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Tuple<ErrorCodes, List<ApplicationOutShortDto>>> ReturnUsersApplications()
+    {
+        throw new NotImplementedException();
     }
 }

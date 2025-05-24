@@ -14,11 +14,13 @@ public class UserController : ControllerBase
 {
     private readonly IUserInterface _userRepository;
     private readonly IProposalInterface _proposalInterface;
+    private readonly IApplicationInterface _applicationService;
 
-    public UserController(IUserInterface userInterface, IProposalInterface proposalInterface)
+    public UserController(IUserInterface userInterface, IProposalInterface proposalInterface, IApplicationInterface applicationInterface)
     {
         _userRepository = userInterface;
         _proposalInterface = proposalInterface;
+        _applicationService = applicationInterface;
     }
 
     [HttpPost]
@@ -173,5 +175,23 @@ public class UserController : ControllerBase
                 return Ok(list);
         }
         return BadRequest("Something went wrong while fethcing information about proposals!");
+    }
+
+    [HttpPut]
+    [Authorize]
+    [Route("send_application")]
+    public async Task<IActionResult> SendApplication([FromBody] ApplicationInDto dto)
+    {
+        var errorCode = await _applicationService.SendAnApplication(dto);
+        switch (errorCode)
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong while adding information about application!");
+            case ErrorCodes.Ok:
+                return Ok();
+        }
+        return BadRequest("Something went wrong while adding information about application!");
     }
 }
