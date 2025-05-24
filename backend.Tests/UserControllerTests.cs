@@ -21,6 +21,7 @@ namespace backend.Tests.Controllers
         private readonly Mock<AppDbContext> _dbContextMock;
         private readonly Mock<IProposalInterface> _proposalMock;
         private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        private readonly Mock<IApplicationInterface> _applicationInterface;
         private readonly UserController _controller;
 
         public UserControllerTests()
@@ -40,9 +41,10 @@ namespace backend.Tests.Controllers
             _proposalMock = new Mock<IProposalInterface>();
             _dbContextMock = new Mock<AppDbContext>(new DbContextOptions<AppDbContext>());
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            _applicationInterface = new Mock<IApplicationInterface>();
 
             _controller = new UserController(
-                _userRepoMock.Object, _proposalMock.Object);
+                _userRepoMock.Object, _proposalMock.Object, _applicationInterface.Object);
         }
         [Fact]
         public async Task ChangeMyPreferences_ReturnsOk_WhenSuccessful()
