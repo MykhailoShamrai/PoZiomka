@@ -77,24 +77,101 @@ public class ApplicationService : IApplicationInterface
             return ErrorCodes.Ok;
         return ErrorCodes.BadRequest;
     }
-    
-        public Task<Tuple<ErrorCodes, List<ApplicationAnswerOutShortDto>>> ReturnAdminsAnswers()
+
+    public async Task<Tuple<ErrorCodes, List<ApplicationAnswerOutShortDto>>> ReturnAdminsAnswers()
     {
-        throw new NotImplementedException();
+        var email = _contextAccessor.HttpContext?.User?.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        if (email is null)
+            return new Tuple<ErrorCodes, List<ApplicationAnswerOutShortDto>>(ErrorCodes.Unauthorized, new List<ApplicationAnswerOutShortDto>());
+
+        var admin = await _userManager.FindByEmailAsync(email!);
+        if (admin is null)
+            return new Tuple<ErrorCodes, List<ApplicationAnswerOutShortDto>>(ErrorCodes.Unauthorized, new List<ApplicationAnswerOutShortDto>());
+
+        var answers = await _appDbContext.ApplicationAnswers.Include(a => a.Application).Where(a => a.AdminId == admin.Id).ToListAsync();
+        if (answers is null)
+            return new Tuple<ErrorCodes, List<ApplicationAnswerOutShortDto>>(ErrorCodes.NotFound, new List<ApplicationAnswerOutShortDto>());
+
+        return new Tuple<ErrorCodes, List<ApplicationAnswerOutShortDto>>(ErrorCodes.Ok, answers.Select(a => new ApplicationAnswerOutShortDto
+                                                                                                        {
+                                                                                                            ApplicationAnswerId = a.ApplicationAnswerId,
+                                                                                                            ApplicationId = a.Application.ApplicationId
+                                                                                                        }).ToList());
     }
 
-    public Task<Tuple<ErrorCodes, ApplicationAnswerOutLongDto>> ReturnInformationAboutSpecificAnswer(int applicationAnswerId)
+    public async Task<Tuple<ErrorCodes, ApplicationAnswerOutLongDto>> ReturnInformationAboutSpecificAnswer(int applicationAnswerId)
     {
-        throw new NotImplementedException();
+        // Here I'll check if I can give an Answer for admin. I don't want that admin 1 can have answer from admin 2
+        var email = _contextAccessor.HttpContext?.User?.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        if (email is null)
+            return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.Unauthorized, new ApplicationAnswerOutLongDto());
+
+        var admin = await _userManager.FindByEmailAsync(email!);
+        if (admin is null)
+            return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.Unauthorized, new ApplicationAnswerOutLongDto());
+
+        var answer = await _appDbContext.ApplicationAnswers.Where(a => a.ApplicationAnswerId == applicationAnswerId).FirstOrDefaultAsync();
+        if (answer is null)
+            return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.NotFound, new ApplicationAnswerOutLongDto());
+
+        if (answer.AdminId != admin.Id)
+            return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.Forbidden, new ApplicationAnswerOutLongDto());
+
+        return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.Ok, new ApplicationAnswerOutLongDto
+                                                                                                        {
+                                                                                                            ApplicationAnswerid = answer.ApplicationAnswerId,
+                                                                                                            Description = answer.Description
+                                                                                                        });
     }
 
-    public Task<Tuple<ErrorCodes, ApplicationOutLongDto>> ReturnInformationAboutSpecificApplication(int applicationId)
+    public async Task<Tuple<ErrorCodes, List<ApplicationOutShortDto>>> ReturnUsersApplications()
     {
-        throw new NotImplementedException();
-    }
+        var email = _contextAccessor.HttpContext?.User?.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        if (email is null)
+            return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.Unauthorized, new List<ApplicationOutShortDto>());
 
-    public Task<Tuple<ErrorCodes, List<ApplicationOutShortDto>>> ReturnUsersApplications()
+        var user = await _userManager.FindByEmailAsync(email!);
+        if (user is null)
+            return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.Unauthorized, new List<ApplicationOutShortDto>());
+
+        var applications = await _appDbContext.Applications.Where(a => a.UserId == user.Id).ToListAsync();
+        if (applications is null)
+            return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.NotFound, new List<ApplicationOutShortDto>());
+
+        return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.Ok, applications.Select(a => new ApplicationOutShortDto
+                                                                                                    {
+                                                                                                        ApplicationId = a.ApplicationId,
+                                                                                                        UserId = user.Id,
+                                                                                                        Status = a.Status
+                                                                                                    }).ToList());
+    }
+    public async Task<Tuple<ErrorCodes, ApplicationOutLongDto>> ReturnInformationAboutSpecificApplication(int applicationId)
     {
-        throw new NotImplementedException();
+        var email = _contextAccessor.HttpContext?.User?.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        if (email is null)
+            return new Tuple<ErrorCodes, ApplicationOutLongDto>(ErrorCodes.Unauthorized, new ApplicationOutLongDto());
+
+        var user = await _userManager.FindByEmailAsync(email!);
+        if (user is null)
+            return new Tuple<ErrorCodes, ApplicationOutLongDto>(ErrorCodes.Unauthorized, new ApplicationOutLongDto());
+
+        var application = await _appDbContext.Applications.Where(a => a.ApplicationId == applicationId).FirstOrDefaultAsync();
+        if (application is null)
+            return new Tuple<ErrorCodes, ApplicationOutLongDto>(ErrorCodes.NotFound, new ApplicationOutLongDto());
+
+        if (application.UserId != user.Id)
+            return new Tuple<ErrorCodes, ApplicationOutLongDto>(ErrorCodes.Forbidden, new ApplicationOutLongDto());
+
+        return new Tuple<ErrorCodes, ApplicationOutLongDto>(ErrorCodes.Ok, new ApplicationOutLongDto
+                                                                                                    {
+                                                                                                        ApplicationId = application.ApplicationId,
+                                                                                                        UserId = user.Id,
+                                                                                                        Description = application.Description,
+                                                                                                        Status = application.Status
+                                                                                                    });
     }
 }
