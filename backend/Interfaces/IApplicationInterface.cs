@@ -13,4 +13,5 @@ public interface IApplicationInterface
     public Task<Tuple<ErrorCodes, ApplicationOutLongDto>> ReturnInformationAboutSpecificApplication(int applicationId);
     public Task<Tuple<ErrorCodes, List<ApplicationAnswerOutShortDto>>> ReturnAdminsAnswers();
     public Task<Tuple<ErrorCodes, ApplicationAnswerOutLongDto>> ReturnInformationAboutSpecificAnswer(int applicationAnswerId);
+    public Task<Tuple<ErrorCodes, List<ApplicationOutShortDto>>> ReturnAllNotConsideredApplications();
 }

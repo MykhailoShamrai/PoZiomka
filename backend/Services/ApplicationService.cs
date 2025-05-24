@@ -94,10 +94,10 @@ public class ApplicationService : IApplicationInterface
             return new Tuple<ErrorCodes, List<ApplicationAnswerOutShortDto>>(ErrorCodes.NotFound, new List<ApplicationAnswerOutShortDto>());
 
         return new Tuple<ErrorCodes, List<ApplicationAnswerOutShortDto>>(ErrorCodes.Ok, answers.Select(a => new ApplicationAnswerOutShortDto
-                                                                                                        {
-                                                                                                            ApplicationAnswerId = a.ApplicationAnswerId,
-                                                                                                            ApplicationId = a.Application.ApplicationId
-                                                                                                        }).ToList());
+        {
+            ApplicationAnswerId = a.ApplicationAnswerId,
+            ApplicationId = a.Application.ApplicationId
+        }).ToList());
     }
 
     public async Task<Tuple<ErrorCodes, ApplicationAnswerOutLongDto>> ReturnInformationAboutSpecificAnswer(int applicationAnswerId)
@@ -120,10 +120,10 @@ public class ApplicationService : IApplicationInterface
             return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.Forbidden, new ApplicationAnswerOutLongDto());
 
         return new Tuple<ErrorCodes, ApplicationAnswerOutLongDto>(ErrorCodes.Ok, new ApplicationAnswerOutLongDto
-                                                                                                        {
-                                                                                                            ApplicationAnswerid = answer.ApplicationAnswerId,
-                                                                                                            Description = answer.Description
-                                                                                                        });
+        {
+            ApplicationAnswerid = answer.ApplicationAnswerId,
+            Description = answer.Description
+        });
     }
 
     public async Task<Tuple<ErrorCodes, List<ApplicationOutShortDto>>> ReturnUsersApplications()
@@ -137,16 +137,25 @@ public class ApplicationService : IApplicationInterface
         if (user is null)
             return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.Unauthorized, new List<ApplicationOutShortDto>());
 
-        var applications = await _appDbContext.Applications.Where(a => a.UserId == user.Id).ToListAsync();
+        var roles = await _userManager.GetRolesAsync(user);
+        List<Application> applications;
+        if (roles.Contains("Admin"))
+        {
+            applications = await _appDbContext.Applications.Where(a => a.Status != ApplicationStatus.Considered).ToListAsync();
+        }
+        else
+        {
+            applications = await _appDbContext.Applications.Where(a => a.UserId == user.Id).ToListAsync();
+        }
         if (applications is null)
             return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.NotFound, new List<ApplicationOutShortDto>());
 
         return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.Ok, applications.Select(a => new ApplicationOutShortDto
-                                                                                                    {
-                                                                                                        ApplicationId = a.ApplicationId,
-                                                                                                        UserId = user.Id,
-                                                                                                        Status = a.Status
-                                                                                                    }).ToList());
+        {
+            ApplicationId = a.ApplicationId,
+            UserId = user.Id,
+            Status = a.Status
+        }).ToList());
     }
     public async Task<Tuple<ErrorCodes, ApplicationOutLongDto>> ReturnInformationAboutSpecificApplication(int applicationId)
     {
@@ -163,15 +172,29 @@ public class ApplicationService : IApplicationInterface
         if (application is null)
             return new Tuple<ErrorCodes, ApplicationOutLongDto>(ErrorCodes.NotFound, new ApplicationOutLongDto());
 
-        if (application.UserId != user.Id)
+        var roles = await _userManager.GetRolesAsync(user);
+        if (!roles.Contains("Admin") && application.UserId != user.Id)
             return new Tuple<ErrorCodes, ApplicationOutLongDto>(ErrorCodes.Forbidden, new ApplicationOutLongDto());
 
         return new Tuple<ErrorCodes, ApplicationOutLongDto>(ErrorCodes.Ok, new ApplicationOutLongDto
-                                                                                                    {
-                                                                                                        ApplicationId = application.ApplicationId,
-                                                                                                        UserId = user.Id,
-                                                                                                        Description = application.Description,
-                                                                                                        Status = application.Status
-                                                                                                    });
+        {
+            ApplicationId = application.ApplicationId,
+            UserId = user.Id,
+            Description = application.Description,
+            Status = application.Status
+        });
+    }
+
+    public async Task<Tuple<ErrorCodes, List<ApplicationOutShortDto>>> ReturnAllNotConsideredApplications()
+    {
+        var applications = await _appDbContext.Applications.Where(a => a.Status != ApplicationStatus.Considered).ToListAsync();
+        if (applications is null)
+            return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.NotFound, new List<ApplicationOutShortDto>());
+        return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.Ok, applications.Select(a => new ApplicationOutShortDto
+        {
+            ApplicationId = a.ApplicationId,
+            UserId = a.UserId,
+            Status = a.Status
+        }).ToList());
     }
 }

@@ -194,4 +194,44 @@ public class UserController : ControllerBase
         }
         return BadRequest("Something went wrong while adding information about application!");
     }
+
+    [HttpGet]
+    [Authorize]
+    [Route("my_applications")]
+    public async Task<IActionResult> GetApplications()
+    {
+        var res = await _applicationService.ReturnUsersApplications();
+        var errorCode = res.Item1;
+        switch (errorCode)
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.NotFound:
+                return NotFound("Some problems occured while fetching database information!");
+            case ErrorCodes.Ok:
+                return Ok(res.Item2);
+        }
+        return BadRequest("Error while fetching ingormation about users applications!");
+    }
+
+    [HttpGet]
+    [Authorize]
+    [Route("application_spicific_info")]
+    public async Task<IActionResult> GetApplicationSpecificInfo([FromBody] int applicationId)
+    {
+        var res = await _applicationService.ReturnInformationAboutSpecificApplication(applicationId);
+        var errorCode = res.Item1;
+        switch (errorCode)
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.NotFound:
+                return NotFound("There is no application with such id!");
+            case ErrorCodes.Forbidden:
+                return Forbid("Access forbidden!");
+            case ErrorCodes.Ok:
+                return Ok(res.Item2);
+        }
+        return BadRequest("Error while fetching ingormation about this application!");
+    }
 }
