@@ -1,13 +1,10 @@
-using System.Dynamic;
 using System.Security.Claims;
-using System.Xml;
 using backend.Data;
 using backend.Dto;
 using backend.Interfaces;
 using backend.Mappers;
 using backend.Models.Communications;
 using backend.Models.User;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

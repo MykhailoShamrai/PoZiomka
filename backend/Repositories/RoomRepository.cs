@@ -92,7 +92,6 @@ public class RoomRepository : IRoomInterface
         else
             return ErrorCodes.BadRequest;
 
-
         if (room.ResidentsIds.Count == room.Capacity)
             room.Status = RoomStatus.Unavailable;
 
@@ -126,6 +125,38 @@ public class RoomRepository : IRoomInterface
         var res = await _appDbContext.SaveChangesAsync();
         if (res > 0)
             return ErrorCodes.Ok;
+        return ErrorCodes.BadRequest;
+    }
+
+    public async Task<ErrorCodes> AddWholeProposalToARoom(int proposalId)
+    {
+        var proposal = await _appDbContext.Proposals.Include(pr => pr.Room).FirstOrDefaultAsync();
+        if (proposal is null)
+            return ErrorCodes.NotFound;
+
+        if (proposal.WholeStatus != StatusOfProposal.AcceptedByAdmin || proposal.Room.Status != RoomStatus.Available)
+        {
+            return ErrorCodes.BadArgument;
+        }
+
+        var room = proposal.Room;
+
+        var users = await _userManager.Users.Where(u => proposal.RoommatesIds.Contains(u.Id)).ToListAsync();
+        foreach (var user in users)
+        {
+            var roomWhereUserLives = await _appDbContext.Rooms.Where(r => r.ResidentsIds.Contains(user.Id) && r.Id != room.Id).FirstOrDefaultAsync();
+    
+            if (roomWhereUserLives is not null)
+            {
+                roomWhereUserLives.ResidentsIds.Remove(user.Id);
+                if (roomWhereUserLives.Capacity == roomWhereUserLives.ResidentsIds.Count + 1)
+                    roomWhereUserLives.Status = RoomStatus.Available;
+            }
+            room.ResidentsIds.Add(user.Id);
+        }
+
+        room.Status = RoomStatus.Unavailable;
+
         return ErrorCodes.BadRequest;
     }
 }

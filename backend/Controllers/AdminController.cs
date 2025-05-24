@@ -381,7 +381,6 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
     [Route("application_spicific_info")]
     public async Task<IActionResult> GetApplicationSpecificInfo([FromQuery] int applicationId)
     {
@@ -399,5 +398,24 @@ public class AdminController : ControllerBase
                 return Ok(res.Item2);
         }
         return BadRequest("Error while fetching ingormation about this application!");
+    }
+
+    [HttpPost]
+    [Route("whole_proposal_to_room")]
+    public async Task<IActionResult> AddWholeProposaToRoom([FromBody] int proposalId)
+    {
+        var errorCode = await _roomInterface.AddWholeProposalToARoom(proposalId);
+        switch (errorCode)
+        {
+            case ErrorCodes.NotFound:
+                return NotFound("Information about proposal can't be found!");
+            case ErrorCodes.BadArgument:
+                return BadRequest("Isn't accepted or room is unavailable");
+            case ErrorCodes.Ok:
+                return Ok();
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong while interaction with database!");
+        }
+        return BadRequest("Something went wrong while interaction with database!");
     }
 }
