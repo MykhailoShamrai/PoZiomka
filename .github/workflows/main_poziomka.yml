@@ -64,5 +64,5 @@ jobs:
         with:
           app-name: 'PoZiomka'
           slot-name: 'Production'
-          package: ./.net-app
+          package: ./
           
