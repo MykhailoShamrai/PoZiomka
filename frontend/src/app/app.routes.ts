@@ -12,6 +12,7 @@ import { UserCommunicationsComponent } from '../user/notification/user-notificat
 import { UserManagementComponent } from '../user/admin/user-management/user-management.component';
 import { AdminApplicationComponent } from '../user/admin/admin-application-component/admin-application.component';
 
+
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
     { path: 'register', component: RegistrationComponent },

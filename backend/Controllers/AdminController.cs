@@ -18,12 +18,14 @@ public class AdminController : ControllerBase
     private readonly IProposalInterface _proposalInterface;
     private readonly IJudgeInterface _judgeInterface;
     private readonly IApplicationInterface _applicationInterface;
+
     public AdminController(IFormsInterface formsInterface,
                             IAdminInterface adminInterface,
                             IRoomInterface roomInterface,
                             IProposalInterface proposalInterface,
                             IJudgeInterface judgeInterface,
                             IApplicationInterface applicationInterface)
+
     {
         _formsInterface = formsInterface;
         _adminInterface = adminInterface;
@@ -31,6 +33,7 @@ public class AdminController : ControllerBase
         _proposalInterface = proposalInterface;
         _judgeInterface = judgeInterface;
         _applicationInterface = applicationInterface;
+
     }
 
     [HttpPost]
@@ -445,4 +448,5 @@ public class AdminController : ControllerBase
         }
         return BadRequest("Error while updating application status!");
     }
+
 }
