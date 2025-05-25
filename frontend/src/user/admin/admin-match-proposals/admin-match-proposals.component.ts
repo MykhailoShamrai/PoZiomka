@@ -28,6 +28,14 @@ enum StatusOfProposal {
   Unavailable = 5
 }
 
+// Admin Status enum for API requests
+enum AdminStatus {
+  Accepted = 0,
+  Rejected = 1,
+  Pending = 2,
+  Unavailable = 3
+}
+
 interface Roommate {
   id: number;
   email: string;
@@ -50,9 +58,14 @@ interface MatchProposal {
   id: number;
   room: Room;
   roommates: Roommate[];
-  statuses: UserActionStatus[];  // Status dla każdego z roommates
+  statuses: UserActionStatus[];
   statusOfProposal: StatusOfProposal;
   timestamp: string;
+}
+
+interface ChangeAdminStatusRequest {
+  proposalId: number;
+  status: AdminStatus;
 }
 
 @Component({
@@ -113,41 +126,49 @@ export class AdminMatchProposalsComponent implements OnInit {
   }
 
   approveProposal(proposal: MatchProposal): void {
-    this.loading = true;
-    
-    this.http.post(`${environment.apiUrl}Admin/approve_proposal/${proposal.id}`, {})
-      .subscribe({
-        next: () => {
-          proposal.statusOfProposal = StatusOfProposal.AcceptedByAdmin;
-          this.successMessage = `Proposal for Room ${proposal.room.number} approved successfully.`;
-          this.loading = false;
-          this.filterProposals();
-          setTimeout(() => this.successMessage = null, 3000);
-        },
-        error: (err) => {
-          console.error('Error approving proposal:', err);
-          this.errorMessage = 'Failed to approve proposal. Please try again.';
-          this.loading = false;
-        }
-      });
+    this.changeAdminStatus(proposal, AdminStatus.Accepted);
   }
 
   rejectProposal(proposal: MatchProposal): void {
+    this.changeAdminStatus(proposal, AdminStatus.Rejected);
+  }
+
+  private changeAdminStatus(proposal: MatchProposal, status: AdminStatus): void {
     this.loading = true;
+    this.errorMessage = null;
+    this.successMessage = null;
     
-    this.http.post(`${environment.apiUrl}Admin/reject_proposal/${proposal.id}`, {})
+    const request: ChangeAdminStatusRequest = {
+      proposalId: proposal.id,
+      status: status
+    };
+    
+    this.http.put(`${environment.apiUrl}Admin/change_admin_status`, request)
       .subscribe({
         next: () => {
-          proposal.statusOfProposal = StatusOfProposal.RejectedByAdmin;
-          this.successMessage = `Proposal for Room ${proposal.room.number} rejected.`;
+          // Update local proposal status based on admin decision
+          if (status === AdminStatus.Accepted) {
+            proposal.statusOfProposal = StatusOfProposal.AcceptedByAdmin;
+            this.successMessage = `Proposal for Room ${proposal.room.number} approved successfully.`;
+          } else if (status === AdminStatus.Rejected) {
+            proposal.statusOfProposal = StatusOfProposal.RejectedByAdmin;
+            this.successMessage = `Proposal for Room ${proposal.room.number} rejected.`;
+          }
+          
           this.loading = false;
           this.filterProposals();
+          
+          // Clear success message after 3 seconds
           setTimeout(() => this.successMessage = null, 3000);
         },
         error: (err) => {
-          console.error('Error rejecting proposal:', err);
-          this.errorMessage = 'Failed to reject proposal. Please try again.';
+          console.error('Error changing admin status:', err);
+          const action = status === AdminStatus.Accepted ? 'approve' : 'reject';
+          this.errorMessage = `Failed to ${action} proposal. Please try again.`;
           this.loading = false;
+          
+          // Clear error message after 5 seconds
+          setTimeout(() => this.errorMessage = null, 5000);
         }
       });
   }
@@ -162,6 +183,7 @@ export class AdminMatchProposalsComponent implements OnInit {
       default: return '';
     }
   }
+
 
   getStatusText(status: StatusOfProposal, statuses?: UserActionStatus[]): string {
     switch (status) {

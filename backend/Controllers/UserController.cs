@@ -14,11 +14,13 @@ public class UserController : ControllerBase
 {
     private readonly IUserInterface _userRepository;
     private readonly IProposalInterface _proposalInterface;
+    private readonly IApplicationInterface _applicationService;
 
-    public UserController(IUserInterface userInterface, IProposalInterface proposalInterface)
+    public UserController(IUserInterface userInterface, IProposalInterface proposalInterface, IApplicationInterface applicationInterface)
     {
         _userRepository = userInterface;
         _proposalInterface = proposalInterface;
+        _applicationService = applicationInterface;
     }
 
     [HttpPost]
@@ -173,5 +175,84 @@ public class UserController : ControllerBase
                 return Ok(list);
         }
         return BadRequest("Something went wrong while fethcing information about proposals!");
+    }
+
+    [HttpPost]
+    [Authorize]
+    [Route("send_application")]
+    public async Task<IActionResult> SendApplication([FromBody] ApplicationInDto dto)
+    {
+        var errorCode = await _applicationService.SendAnApplication(dto);
+        switch (errorCode)
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.BadRequest:
+                return BadRequest("Something went wrong while adding information about application!");
+            case ErrorCodes.Ok:
+                return Ok();
+        }
+        return BadRequest("Something went wrong while adding information about application!");
+    }
+
+    [HttpGet]
+    [Authorize]
+    [Route("my_applications")]
+    public async Task<IActionResult> GetApplications()
+    {
+        var res = await _applicationService.ReturnUsersApplications();
+        var errorCode = res.Item1;
+        switch (errorCode)
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.NotFound:
+                return NotFound("Some problems occured while fetching database information!");
+            case ErrorCodes.Ok:
+                return Ok(res.Item2);
+        }
+        return BadRequest("Error while fetching ingormation about users applications!");
+    }
+
+    [HttpGet]
+    [Authorize]
+    [Route("application_spicific_info")]
+    public async Task<IActionResult> GetApplicationSpecificInfo([FromQuery] int applicationId)
+    {
+        var res = await _applicationService.ReturnInformationAboutSpecificApplication(applicationId);
+        var errorCode = res.Item1;
+        switch (errorCode)
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.NotFound:
+                return NotFound("There is no application with such id!");
+            case ErrorCodes.Forbidden:
+                return Forbid();
+            case ErrorCodes.Ok:
+                return Ok(res.Item2);
+        }
+        return BadRequest("Error while fetching information about this application!");
+    }
+
+    [HttpGet]
+    [Authorize]
+    [Route("answer_for_application")]
+    public async Task<IActionResult> GetApplicationAnswer([FromQuery] int applicationId)
+    {
+        var res = await _applicationService.ReturnAnswerForSpecificApplication(applicationId);
+        var errorCode = res.Item1;
+        switch (errorCode)
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.NotFound:
+                return NotFound();
+            case ErrorCodes.Forbidden:
+                return Forbid();
+            case ErrorCodes.Ok:
+                return Ok(res.Item2);
+        }
+        return BadRequest("Error while fetching information about this asnwer!");
     }
 }

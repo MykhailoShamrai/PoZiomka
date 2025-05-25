@@ -192,6 +192,7 @@ public class ProposalRepository : IProposalInterface
             communication.Description = "Your proposal was successfully accepted by all roommates";
         }
 
+        _communicationSender.CreateCommunication(communication, proposal.RoommatesIds);
         var res = await _appDbContext.SaveChangesAsync();
         _communicationSender.CreateCommunication(communication, proposal.RoommatesIds);
         if (res > 0)
@@ -254,6 +255,7 @@ public class ProposalRepository : IProposalInterface
         }
         proposal.AdminStatus = dto.Status;
 
+        _communicationSender.CreateCommunication(communication, proposal.RoommatesIds);
         var res = await _appDbContext.SaveChangesAsync();
         _communicationSender.CreateCommunication(communication, proposal.RoommatesIds);
 
