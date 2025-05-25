@@ -27,7 +27,7 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ./PoZiomkaAppPublish ./backend/backend.csproj
+        run: dotnet publish -c Release -o ./PoZiomkaAppPublish
 
       - name: Show published files (debug)
         run: |
