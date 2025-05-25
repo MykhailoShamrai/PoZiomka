@@ -70,5 +70,5 @@ jobs:
         with:
           app-name: 'PoZiomka'
           slot-name: 'Production'
-          package: ./
+          package: './PoZiomkaAppPublish'
           
