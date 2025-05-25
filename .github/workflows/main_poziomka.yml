@@ -27,20 +27,20 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/PoZiomkaApp ~/backend/backend.csproj
+        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/PoZiomkaApp" ./backend/backend.csproj
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/PoZiomkaApp
+          path: "${{env.DOTNET_ROOT}}/PoZiomkaApp"
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     environment:
       name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+      url: "${{ steps.deploy-to-webapp.outputs.webapp-url }}"
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -54,9 +54,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_3906F21EDA4A44B39BC1AC2E7DAB1BF2 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E1C8714FAD3A45C8A5EDA9EA0BF1B4FA }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_EA10D18B37954FDD9744EC492057757C }}
+          client-id: "${{ secrets.AZUREAPPSERVICE_CLIENTID_3906F21EDA4A44B39BC1AC2E7DAB1BF2 }}"
+          tenant-id: "${{ secrets.AZUREAPPSERVICE_TENANTID_E1C8714FAD3A45C8A5EDA9EA0BF1B4FA }}"
+          subscription-id: "${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_EA10D18B37954FDD9744EC492057757C }}"
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
