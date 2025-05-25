@@ -27,13 +27,13 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/PoZiomkaApp" ./backend/backend.csproj
+        run: dotnet publish -c Release -o ./PoZiomkaAppPublish ./backend/backend.csproj
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: "${{env.DOTNET_ROOT}}/PoZiomkaApp"
+          path: ./PoZiomkaAppPublish
 
   deploy:
     runs-on: ubuntu-latest
@@ -64,5 +64,5 @@ jobs:
         with:
           app-name: 'PoZiomka'
           slot-name: 'Production'
-          package: "${{env.DOTNET_ROOT}}/PoZiomkaApp"
+          package: ./.net-app
           
