@@ -194,6 +194,7 @@ public class ProposalRepository : IProposalInterface
 
         _communicationSender.CreateCommunication(communication, proposal.RoommatesIds);
         var res = await _appDbContext.SaveChangesAsync();
+        _communicationSender.CreateCommunication(communication, proposal.RoommatesIds);
         if (res > 0)
             return ErrorCodes.Ok;
         return ErrorCodes.BadRequest;
@@ -256,6 +257,7 @@ public class ProposalRepository : IProposalInterface
 
         _communicationSender.CreateCommunication(communication, proposal.RoommatesIds);
         var res = await _appDbContext.SaveChangesAsync();
+        _communicationSender.CreateCommunication(communication, proposal.RoommatesIds);
 
         if (res > 0)
             return ErrorCodes.Ok;

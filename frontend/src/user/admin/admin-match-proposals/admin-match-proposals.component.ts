@@ -184,6 +184,7 @@ export class AdminMatchProposalsComponent implements OnInit {
     }
   }
 
+
   getStatusText(status: StatusOfProposal, statuses?: UserActionStatus[]): string {
     switch (status) {
       case StatusOfProposal.WaitingForRoommates: 

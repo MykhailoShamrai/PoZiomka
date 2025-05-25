@@ -56,7 +56,7 @@ var connectionString = builder.Configuration.GetConnectionString("AzureConnectio
 // Db contexts
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(connectionString));
-builder.Services.AddDbContext<AppDbContext>(options => 
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddIdentity<User, IdentityRole<int>>()

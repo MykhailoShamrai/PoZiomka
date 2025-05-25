@@ -44,7 +44,7 @@ namespace backend.Tests.Controllers
             _applicationInterface = new Mock<IApplicationInterface>();
 
             _controller = new UserController(
-                _userRepoMock.Object, _proposalMock.Object, _applicationInterface.Object);
+            _userRepoMock.Object, _proposalMock.Object, _applicationInterface.Object);
         }
         [Fact]
         public async Task ChangeMyPreferences_ReturnsOk_WhenSuccessful()
