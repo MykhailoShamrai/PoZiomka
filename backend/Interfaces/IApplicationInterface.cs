@@ -1,3 +1,4 @@
+using System.Net;
 using backend.Dto;
 using backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -8,4 +9,12 @@ public interface IApplicationInterface
 {
     public Task<ErrorCodes> SendAnApplication(ApplicationInDto dto);
     public Task<ErrorCodes> AnswerToApplication(ApplicationAnswerInDto dto);
+    public Task<Tuple<ErrorCodes, List<ApplicationOutShortDto>>> ReturnUsersApplications();
+    public Task<Tuple<ErrorCodes, ApplicationOutLongDto>> ReturnInformationAboutSpecificApplication(int applicationId);
+    public Task<Tuple<ErrorCodes, List<ApplicationAnswerOutShortDto>>> ReturnAdminsAnswers();
+    public Task<Tuple<ErrorCodes, ApplicationAnswerOutLongDto>> ReturnInformationAboutSpecificAnswer(int applicationAnswerId);
+    public Task<Tuple<ErrorCodes, List<ApplicationOutShortDto>>> ReturnAllNotConsideredApplications();
+    public Task<Tuple<ErrorCodes, ApplicationAnswerOutLongDto>> ReturnAnswerForSpecificApplication(int applicationId);
+    Task<Tuple<ErrorCodes, List<ApplicationOutLongDto>>> GetAllApplications();
+    Task<ErrorCodes> UpdateApplicationStatus(UpdateApplicationStatusDto dto);
 }

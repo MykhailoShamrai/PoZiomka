@@ -73,6 +73,7 @@ builder.Services.AddScoped<IRoomInterface, RoomRepository>();
 builder.Services.AddScoped<IProposalInterface, ProposalRepository>();
 builder.Services.AddScoped<IJudgeInterface, JudgeService>();
 builder.Services.AddScoped<CommunicationSender, CommunicationSender>();
+builder.Services.AddScoped<IApplicationInterface, ApplicationService>();
 
 builder.Services.AddAuthentication(options =>
     {
