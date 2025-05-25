@@ -115,8 +115,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-await app.InitializeAuthContext();
-app.UseCors("AllowAll");
+//await app.InitializeAuthContext();
+app.UseCors("AllowAngularApp");
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
