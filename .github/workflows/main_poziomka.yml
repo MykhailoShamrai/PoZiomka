@@ -29,6 +29,12 @@ jobs:
       - name: dotnet publish
         run: dotnet publish -c Release -o ./PoZiomkaAppPublish ./backend/backend.csproj
 
+      - name: Show published files (debug)
+        run: |
+          echo "Published files:"
+          ls -R ./PoZiomkaAppPublish
+
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
