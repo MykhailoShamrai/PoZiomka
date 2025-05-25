@@ -1,0 +1,74 @@
+<div class="container">
+  <h2>Application Management</h2>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      placeholder="Search by email or description..."
+      [(ngModel)]="searchTerm"
+      (input)="filterApplications()"
+    />
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading applications...</div>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="success">{{ successMessage }}</div>
+
+  <table *ngIf="!loading && filteredApplications.length > 0" class="applications-table">
+    <thead>
+    <tr>
+      <th>Application ID</th>
+      <th>User Email</th>
+      <th>Description</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let application of filteredApplications">
+      <td>{{ application.applicationId }}</td>
+      <td>{{ application.userEmail || 'Unknown' }}</td>
+      <td>{{ application.description }}</td>
+      <td>{{ getStatusLabel(application.status) }}</td>
+      <td>
+        <ng-container *ngIf="application.status === ApplicationStatus.Sent">
+          <button (click)="showResponseForm(application, 'approve')" class="btn approve">
+            Approve
+          </button>
+          <button (click)="showResponseForm(application, 'reject')" class="btn reject">
+            Reject
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="selectedApplicationId === application.applicationId">
+          <div class="response-form">
+                  <textarea
+                    [(ngModel)]="responseText"
+                    placeholder="Enter your response here..."
+                    rows="3"
+                  ></textarea>
+            <div class="form-actions">
+              <button
+                (click)="submitResponse()"
+                class="btn submit"
+                [disabled]="!responseText"
+              >
+                Submit
+              </button>
+              <button (click)="cancelResponse()" class="btn cancel">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </ng-container>
+
+        <span *ngIf="application.status === ApplicationStatus.Considered">Decision made</span>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && filteredApplications.length === 0" class="no-data">
+    No applications found.
+  </div>
+</div>

@@ -1,31 +1,63 @@
 <div class="application-container">
-    <h2>Submit Your Question/Application</h2>
-    
-    <div class="form-group">
-      <label for="applicationText">Your question or application:</label>
-      <textarea 
-        id="applicationText" 
-        rows="6" 
-        [(ngModel)]="applicationText" 
-        placeholder="Type your question or application here..."
-        [disabled]="isSubmitting"
-      ></textarea>
-    </div>
-    
-    <button 
-      (click)="submitApplication()" 
-      [disabled]="isSubmitting || !applicationText.trim()"
-      class="submit-button"
-    >
-      {{ isSubmitting ? 'Submitting...' : 'Submit' }}
-    </button>
-    
-    <div *ngIf="submitSuccess" class="success-message">
-      Your application has been submitted successfully!
-    </div>
-    
-    <div *ngIf="submitError" class="error-message">
-      {{ submitError }}
+  <h2>Submit Your Question/Application</h2>
+
+  <div class="form-group">
+    <label for="applicationText">Your question or application:</label>
+    <textarea
+      id="applicationText"
+      rows="6"
+      [(ngModel)]="applicationText"
+      placeholder="Type your question or application here..."
+      [disabled]="isSubmitting"
+    ></textarea>
+  </div>
+
+  <button
+    (click)="submitApplication()"
+    [disabled]="isSubmitting || !applicationText.trim()"
+    class="submit-button"
+  >
+    {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+  </button>
+
+  <div *ngIf="submitSuccess" class="success-message">
+    Your application has been submitted successfully!
+  </div>
+
+  <div *ngIf="submitError" class="error-message">
+    {{ submitError }}
+  </div>
+
+  <div class="applications-section">
+    <h3>Your Applications</h3>
+    <div *ngIf="loading" class="loading">Loading your applications...</div>
+    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+    <table *ngIf="!loading && applications.length > 0" class="applications-table">
+      <thead>
+      <tr>
+        <th>Application ID</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Admin Response</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let application of applications">
+        <td>{{ application.applicationId }}</td>
+        <td>{{ application.description }}</td>
+        <td>{{ getStatusLabel(application.status) }}</td>
+        <td>
+          <span *ngIf="application.status === ApplicationStatus.Sent">Pending response</span>
+          <span *ngIf="application.status === ApplicationStatus.Considered && application.answer">{{ application.answer }}</span>
+          <span *ngIf="application.status === ApplicationStatus.Considered && !application.answer">No response provided</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!loading && applications.length === 0" class="no-data">
+      You have not submitted any applications yet.
     </div>
   </div>
-  
+</div>

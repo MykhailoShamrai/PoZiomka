@@ -10,6 +10,8 @@ import { UserApplicationComponent } from '../user/application/user-application.c
 import { RoomManagementComponent } from '../user/admin/room-management/room-management.component';
 import { UserCommunicationsComponent } from '../user/notification/user-notifications/user-communications.component';
 import { UserManagementComponent } from '../user/admin/user-management/user-management.component';
+import { AdminApplicationComponent } from '../user/admin/admin-application-component/admin-application.component';
+
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -22,6 +24,7 @@ export const routes: Routes = [
     { path: 'admin/match-proposals', component: AdminMatchProposalsComponent },
     { path: 'admin/rooms', component: RoomManagementComponent },
     { path: 'admin/users', component: UserManagementComponent },
+    { path: 'admin/applications', component: AdminApplicationComponent },
     { path: 'application', component: UserApplicationComponent },
     { path: 'communications', component: UserCommunicationsComponent },
 ];

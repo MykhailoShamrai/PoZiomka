@@ -56,7 +56,7 @@ var connectionString = builder.Configuration.GetConnectionString("AzureConnectio
 // Db contexts
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(connectionString));
-builder.Services.AddDbContext<AppDbContext>(options => 
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddIdentity<User, IdentityRole<int>>()
@@ -73,6 +73,8 @@ builder.Services.AddScoped<IRoomInterface, RoomRepository>();
 builder.Services.AddScoped<IProposalInterface, ProposalRepository>();
 builder.Services.AddScoped<IJudgeInterface, JudgeService>();
 builder.Services.AddScoped<CommunicationSender, CommunicationSender>();
+builder.Services.AddScoped<IApplicationInterface, ApplicationService>();
+
 
 builder.Services.AddAuthentication(options =>
     {
@@ -87,6 +89,7 @@ builder.Services.AddAuthentication(options =>
         options.Cookie.Name = Settings.AuthCookieName;
         options.Cookie.HttpOnly = true;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(180);
+        options.Cookie.SameSite = SameSiteMode.None; 
     });
 
 builder.Services.AddAuthorization(
@@ -100,7 +103,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("https://kind-water-0f68c7f03.6.azurestaticapps.net", "http://localhost:4200")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
