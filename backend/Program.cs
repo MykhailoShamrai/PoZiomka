@@ -116,6 +116,7 @@ if (app.Environment.IsDevelopment())
 }
 
 await app.InitializeAuthContext();
+app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("AllowAngularApp");
 app.UseAuthentication();
