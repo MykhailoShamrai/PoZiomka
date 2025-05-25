@@ -29,7 +29,7 @@ export class AuthGatewayService {
     return this.http.post<AuthResponse>(this.apiUrl + '/login', {
       email,
       password,
-    }).pipe(
+    }, {withCredentials: true}).pipe(
       tap(response => this.handleAuthResponse(response))
     );
   }
