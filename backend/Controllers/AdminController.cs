@@ -400,4 +400,47 @@ public class AdminController : ControllerBase
         }
         return BadRequest("Error while fetching ingormation about this application!");
     }
+    
+    [HttpGet]
+    [Route("get_all_applications")]
+    public async Task<IActionResult> GetAllApplicationsForAdmin()
+    {
+        var res = await _applicationInterface.GetAllApplications();
+        var errorCode = res.Item1;
+        switch (errorCode)
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.Forbidden:
+                return Forbid();
+            case ErrorCodes.NotFound:
+                return NotFound("No applications found in the database!");
+            case ErrorCodes.Ok:
+                return Ok(res.Item2);
+        }
+        return BadRequest("Error while fetching information about applications!");
+    }
+    
+    [HttpPut]
+    [Route("update_application_status")]
+    public async Task<IActionResult> UpdateApplicationStatus([FromBody] UpdateApplicationStatusDto dto)
+    {
+        var errorCode = await _applicationInterface.UpdateApplicationStatus(dto);
+        switch (errorCode)
+        {
+            case ErrorCodes.Unauthorized:
+                return Unauthorized();
+            case ErrorCodes.Forbidden:
+                return Forbid();
+            case ErrorCodes.NotFound:
+                return NotFound("Application not found!");
+            case ErrorCodes.BadArgument:
+                return BadRequest("Invalid status value provided!");
+            case ErrorCodes.BadRequest:
+                return BadRequest("Error while updating application status!");
+            case ErrorCodes.Ok:
+                return Ok();
+        }
+        return BadRequest("Error while updating application status!");
+    }
 }

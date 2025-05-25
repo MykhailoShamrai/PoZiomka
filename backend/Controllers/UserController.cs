@@ -177,7 +177,7 @@ public class UserController : ControllerBase
         return BadRequest("Something went wrong while fethcing information about proposals!");
     }
 
-    [HttpPut]
+    [HttpPost]
     [Authorize]
     [Route("send_application")]
     public async Task<IActionResult> SendApplication([FromBody] ApplicationInDto dto)

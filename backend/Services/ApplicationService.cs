@@ -138,25 +138,18 @@ public class ApplicationService : IApplicationInterface
             return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.Unauthorized, new List<ApplicationOutShortDto>());
 
         var roles = await _userManager.GetRolesAsync(user);
-        List<Application> applications;
-        if (roles.Contains("Admin"))
-        {
-            applications = await _appDbContext.Applications.Where(a => a.Status != ApplicationStatus.Considered).ToListAsync();
-        }
-        else
-        {
-            applications = await _appDbContext.Applications.Where(a => a.UserId == user.Id).ToListAsync();
-        }
-        if (applications is null)
-            return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.NotFound, new List<ApplicationOutShortDto>());
+        List<Application> applications = await _appDbContext.Applications
+            .Where(a => a.UserId == user.Id).ToListAsync();
 
         return new Tuple<ErrorCodes, List<ApplicationOutShortDto>>(ErrorCodes.Ok, applications.Select(a => new ApplicationOutShortDto
         {
             ApplicationId = a.ApplicationId,
             UserId = a.UserId,
-            Status = a.Status
+            Status = a.Status,
+            Description = a.Description
         }).ToList());
     }
+    
     public async Task<Tuple<ErrorCodes, ApplicationOutLongDto>> ReturnInformationAboutSpecificApplication(int applicationId)
     {
         var email = _contextAccessor.HttpContext?.User?.Claims
@@ -219,5 +212,77 @@ public class ApplicationService : IApplicationInterface
             ApplicationAnswerid = application.Answer!.ApplicationAnswerId,
             Description = application.Answer!.Description
         });
+    }
+    
+    public async Task<Tuple<ErrorCodes, List<ApplicationOutLongDto>>> GetAllApplications()
+    {
+        var email = _contextAccessor.HttpContext?.User?.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        if (email is null)
+            return new Tuple<ErrorCodes, List<ApplicationOutLongDto>>(ErrorCodes.Unauthorized, new List<ApplicationOutLongDto>());
+
+        var admin = await _userManager.FindByEmailAsync(email!);
+        if (admin is null)
+            return new Tuple<ErrorCodes, List<ApplicationOutLongDto>>(ErrorCodes.Unauthorized, new List<ApplicationOutLongDto>());
+
+        var roles = await _userManager.GetRolesAsync(admin);
+        if (!roles.Contains("Admin"))
+            return new Tuple<ErrorCodes, List<ApplicationOutLongDto>>(ErrorCodes.Forbidden, new List<ApplicationOutLongDto>());
+
+        var applications = await _appDbContext.Applications.ToListAsync();
+        if (applications is null || applications.Count == 0)
+            return new Tuple<ErrorCodes, List<ApplicationOutLongDto>>(ErrorCodes.NotFound, new List<ApplicationOutLongDto>());
+
+        return new Tuple<ErrorCodes, List<ApplicationOutLongDto>>(ErrorCodes.Ok, applications.Select(a => new ApplicationOutLongDto
+        {
+            ApplicationId = a.ApplicationId,
+            UserId = a.UserId,
+            Description = a.Description,
+            Status = a.Status
+        }).ToList());
+    }
+    
+    public async Task<ErrorCodes> UpdateApplicationStatus(UpdateApplicationStatusDto dto)
+    {
+        var email = _contextAccessor.HttpContext?.User?.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        if (email is null)
+            return ErrorCodes.Unauthorized;
+
+        var admin = await _userManager.FindByEmailAsync(email!);
+        if (admin is null)
+            return ErrorCodes.Unauthorized;
+
+        var roles = await _userManager.GetRolesAsync(admin);
+        if (!roles.Contains("Admin"))
+            return ErrorCodes.Forbidden;
+
+        var application = await _appDbContext.Applications
+            .Where(a => a.ApplicationId == dto.ApplicationId)
+            .FirstOrDefaultAsync();
+        if (application is null)
+            return ErrorCodes.NotFound;
+        
+        if (!Enum.IsDefined(typeof(ApplicationStatus), dto.Status))
+            return ErrorCodes.BadArgument;
+        
+        application.Status = (ApplicationStatus)dto.Status;
+        
+        if (!string.IsNullOrEmpty(dto.Description))
+        {
+            ApplicationAnswer answer = new ApplicationAnswer
+            {
+                AdminId = admin.Id,
+                Application = application,
+                Description = dto.Description
+            };
+            application.Answer = answer;
+            _appDbContext.ApplicationAnswers.Add(answer);
+        }
+
+        var res = await _appDbContext.SaveChangesAsync();
+        if (res > 0)
+            return ErrorCodes.Ok;
+        return ErrorCodes.BadRequest;
     }
 }
