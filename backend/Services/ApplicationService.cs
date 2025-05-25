@@ -192,6 +192,7 @@ public class ApplicationService : IApplicationInterface
     }
 
     public async Task<Tuple<ErrorCodes, ApplicationAnswerOutLongDto>> ReturnAnswerForSpecificApplication(int applicationId)
+
     {
         var email = _contextAccessor.HttpContext?.User?.Claims
             .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
@@ -212,6 +213,7 @@ public class ApplicationService : IApplicationInterface
             ApplicationAnswerid = application.Answer!.ApplicationAnswerId,
             Description = application.Answer!.Description
         });
+
     }
     
     public async Task<Tuple<ErrorCodes, List<ApplicationOutLongDto>>> GetAllApplications()
@@ -243,6 +245,7 @@ public class ApplicationService : IApplicationInterface
     }
     
     public async Task<ErrorCodes> UpdateApplicationStatus(UpdateApplicationStatusDto dto)
+
     {
         var email = _contextAccessor.HttpContext?.User?.Claims
             .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
@@ -279,6 +282,7 @@ public class ApplicationService : IApplicationInterface
             application.Answer = answer;
             _appDbContext.ApplicationAnswers.Add(answer);
         }
+
 
         var res = await _appDbContext.SaveChangesAsync();
         if (res > 0)

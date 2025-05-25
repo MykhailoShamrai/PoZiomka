@@ -35,7 +35,6 @@ enum AdminStatus {
   Pending = 2,
   Unavailable = 3
 }
-
 interface Roommate {
   id: number;
   email: string;
@@ -66,6 +65,7 @@ interface MatchProposal {
 interface ChangeAdminStatusRequest {
   proposalId: number;
   status: AdminStatus;
+
 }
 
 @Component({
@@ -215,6 +215,7 @@ export class AdminMatchProposalsComponent implements OnInit {
 
   getUserStatusText(status: UserActionStatus): string {
     switch (status) {
+
       case UserActionStatus.Accepted: return 'Accepted';
       case UserActionStatus.Rejected: return 'Rejected';
       case UserActionStatus.Pending: return 'Pending';

@@ -75,6 +75,7 @@ builder.Services.AddScoped<IJudgeInterface, JudgeService>();
 builder.Services.AddScoped<CommunicationSender, CommunicationSender>();
 builder.Services.AddScoped<IApplicationInterface, ApplicationService>();
 
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = Settings.AuthCookieName;
