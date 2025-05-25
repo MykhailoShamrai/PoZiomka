@@ -100,7 +100,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
-        policy.WithOrigins("https://kind-water-0f68c7f03.6.azurestaticapps.net")
+        policy.WithOrigins("https://kind-water-0f68c7f03.6.azurestaticapps.net", "http://localhost:4200")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
