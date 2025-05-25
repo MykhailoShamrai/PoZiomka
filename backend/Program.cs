@@ -88,6 +88,7 @@ builder.Services.AddAuthentication(options =>
         options.Cookie.Name = Settings.AuthCookieName;
         options.Cookie.HttpOnly = true;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(180);
+        options.Cookie.SameSite = SameSiteMode.None; 
     });
 
 builder.Services.AddAuthorization(
@@ -101,7 +102,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("https://kind-water-0f68c7f03.6.azurestaticapps.net", "http://localhost:4200")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
