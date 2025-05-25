@@ -21,6 +21,13 @@ public class UserController : ControllerBase
         _proposalInterface = proposalInterface;
     }
 
+    [HttpGet]
+    [Route("test")]
+    public IActionResult Test()
+    {
+        return Ok();
+    }
+
     [HttpPost]
     [Authorize]
     [Route("preferences")]
